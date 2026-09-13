@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
-import com.aniforge.engine.R
+import com.yumeka.anime.engine.R
 
 class FloatingHub(context: Context, attrs: AttributeSet? = null) : FrameLayout(context, attrs) {
     init {
@@ -13,6 +13,6 @@ class FloatingHub(context: Context, attrs: AttributeSet? = null) : FrameLayout(c
     }
     
     private fun setupListeners() {
-        // Implementar listeners dos botões flutuantes
+        // Implementar listeners dos botoes flutuantes
     }
 }
