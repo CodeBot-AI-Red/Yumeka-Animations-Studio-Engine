@@ -2,8 +2,8 @@ package com.yumeka.anime.engine
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.yumeka.anime.engine.fragments.SplashFragment
 import com.yumeka.anime.engine.fragments.HomeFragment
+import com.yumeka.anime.engine.fragments.SplashFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -17,16 +17,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showSplashScreen() {
+        // NOT AddOato BackStack: pressionar Voltar no Splash encerra o app corretamente
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, SplashFragment())
-            .addToBackStack(null)
             .commit()
     }
 
     fun showHomeScreen() {
+        if (isFinishing || isDestroyed) return
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, HomeFragment())
             .setReorderingAllowed(true)
-            .commit()
+            .commitAllowingStateLoss()
     }
 }
