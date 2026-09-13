@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#000000</color>
+    <color name="yumeka_red">#C9142B</color>
+    <color name="yumeka_pink">#FF6080</color>
+    <color name="yumeka_red_dim">#661420</color>
+    <color name="surface_dark">#120507</color>
+    <color name="surface_card">#1A0809</color>
+    <color name="surface_card_border">#3D1013</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#BBAAAD</color>
+    <color name="text_muted">#664447</color>
 </resources>
