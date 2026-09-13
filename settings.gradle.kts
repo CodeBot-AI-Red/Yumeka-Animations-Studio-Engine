@@ -14,6 +14,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "aniforge-engine"
+rootProject.name = "yumeka-animations-studio-engine"
 include(":app")
 project(":app").projectDir = file("android/app")
