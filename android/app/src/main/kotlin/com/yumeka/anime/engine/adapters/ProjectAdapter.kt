@@ -3,7 +3,6 @@ package com.yumeka.anime.engine.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.yumeka.anime.engine.R
@@ -15,30 +14,36 @@ class ProjectAdapter(
 ) : RecyclerView.Adapter<ProjectAdapter.ProjectViewHolder>() {
 
     inner class ProjectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val iconView: ImageView = itemView.findViewById(R.id.project_icon)
-        private val nameView: TextView = itemView.findViewById(R.id.project_name)
-        private val pathView: TextView = itemView.findViewById(R.id.project_path)
+        private val iconEmoji: TextView   = itemView.findViewById(R.id.project_icon_emoji)
+        private val nameView: TextView    = itemView.findViewById(R.id.project_name)
+        private val dateView: TextView    = itemView.findViewById(R.id.project_date)
         private val versionView: TextView = itemView.findViewById(R.id.project_version)
-        private val dateView: TextView = itemView.findViewById(R.id.project_date)
-        private val favoriteView: ImageView = itemView.findViewById(R.id.project_favorite)
-        private val errorView: ImageView = itemView.findViewById(R.id.project_error)
-        private val errorMessageView: TextView = itemView.findViewById(R.id.project_error_message)
+        private val sizeView: TextView    = itemView.findViewById(R.id.project_size)
+        private val errorMsg: TextView    = itemView.findViewById(R.id.project_error_message)
 
         fun bind(project: Project) {
-            iconView.setImageResource(project.iconRes)
-            nameView.text = project.name
-            pathView.text = project.path
-            versionView.text = project.version
-            dateView.text = project.lastEdited
-            favoriteView.visibility = if (project.isFavorite) View.VISIBLE else View.GONE
-            if (project.hasError) {
-                errorView.visibility = View.VISIBLE
-                errorMessageView.visibility = View.VISIBLE
-                errorMessageView.text = project.errorMessage ?: "Erro desconhecido"
-            } else {
-                errorView.visibility = View.GONE
-                errorMessageView.visibility = View.GONE
+            // Emoji baseado no nome para diferenciar visualmente
+            iconEmoji.text = when {
+                project.name.contains("fight", ignoreCase = true) -> "\uD83E\uDD4A"
+                project.name.contains("magic", ignoreCase = true) -> "\u2728"
+                project.name.contains("hero",  ignoreCase = true) -> "\uD83E\uDDB8"
+                project.name.contains("scene", ignoreCase = true) -> "\uD83C\uDFAC"
+                project.name.contains("char",  ignoreCase = true) -> "\uD83D\uDC64"
+                else -> "\uD83C\uDFA8"
             }
+
+            nameView.text    = project.name
+            dateView.text    = project.lastEdited
+            versionView.text = project.version
+            sizeView.text    = project.sizeLabel
+
+            if (project.hasError) {
+                errorMsg.visibility = View.VISIBLE
+                errorMsg.text       = project.errorMessage ?: "Erro desconhecido"
+            } else {
+                errorMsg.visibility = View.GONE
+            }
+
             itemView.setOnClickListener { onProjectClick(project) }
         }
     }
