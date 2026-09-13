@@ -7,12 +7,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.yumeka.anime.engine.MainActivity
 import com.yumeka.anime.engine.R
 
 class SplashFragment : Fragment() {
+
+    private var navHandler: Handler? = null
+    private var navRunnable: Runnable? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,24 +28,42 @@ class SplashFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val logo = view.findViewById<ImageView>(R.id.splash_logo)
-        val subtitle = view.findViewById<TextView>(R.id.splash_subtitle)
-        val status = view.findViewById<TextView>(R.id.splash_status)
-        val version = view.findViewById<TextView>(R.id.splash_version)
 
+        // Entrada: fade-in + leve scale up
         logo.alpha = 0f
-        subtitle.alpha = 0f
-        status.alpha = 0f
-        version.alpha = 0f
+        logo.scaleX = 0.85f
+        logo.scaleY = 0.85f
+        logo.animate()
+            .alpha(1f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(900)
+            .start()
 
-        logo.animate().alpha(1f).duration = 800
-        subtitle.animate().alpha(1f).setStartDelay(400).duration = 800
-        status.animate().alpha(1f).setStartDelay(800).duration = 800
-        version.animate().alpha(1f).setStartDelay(1200).duration = 800
+        // Navegar para Home após 3 segundos: fade-out suave antes
+        val navRunnable = Runnable {
+            if (!isAdded) return@Runnable
+            logo.animate()
+                .alpha(0f)
+                .scaleX(1.1f)
+                .scaleY(1.1f)
+                .setDuration(600)
+                .withEndAction {
+                    if (isAdded) {
+                        (activity as? MainActivity)?.showHomeScreen()
+                    }
+                }
+                .start()
+        }
+        this.navRunnable = navRunnable
+        navHandler = Handler(Looper.getMainLooper()).also {
+            it.postDelayed(navRunnable, 3000)
+        }
+    }
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (isAdded) {
-                (activity as? MainActivity)?.showHomeScreen()
-            }
-        }, 3000)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // Cancelar timer se o fragment for destrído
+        navRunnable?.let { navHandler?.removeCallbacks(it) }
     }
 }
