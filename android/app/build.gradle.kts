@@ -55,18 +55,16 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
 
     // Coroutines
-    implementation("org.jetbrains.kotlinx:
-kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:
-kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
 
-    // Lottie
+    // Lottie - animacoes vetoriais
     implementation("com.airbnb:lottie:6.3.0")
 
-    // Coil
+    // Coil - sprites
     implementation("io.coil-kt:coil:2.5.0")
 
     // OkHttp
-    implementation("com.squareup.okhttp:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
