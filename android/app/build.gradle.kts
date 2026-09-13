@@ -61,11 +61,11 @@ kotlinx-coroutines-core:1.7.3")
 kotlinx-coroutines-android:1.7.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
 
-    // Lottie - animações vetoriais
+    // Lottie
     implementation("com.airbnb:lottie:6.3.0")
 
-    // Coil - sprites
-    implementation( "io.coil-kt:coil:2.5.0")
+    // Coil
+    implementation("io.coil-kt:coil:2.5.0")
 
     // OkHttp
     implementation("com.squareup.okhttp:okhttp:4.12.0")
