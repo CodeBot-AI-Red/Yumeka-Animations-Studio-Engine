@@ -6,11 +6,11 @@
 
     <application
         android:allowBackup="true"
-        android:label="AniForge Engine"
+        android:label="Yumeka Animations Studio Engine"
         android:icon="@mipmap/ic_launcher">
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.yumeka.anime.engine.MainActivity"
             android:exported="true"
             android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize|keyboardHidden"
