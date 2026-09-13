@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.aniforge.engine"
+    namespace = "com.yumeka.anime.engine"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.aniforge.engine"
+        applicationId = "com.yumeka.anime.engine"
         minSdk = 21
         targetSdk = 34
         versionCode = 1
