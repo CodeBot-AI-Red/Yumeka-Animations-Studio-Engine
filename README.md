@@ -1,70 +1,70 @@
-# 🎢 Yumeka Animations Studio Engine
+# ðŸŽ Yumeka Animations Studio Engine
 
-> Engine nativa Android para reprodução e criação de animções estilo anime.
+> Engine nativa Android para reproduÃ§Ã£o e criaÃ§Ã£o de animÃ§Ãµes estilo anime.
 
 ![Build APK](https://github.com/CodeBot-AI-REd/Yumeka-Animations-Studio-Engine/actions/workflows/build-apk.yml/badge.svg)(https://github.com/CodeBot-AI-Red/Yumeka-Animations-Studio-Engine/actions)
 
 ---
 
-## 📈 Estrutura do Projeto
+## ðŸ“ˆ Estrutura do Projeto
 
 ```
 Yumeka-Animations-Studio-Engine/
-├── android/                   # Ap Android host
-│   ├── app/
-│      ├── src/                # Sources Kotlin
+â”œâ”€â”€ android/                   # Ap Android host
+â”‚   â”œâ”€â”€ app/
+â”‚      â”œâ”€â”€ src/                # Sources Kotlin
 
-├── engine/                  # M�dulos da Engine
-│   ├── anime/                # 🎢 Módulos de anime
-│   │   ├── AnimePlayer.kt       # Reprodutor de frames
-│   │   ├── SpriteSheet.kt       # Gerenciador de spritesheets
-│   │   ├── SceneDirector.kt     # Orquestrador de cenas
-│   │   └── CharacterRig.kt      # Sistema de personagens
-│   ├── core/                  # Loop principal da engine
-│   ├── renderer/              # Renderização
-│   ├── scene/                 # Gerenciamento de cenas
-│   ├── gameobject/           # Entidades
-│   └── transform/             # Transformações 2D
+â”œâ”€â”€ engine/                  # Módulos da Engine
+â”‚   â”œâ”€â”€ anime/                # ðŸŽ¢ MÃ³dulos de anime
+â”‚   â”‚   â”œâ”€â”€ AnimePlayer.kt       # Reprodutor de frames
+â”‚   â”‚   â”œâ”€â”€ SpriteSheet.kt       # Gerenciador de spritesheets
+â”‚   â”‚   â”œâ”€â”€ SceneDirector.kt     # Orquestrador de cenas
+â”‚   â”‚   â””â”€â”€ CharacterRig.kt      # Sistema de personagens
+â”‚   â”œâ”€â”€ core/                  # Loop principal da engine
+â”‚   â”œâ”€â”€ renderer/              # RenderizaÃ§Ã£o
+â”‚   â”œâ”€â”€ scene/                 # Gerenciamento de cenas
+â”‚   â”œâ”€â”€ gameobject/           # Entidades
+â”‚   â””â”€â”€ transform/             # TransformaÃ§Ãµes 2D
 
-└── .github/workflows/
-      └  build-apk.yml           # CI/CD \u2192 Gera APK automaticamente
+â””â”€â”€ .github/workflows/
+      â””  build-apk.yml           # CI/CD \u2192 Gera APK automaticamente
 ```
 
 ---
 
-## 😈 Módulos principais
+## ðŸ˜ˆ MÃ³dulos principais
 
-| Módulo | Descrição |
+| MÃ³dulo | DescriÃ§Ã£o |
 |-----------------|-----------------------------------------|
 | `AnimePlayer` | Reproduz frames a 24 fps, suporta loop, pause e seek |
 | `SpriteSheet` | Extrai e desenha frames de spritesheets em grid |
-| `SceneDirector` | Orquestra sequência de cenas com diálogo e personagens |
-| `CharacterRig` | Personagem com clips, expressões faciais e posicionamento |
+| `SceneDirector` | Orquestra sequÃªncia de cenas com diÃ¡logo e personagens |
+| `CharacterRig` | Personagem com clips, expressÃµes faciais e posicionamento |
 
 ---
 
-## 💗 CI/CD - Geração de APK
+## ðŸ’— CI/CD - GeraÃ§Ã£o de APK
 
 O workflow `.github/workflows/build-apk.yml` roda automaticamente em:
 
-- 🔁 Push na branch `main`
-- 📠 Pull Request para `main`
-- 🤕 Disparo manual via workflow_dispatch (debug ou release)
+- ðŸ” Push na branch `main`
+- ðŸ“  Pull Request para `main`
+- ðŸ¤• Disparo manual via workflow_dispatch (debug ou release)
 
-O APK gerado é salvo como artefato no GitHub Actions por 30 dias (debug) ou 90 dias (release).
-
----
-
-## 💩 Dependências principais
-
-- **Lottie Android** — animações vetoriais estilo anime
-- **Coil** — carregamento de sprites e backgrounds
-- **Kotlin Coroutines** — animações assíncronas sem travQr
-- **Android ViewBinding** — UI fluida e type-safe
+O APK gerado Ã© salvo como artefato no GitHub Actions por 30 dias (debug) ou 90 dias (release).
 
 ---
 
-## 🔅 Build local
+## ðŸ’© DependÃªncias principais
+
+- **Lottie Android** â€” animaÃ§Ãµes vetoriais estilo anime
+- **Coil** â€” carregamento de sprites e backgrounds
+- **Kotlin Coroutines** â€” animaÃ§Ãµes assÃ­ncronas sem travQr
+- **Android ViewBinding** â€” UI fluida e type-safe
+
+---
+
+## ðŸ”… Build local
 
 ```bash
 # APK Debug
@@ -76,4 +76,4 @@ O APK gerado é salvo como artefato no GitHub Actions por 30 dias (debug) ou 90 
 
 ---
 
-> Build por Yumeka Studio │ Powered by Yumeka Animations Engine
+> Build por Yumeka Studio â”‚ Powered by Yumeka Animations Engine
