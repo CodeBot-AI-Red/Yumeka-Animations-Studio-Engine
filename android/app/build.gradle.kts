@@ -60,7 +60,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
 
     // Lottie - animacoes vetoriais
-    implementation("com.airbnb:lottie:6.3.0")
+    implementation("com.airbnb.android:lottie:6.3.0")
 
     // Coil - sprites
     implementation("io.coil-kt:coil:2.5.0")
