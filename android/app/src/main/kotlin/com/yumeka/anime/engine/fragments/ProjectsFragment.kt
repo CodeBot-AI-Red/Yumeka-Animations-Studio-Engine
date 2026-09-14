@@ -30,7 +30,6 @@ class ProjectsFragment : Fragment() {
         private const val YUMEKA_FOLDER = "Yumeka Animations"
     }
 
-    // Todas as views como nullable - zero crash por lateinit
     private var recycler:     RecyclerView? = null
     private var emptyState:  View? = null
     private var countBadge:  TextView? = null
@@ -69,7 +68,6 @@ class ProjectsFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Recarrega somente se já foi carregado uma vez
         if (loaded) loadProjects()
     }
 
@@ -83,7 +81,6 @@ class ProjectsFragment : Fragment() {
 
     private fun checkPermissionAndLoad() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Android 11+: sempretem acesso à pasta pública Documents
             loadProjects()
         } else {
             val perm = Manifest.permission.READ_EXTERNAL_STORAGE
@@ -140,7 +137,7 @@ class ProjectsFragment : Fragment() {
                     version     = readVersion(folder),
                     lastEdited  = sdf.format(Date(folder.lastModified())),
                     sizeLabel    = folderSize(folder),
-                    iconRes     = 0
+                    iconRes      = 0
                 )
             }
             ?: emptyList()
@@ -152,8 +149,8 @@ class ProjectsFragment : Fragment() {
             val json = File(folder, "project.ymk.json")
             when {
                 ymk.exists() -> ymk.readLines()
-                    .firstirNull { it.startsWith("version") }
-                      ?.split("=", ":").getOrNull(1)?.trim()?.let { "v$it" } ?: "v1.0"
+                    .firstOrNull { it.startsWith("version") }
+                        ?.split("=", ":").getOrNull(1)?.trim()?.let { "v$it" } ?: "v1.0"
                 json.exists() -> "v1.0"
                 else -> "-"
             }
@@ -166,7 +163,7 @@ class ProjectsFragment : Fragment() {
             when {
                 bytes < 1024L         -> "${bytes} B"
                 bytes < 1048576L    -> "${bytes / 1024} KB"
-                else                 -> "${bytes / 1048576} MB"
+                else                  -> "${bytes / 1048576} MB"
             }
         } catch (e: Exception) { "-" }
     }
