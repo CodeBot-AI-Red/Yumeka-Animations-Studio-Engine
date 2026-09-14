@@ -4,10 +4,20 @@
     <color name="yumeka_red">#C9142B</color>
     <color name="yumeka_pink">#FF6080</color>
     <color name="yumeka_red_dim">#661420</color>
-    <color name="surface_dark">#120507</color>
-    <color name="surface_card">#1A0809</color>
-    <color name="surface_card_border">#3D1013</color>
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#BBAAAD</color>
-    <color name="text_muted">#664447</color>
+    <color name="surface_dark">#0F0F13</color>
+    <color name="surface_card">#1A1A22</color>
+    <color name="surface_card2">#22222E</color>
+    <color name="surface_card_border">#2A2A38</color>
+    <color name="text_primary">#F0F0F5</color>
+    <color name="text_secondary">#A0A0B8</color>
+    <color name="text_muted">#606078</color>
+    <color name="accent_purple">#9B6DFF</color>
+    <color name="accent_green">#4ADE80</color>
+    <color name="accent_amber">#FBBF24</color>
+    <color name="stat_accent">#E8445A</color>
+    <color name="card_border1">#E8445A</color>
+    <color name="card_border2">#9B6DFF</color>
+    <color name="card_border3">#4ADE80</color>
+    <color name="card_border4">#FBBF24</color>
+    <color name="perm_red_bg">#1F0A0D</color>
 </resources>
