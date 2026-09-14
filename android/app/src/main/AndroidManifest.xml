@@ -14,7 +14,7 @@
         android:label="Yumeka Animations Studio Engine"
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"
-        android:theme="@style/Theme.YUMEKAEngine">
+        android:theme="@style/Theme.YumekaEngine">
 
         <activity
             android:name="com.yumeka.anime.engine.MainActivity"
