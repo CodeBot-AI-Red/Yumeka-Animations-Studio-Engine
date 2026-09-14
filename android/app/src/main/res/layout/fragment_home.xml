@@ -3,17 +3,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#0a0a0a">
+    android:background="#0D0D0D">
 
     <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:background="#1a1a1a">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="12dp"
+        android:background="#161616">
 
-        <!-- Logo e Título -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -21,89 +23,126 @@
             android:gravity="center_vertical">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="🔴 ANIFORGE"
-                android:textColor="@android:color/white"
-                android:textSize="24sp"
+                android:layout_weight="1"
+                android:text="Yumeka Studio"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Projects"
-                android:textColor="#FF6B00"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:layout_marginStart="8dp" />
+                android:id="@+id/btn_settings"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="&#9881;"
+                android:textSize="20sp"
+                android:textColor="#AAAAAA"
+                android:gravity="center"
+                android:background="#222222"
+                android:padding="6dp" />
 
         </LinearLayout>
 
-        <!-- Menu Buttons -->
+        <TextView
+            android:id="@+id/txt_folder_path"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="/Documents/Yumeka Animations"
+            android:textColor="#FF6B35"
+            android:textSize="11sp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="14dp"
             android:gravity="center_vertical">
 
-            <Button
+            <TextView
                 android:id="@+id/btn_new_project"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="+ Criar"
-                android:backgroundTint="#FF6B00"
-                android:textColor="@android:color/white" />
-
-            <Button
-                android:id="@+id/btn_import_project"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="⬇ Importar"
-                android:backgroundTint="#333333"
-                android:textColor="@android:color/white"
-                android:layout_marginStart="8dp" />
-
-            <Button
-                android:id="@+id/btn_search"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🔍 Pesquisar"
-                android:backgroundTint="#333333"
-                android:textColor="@android:color/white"
-                android:layout_marginStart="8dp" />
-
-            <View
                 android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:text="+ New"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:background="#FF6B35"
+                android:layout_marginEnd="6dp" />
 
-            <Button
-                android:id="@+id/btn_settings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="⚙️ Config"
-                android:backgroundTint="#333333"
-                android:textColor="@android:color/white" />
+            <TextView
+                android:id="@+id/btn_import_project"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:text="Import"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:gravity="center"
+                android:background="#222222"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/btn_search"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="&#128269;"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:background="#222222" />
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <!-- Projects RecyclerView -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/txt_project_count"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0 projects"
+            android:textColor="#888888"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/btn_refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Refresh"
+            android:textColor="#FF6B35"
+            android:textSize="12sp"
+            android:padding="4dp" />
+
+    </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/projects_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingTop="8dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="12dp"
         android:clipToPadding="false" />
 
-    <!-- Empty State -->
     <LinearLayout
         android:id="@+id/empty_state"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="vertical"
         android:gravity="center"
         android:visibility="gone">
@@ -111,18 +150,28 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nenhum projeto"
-            android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:text="&#127916;"
+            android:textSize="56sp"
+            android:gravity="center" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Crie ou importe um projeto para começar"
-            android:textColor="#999999"
-            android:textSize="14sp"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="16dp"
+            android:text="No projects yet"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Tap + New to create your first project"
+            android:textColor="#666666"
+            android:textSize="13sp"
+            android:gravity="center" />
 
     </LinearLayout>
 
