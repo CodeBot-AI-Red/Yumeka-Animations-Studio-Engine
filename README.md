@@ -1,79 +1,78 @@
-# ðŸŽ Yumeka Animations Studio Engine
+# 🎢 Yumeka Animations Studio Engine
 
-> Engine nativa Android para reproduÃ§Ã£o e criaÃ§Ã£o de animÃ§Ãµes estilo anime.
+> Engine nativa Android para reprodução e criação de animções estilo anime.
 
 ![Build APK](https://github.com/CodeBot-AI-REd/Yumeka-Animations-Studio-Engine/actions/workflows/build-apk.yml/badge.svg)(https://github.com/CodeBot-AI-Red/Yumeka-Animations-Studio-Engine/actions)
 
 ---
 
-## ðŸ“ˆ Estrutura do Projeto
+## 📈 Estrutura do Projeto
 
 ```
 Yumeka-Animations-Studio-Engine/
-â”œâ”€â”€ android/                   # Ap Android host
-â”‚   â”œâ”€â”€ app/
-â”‚      â”œâ”€â”€ src/                # Sources Kotlin
+├── android/
+│   ├── app/
+│      ├── src/
 
-â”œâ”€â”€ engine/                  # Módulos da Engine
-â”‚   â”œâ”€â”€ anime/                # ðŸŽ¢ MÃ³dulos de anime
-â”‚   â”‚   â”œâ”€â”€ AnimePlayer.kt       # Reprodutor de frames
-â”‚   â”‚   â”œâ”€â”€ SpriteSheet.kt       # Gerenciador de spritesheets
-â”‚   â”‚   â”œâ”€â”€ SceneDirector.kt     # Orquestrador de cenas
-â”‚   â”‚   â””â”€â”€ CharacterRig.kt      # Sistema de personagens
-â”‚   â”œâ”€â”€ core/                  # Loop principal da engine
-â”‚   â”œâ”€â”€ renderer/              # RenderizaÃ§Ã£o
-â”‚   â”œâ”€â”€ scene/                 # Gerenciamento de cenas
-â”‚   â”œâ”€â”€ gameobject/           # Entidades
-â”‚   â””â”€â”€ transform/             # TransformaÃ§Ãµes 2D
+├── engine/
+│   ├── anime/
+│   │   ├── AnimePlayer.kt
+│   │   ├── SpriteSheet.kt
+│   │   ├── SceneDirector.kt
+│   │   └── CharacterRig.kt
+│   ├── core/
+│   ├── renderer/
+│   ├── scene/
+│   └── gameobject/
 
-â””â”€â”€ .github/workflows/
-      â””  build-apk.yml           # CI/CD \u2192 Gera APK automaticamente
+└── .github/workflows/
+      └ build-apk.yml
 ```
 
 ---
 
-## ðŸ˜ˆ MÃ³dulos principais
+## 😈 Modulos principais
 
-| MÃ³dulo | DescriÃ§Ã£o |
-|-----------------|-----------------------------------------|
+| Modulo | Descricao |
+|-----------------|-------------------------------------------|
 | `AnimePlayer` | Reproduz frames a 24 fps, suporta loop, pause e seek |
 | `SpriteSheet` | Extrai e desenha frames de spritesheets em grid |
-| `SceneDirector` | Orquestra sequÃªncia de cenas com diÃ¡logo e personagens |
-| `CharacterRig` | Personagem com clips, expressÃµes faciais e posicionamento |
+| `SceneDirector` | Orquestra sequencia de cenas com dialogo e personagens |
+| `CharacterRig` | Personagem com clips, expressoes faciais e posicionamento |
 
 ---
 
-## ðŸ’— CI/CD - GeraÃ§Ã£o de APK
+## 🔗 CI/CD - Geracao de APK
 
 O workflow `.github/workflows/build-apk.yml` roda automaticamente em:
 
-- ðŸ” Push na branch `main`
-- ðŸ“  Pull Request para `main`
-- ðŸ¤• Disparo manual via workflow_dispatch (debug ou release)
+- 🔁 Push na branch `main`
+- 📢 Pull Request para `main`
+- 🤕 Dispare manual via workflow_dispatch (debug ou release)
 
-O APK gerado Ã© salvo como artefato no GitHub Actions por 30 dias (debug) ou 90 dias (release).
-
----
-
-## ðŸ’© DependÃªncias principais
-
-- **Lottie Android** â€” animaÃ§Ãµes vetoriais estilo anime
-- **Coil** â€” carregamento de sprites e backgrounds
-- **Kotlin Coroutines** â€” animaÃ§Ãµes assÃ­ncronas sem travQr
-- **Android ViewBinding** â€” UI fluida e type-safe
+O APK gerado e salvo como artefato no GitHub Actions por 30 dias (debug) ou 90 dias (release).
 
 ---
 
-## ðŸ”… Build local
+## 💩 Dependencias principais
+
+- **Lottie Android** - animacoes vetoriais estilo anime
+- **Coil** - carregamento de sprites e backgrounds
+- **Kotlin Coroutines** - animacoes assincronas
+- **Android ViewBinding** - UI fluida e type-safe
+
+---
+
+## 🔅 Build local
 
 ```bash
 # APK Debug
-./gradlew :android:app:assembleDebug
+./gradlew :app:assembleDebug
 
 # APK Release
-./gradlew :android:app:assembleRelease
+./gradlew :app:assembleRelease
 ```
 
 ---
 
-> Build por Yumeka Studio â”‚ Powered by Yumeka Animations Engine
+> Build por Yumeka Studio | Powered by Yumeka Animations Engine
