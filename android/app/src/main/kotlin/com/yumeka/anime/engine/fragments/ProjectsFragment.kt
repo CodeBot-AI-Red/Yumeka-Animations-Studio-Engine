@@ -1,10 +1,13 @@
 package com.yumeka.anime.engine.fragments
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -30,17 +33,31 @@ class ProjectsFragment : Fragment() {
         private const val YUMEKA_FOLDER = "Yumeka Animations"
     }
 
-    private var recycler:     RecyclerView? = null
-    private var emptyState:  View? = null
-    private var countBadge:  TextView? = null
-    private var pathSub:     TextView? = null
-
+    private var recycler:    RecyclerView? = null
+    private var emptyState: View? = null
+    private var countBadge: TextView? = null
+    private var pathSub:    TextView? = null
     private var loaded = false
 
-    private val permissionLauncher = registerForActivityResult(
+    // Launcher para Android < 11 (READ_EXTERNAL_STORAGE)
+    private val legacyPermLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) loadProjects()
+        else Log.w(TAG, "Permissão READ_EXTERNAL_STORAGE negada")
+    }
+
+    // Launcher para Android 11+ (MANAGE_EXTERNAL_STORAGE - abre tela de configuração)
+    private val manageStorageLasuncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        // Usuário voltou da tela de configuração - verifica novamente
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+            && Environment.isExternalStorageManager()) {
+            loadProjects()
+        } else {
+            Log.w(TAG, "Permissão MANAGE_EXTERNAL_STORAGE negada ou não concedida")
+        }
     }
 
     override fun onCreateView(
@@ -55,13 +72,11 @@ class ProjectsFragment : Fragment() {
         recycler   = view.findViewById(R.id.projects_list)
         emptyState = view.findViewById(R.id.empty_state)
         countBadge = view.findViewById(R.id.projects_count)
-        pathSub     = view.findViewById(R.id.path_subtitle)
+        pathSub    = view.findViewById(R.id.path_subtitle)
 
         recycler?.layoutManager = GridLayoutManager(requireContext(), 2)
 
-        view.findViewById<View>(R.id.fab_new_project)?.setOnClickListener {
-            // TODO: criar novo projeto
-        }
+        view.findViewById<View>(R.id.fab_new_project)?.setOnClickListener { /* TODO */ }
 
         checkPermissionAndLoad()
     }
@@ -76,22 +91,46 @@ class ProjectsFragment : Fragment() {
         recycler   = null
         emptyState = null
         countBadge = null
-        pathSub     = null
+        pathSub    = null
     }
 
+    // -----------------------------------------------
+    // Permissões
+    // -----------------------------------------------
+
     private fun checkPermissionAndLoad() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            loadProjects()
-        } else {
-            val perm = Manifest.permission.READ_EXTERNAL_STORAGE
-            if (ContextCompat.checkSelfPermission(requireContext(), perm)
-                == PackageManager.PERMISSION_GRANTED) {
-                loadProjects()
-            } else {
-                permissionLauncher.launch(perm)
+        when {
+            // Android 11+: precisa de MANAGE_EXTERNAL_STORAGE
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                if (Environment.isExternalStorageManager()) {
+                    loadProjects()
+                } else {
+                    // Abre tela especial de configuração do sistema
+                    val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                        .apply { data = Uri.parse("package:${requireContext().packageName}") }
+                    manageStorageLasuncher.launchintent)
+                }
             }
+
+            // Android 6-10: pide READ_EXTERNAL_STORAGE normalmente
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
+                val perm = Manifest.permission.READ_EXTERNAL_STORAGE
+                if (ContextCompat.checkSelfPermission(requireContext(), perm)
+                    == PackageManager.PERMISSION_GRANTED) {
+                    loadProjects()
+                } else {
+                    legacyPermLauncher.launch(perm)
+                }
+            }
+
+            // Android 5 e abaixo: sem runtime permission
+            else -> loadProjects()
         }
     }
+
+    // ----------------------------------------------
+    // Carregar projetos
+    // ------------------------------------------------
 
     private fun loadProjects() {
         if (!isAdded) return
@@ -136,7 +175,7 @@ class ProjectsFragment : Fragment() {
                     path        = folder.absolutePath,
                     version     = readVersion(folder),
                     lastEdited  = sdf.format(Date(folder.lastModified())),
-                    sizeLabel   = folderSize(folder),
+                    sizeLabel    = folderSize(folder),
                     iconRes     = 0
                 )
             }
@@ -146,13 +185,11 @@ class ProjectsFragment : Fragment() {
     private fun readVersion(folder: File): String {
         return try {
             val ymk = File(folder, "project.ymk")
-            val json = File(folder, "project.ymk.json")
+            val json = File(folder, "project.json")
             when {
-                ymk.exists() -> {
-                    // firstOrNull returns String? -> usams ?. para encadear
-                    val line = ymk.readLines().firstOrNull { it.startsWith("version") }
-                    line?.split("=", ":")?.getOrNull(1)?.trim()?.let { "v$it" } ?: "v1.0"
-                }
+                ymk.exists() -> ymk.readLines()
+                    .firstOrNull { it.startsWith("version") }
+                    ?.split("=", ":").getOrNull(1)?.trim()?.let { "v$it" } ?: "v1.0"
                 json.exists() -> "v1.0"
                 else -> "-"
             }
@@ -163,9 +200,9 @@ class ProjectsFragment : Fragment() {
         return try {
             val bytes = folder.walkTopDown().filter { it.isFile }.sumOf { it.length() }
             when {
-                bytes < 1024L         -> "${bytes} B"
-                bytes < 1048576L    -> "${bytes / 1024} KB"
-                else                  -> "${bytes / 1048576} MB"
+                bytes < 1024L       -> "${bytes} B"
+                bytes < 1048576L  -> "${bytes / 1024} KB"
+                else              -> "${bytes / 1048576} MB"
             }
         } catch (e: Exception) { "-" }
     }
