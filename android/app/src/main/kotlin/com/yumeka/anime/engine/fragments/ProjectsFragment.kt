@@ -136,8 +136,8 @@ class ProjectsFragment : Fragment() {
                     path        = folder.absolutePath,
                     version     = readVersion(folder),
                     lastEdited  = sdf.format(Date(folder.lastModified())),
-                    sizeLabel    = folderSize(folder),
-                    iconRes      = 0
+                    sizeLabel   = folderSize(folder),
+                    iconRes     = 0
                 )
             }
             ?: emptyList()
@@ -148,9 +148,11 @@ class ProjectsFragment : Fragment() {
             val ymk = File(folder, "project.ymk")
             val json = File(folder, "project.ymk.json")
             when {
-                ymk.exists() -> ymk.readLines()
-                    .firstOrNull { it.startsWith("version") }
-                        ?.split("=", ":").getOrNull(1)?.trim()?.let { "v$it" } ?: "v1.0"
+                ymk.exists() -> {
+                    // firstOrNull returns String? -> usams ?. para encadear
+                    val line = ymk.readLines().firstOrNull { it.startsWith("version") }
+                    line?.split("=", ":")?.getOrNull(1)?.trim()?.let { "v$it" } ?: "v1.0"
+                }
                 json.exists() -> "v1.0"
                 else -> "-"
             }
