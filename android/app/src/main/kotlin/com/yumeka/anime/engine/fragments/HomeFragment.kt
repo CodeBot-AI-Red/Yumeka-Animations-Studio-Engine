@@ -1,7 +1,7 @@
 package com.yumeka.anime.engine.fragments
 
 import android.Manifest
-import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -37,23 +37,23 @@ class HomeFragment : Fragment() {
     private lateinit var emptyState: View
     private lateinit var txtCount: TextView
     private lateinit var txtFolderPath: TextView
+    private var permDialog: Dialog? = null
 
-    // Android 10- - request popup permission
     private val requestLegacyPermission = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { perms ->
         if (perms.values.any { it }) initYumekaFolder()
-        else showPermissionDeniedDialog()
+        else showDeniedToast()
     }
 
-    // Android 11+ - volta da tela de Settings
     private val requestManagerPermission = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+            Environment.isExternalStorageManager()) {
             initYumekaFolder()
         } else {
-            showPermissionDeniedDialog()
+            showDeniedToast()
         }
     }
 
@@ -71,7 +71,7 @@ class HomeFragment : Fragment() {
 
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        view.findViewById<TextView>(R.id.btn_refresh).setOnClickListener { checkPermissionsAndLoad() }
+        view.findViewById<TextView>(R.id.btn_refresh).setOnClickListener { checkPermissions() }
         view.findViewById<TextView>(R.id.btn_new_project).setOnClickListener {
             Toast.makeText(context, "New project coming soon", Toast.LENGTH_SHORT).show()
         }
@@ -85,24 +85,56 @@ class HomeFragment : Fragment() {
             Toast.makeText(context, "Settings coming soon", Toast.LENGTH_SHORT).show()
         }
 
-        checkPermissionsAndLoad()
+        checkPermissions()
     }
 
     override fun onResume() {
         super.onResume()
-        // Rele ao voltar da tela de Settings
         if (hasStoragePermission()) initYumekaFolder()
     }
 
-    private fun checkPermissionsAndLoad() {
+    private fun checkPermissions() {
         when {
             hasStoragePermission() -> initYumekaFolder()
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> requestManagerAccess()
-            else -> requestLegacyPermission.launch(arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ))
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> showPermissionDialog(isManager = true)
+            else -> showPermissionDialog(isManager = false)
         }
+    }
+
+    private fun showPermissionDialog(isManager: Boolean) {
+        val dialog = Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar)
+        val view = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_permission, null)
+        dialog.setContentView(view)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setLayout(
+            ((requireContext().resources.displayMetrics.widthPixels) * 0.92).toInt(),
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        view.findViewById<TextView>(R.id.btn_allow).setOnClickListener {
+            dialog.dismiss()
+            if (isManager) {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                intent.data = Uri.parse("package:${requireContext().packageName}")
+                requestManagerPermission.launch(intent)
+            } else {
+                requestLegacyPermission.launch(arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ))
+            }
+        }
+        view.findViewById<TextView>(R.id.btn_cancel).setOnClickListener { dialog.dismiss() }
+        permDialog = dialog
+        dialog.show()
+    }
+
+    private fun showDeniedToast() {
+        Toast.makeText(
+            context,
+            "Permission needed. Open App Settings to enable storage access.",
+            Toast.LENGTH_LONG
+        ).show()
     }
 
     private fun hasStoragePermission(): Boolean {
@@ -110,41 +142,9 @@ class HomeFragment : Fragment() {
             Environment.isExternalStorageManager()
         } else {
             ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.READ_EXTERNAL_STORAGE
+                requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE
             ) == PackageManager.PERMISSION_GRANTED
         }
-    }
-
-    // Android 11+: abre a tela de Settings para MANAGE_ALL_FILES
-    private fun requestManagerAccess() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Storage Permission Required")
-            .setMessage(
-                "Yumeka needs access to 'All Files' to read your projects from:\n\n" +
-                "Documents/Yumeka Animations\n\n" +
-                "Tap 'Allow' then enable 'Allow access to manage all files'."
-            )
-            .setPositiveButton("Allow") { _, _ ->
-                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                intent.data = Uri.parse("package:${requireContext().packageName}")
-                requestManagerPermission.launch(intent)
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    private fun showPermissionDeniedDialog() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Permission Denied")
-            .setMessage("Storage access is required to read projects. Please enable it in App Settings.")
-            .setPositiveButton("Open Settings") { _, _ ->
-                startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.parse("package:${requireContext().packageName}")
-                })
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
     }
 
     private fun initYumekaFolder() {
@@ -164,7 +164,7 @@ class HomeFragment : Fragment() {
                 val fileCount = folder.listFiles()?.size ?: 0
                 val versionFile = File(folder, "version.txt")
                 val version = if (versionFile.exists()) versionFile.readText().trim().take(10)
-                                   else "$fileCount files"
+                              else "$fileCount files"
                 Project(
                     id = folder.name,
                     name = folder.name,
@@ -191,5 +191,11 @@ class HomeFragment : Fragment() {
                 Toast.makeText(context, "Opening: ${project.name}", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        permDialog?.dismiss()
+        permDialog = null
     }
 }
