@@ -1,24 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    Editor principal do Yumeka - layout 16:9 landscape
+    Canvas ocupa toda a tela; FloatingHub fica sobreposto no canto inferior direito
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="#0A0A0A">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Editor de Anime"
-        android:textSize="24sp"
-        android:textStyle="bold" />
-
-    <!-- Canvas de edição aqui -->
+    <!-- Canvas de animacao - ocupa toda a tela -->
     <View
         android:id="@+id/canvas_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#f0f0f0"
-        android:layout_margin="10dp" />
+        android:layout_height="match_parent"
+        android:background="#111111" />
 
-</LinearLayout>
+    <!-- Barra de titulo minima no topo -->
+    <LinearLayout
+        android:id="@+id/editor_topbar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="top"
+        android:background="#CC0D0D0D"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp">
+
+        <TextView
+            android:id="@+id/txt_project_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Projeto sem título"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:ellipsize="end"
+            android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/btn_editor_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="← Voltar"
+            android:textColor="#FF6B35"
+            android:textSize="13sp"
+            android:padding="8dp" />
+
+    </LinearLayout>
+
+    <!-- FloatingHub sobreposto no canto inferior direito -->
+    <com.aniforge.engine.components.FloatingHub
+        android:id="@+id/floating_hub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp" />
+
+</FrameLayout>
