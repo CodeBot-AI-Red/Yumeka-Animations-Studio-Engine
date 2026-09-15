@@ -1,130 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="6dp"
-    android:paddingBottom="6dp">
+    android:orientation="horizontal"
+    android:background="#1A1A1A"
+    android:padding="12dp"
+    android:layout_marginBottom="1dp"
+    android:gravity="center_vertical">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/project_card"
-        android:layout_width="match_parent"
+    <FrameLayout
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="10dp">
+
+        <TextView
+            android:id="@+id/project_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="&#127916;"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:background="#252525" />
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/surface_card"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="6dp"
-        app:cardUseCompatPadding="true">
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <TextView
+            android:id="@+id/project_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="14dp"
-            android:paddingBottom="14dp">
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
 
-            <!-- Emoji do projeto -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical">
+
             <TextView
-                android:id="@+id/project_icon_emoji"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:text="📣"
-                android:textSize="30sp"
-                android:gravity="center"
-                android:background="@drawable/icon_background"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
-            <!-- Bloco central de informações -->
-            <LinearLayout
-                android:id="@+id/project_info_block"
+                android:id="@+id/project_date"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginStart="14dp"
-                android:layout_marginEnd="4dp"
-                app:layout_constraintStart_toEndOf="@id/project_icon_emoji"
-                app:layout_constraintEnd_toStartOf="@id/project_menu_btn"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_bias="0">
+                android:layout_weight="1"
+                android:textColor="#444444"
+                android:textSize="11sp" />
 
-                <TextView
-                    android:id="@+id/project_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp"
-                    android:textStyle="bold"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
+            <TextView
+                android:id="@+id/project_version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FF6B35"
+                android:textSize="10sp"
+                android:background="#1F120A"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp" />
 
-                <TextView
-                    android:id="@+id/project_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    android:layout_marginTop="2dp" />
+        </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="8dp">
+        <TextView
+            android:id="@+id/project_path"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="#333333"
+            android:textSize="10sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
 
-                    <TextView
-                        android:id="@+id/project_version"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/yumeka_pink"
-                        android:textSize="11sp"
-                        android:background="@drawable/version_badge"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:paddingTop="3dp"
-                        android:paddingBottom="3dp" />
+        <TextView
+            android:id="@+id/project_error_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="#FF4444"
+            android:textSize="10sp"
+            android:visibility="gone" />
 
-                    <TextView
-                        android:id="@+id/project_size"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/text_muted"
-                        android:textSize="11sp"
-                        android:layout_marginStart="10dp" />
+    </LinearLayout>
 
-                </LinearLayout>
+    <TextView
+        android:id="@+id/project_favorite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#9733;"
+        android:textColor="#FFB347"
+        android:textSize="14sp"
+        android:layout_marginEnd="6dp"
+        android:visibility="gone" />
 
-                <TextView
-                    android:id="@+id/project_error_message"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#FF4444"
-                    android:textSize="11sp"
-                    android:layout_marginTop="4dp"
-                    android:visibility="gone" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#8250;"
+        android:textColor="#2A2A2A"
+        android:textSize="22sp" />
 
-            </LinearLayout>
-
-            <!-- Botão de menu -->
-            <ImageView
-                android:id="@+id/project_menu_btn"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:src="@android:drawable/ic_menu_more"
-                android:contentDescription="Opções"
-                android:scaleType="centerInside"
-                android:tint="@color/text_secondary"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
-
-</FrameLayout>
+</LinearLayout>
