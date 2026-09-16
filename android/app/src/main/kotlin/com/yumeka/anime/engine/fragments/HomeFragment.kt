@@ -58,22 +58,22 @@ class HomeFragment : Fragment() {
             initYumekaFolder() else showDeniedToast()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_home, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View? = inflater.inflate(R.layout.fragment_home, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recyclerView  = view.findViewById(R.id.projects_recycler_view)
-        emptyState    = view.findViewById(R.id.empty_state)
-        txtCount      = view.findViewById(R.id.txt_project_count)
-        txtFolderPath = view.findViewById(R.id.txt_folder_path)
+        recyclerView   = view.findViewById(R.id.projects_recycler_view)
+        emptyState     = view.findViewById(R.id.empty_state)
+        txtCount       = view.findViewById(R.id.txt_project_count)
+        txtFolderPath  = view.findViewById(R.id.txt_folder_path)
 
         recyclerView.layoutManager = LinearLayoutManager(context)
 
         view.findViewById<TextView>(R.id.btn_refresh).setOnClickListener { checkPermissions() }
 
-        // Botao + New: abre dialog de criacao
         view.findViewById<TextView>(R.id.btn_new_project).setOnClickListener {
             if (hasStoragePermission()) showNewProjectDialog()
             else Toast.makeText(context, "Permita o acesso ao armazenamento primeiro.", Toast.LENGTH_SHORT).show()
@@ -96,10 +96,6 @@ class HomeFragment : Fragment() {
         if (hasStoragePermission()) initYumekaFolder()
     }
 
-    // ------------------------------
-    // Dialog de Criacao de Projeto
-    // ------------------------------
-
     private fun showNewProjectDialog() {
         val dialog = Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar)
         val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_new_project, null)
@@ -109,28 +105,22 @@ class HomeFragment : Fragment() {
             ((requireContext().resources.displayMetrics.widthPixels) * 0.92).toInt(),
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
-
         val edtName = view.findViewById<EditText>(R.id.edt_anime_name)
         val txtError = view.findViewById<TextView>(R.id.txt_error_name)
-
         view.findViewById<TextView>(R.id.btn_criar).setOnClickListener {
             val name = edtName.text.toString().trim()
-
             if (name.isEmpty()) {
                 txtError.text = "Digite o nome do anime."
                 txtError.visibility = View.VISIBLE
                 return@setOnClickListener
             }
-
             val base = yumekaDir ?: return@setOnClickListener
             val result = ProjectCreator.createProject(base, name)
-
             when (result.status) {
                 ProjectCreator.Result.SUCCESS -> {
                     hideKeyboard(edtName)
                     dialog.dismiss()
                     loadProjectsFrom(base)
-                    // Abre o editor com o novo projeto
                     (activity as? MainActivity)?.openEditor(name)
                 }
                 ProjectCreator.Result.ALREADY_EXISTS -> {
@@ -143,12 +133,10 @@ class HomeFragment : Fragment() {
                 }
             }
         }
-
         view.findViewById<TextView>(R.id.btn_cancelar).setOnClickListener {
             hideKeyboard(edtName)
             dialog.dismiss()
         }
-
         newProjectDialog = dialog
         dialog.show()
         edtName.requestFocus()
@@ -158,10 +146,6 @@ class HomeFragment : Fragment() {
         val imm = requireContext().getSystemService(InputMethodManager::class.java)
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
-
-    // ------------------------------
-    // Permissoes
-    // ------------------------------
 
     private fun checkPermissions() {
         when {
@@ -198,20 +182,18 @@ class HomeFragment : Fragment() {
         dialog.show()
     }
 
-    private fun showDeniedToast() =
+    private fun showDeniedToast() {
         Toast.makeText(context, "Permissao necessaria para acessar os projetos.", Toast.LENGTH_LONG).show()
+    }
 
-    private fun hasStoragePermission() =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+    private fun hasStoragePermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Environment.isExternalStorageManager()
         } else {
             ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) ==
                 PackageManager.PERMISSION_GRANTED
         }
-
-    // ------------------------------
-    // Pasta e listagem
-    // ------------------------------
+    }
 
     private fun initYumekaFolder() {
         val docs = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
@@ -250,17 +232,16 @@ class HomeFragment : Fragment() {
             emptyState.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
             recyclerView.adapter = ProjectAdapter(projects) { project ->
-                (parentFragmentManager.findFragmentByTag("HOME")?.activity as? MainActivity)
-                    ?.openEditor(project.name)
-                    ?: (if (isAdded) (activity as? MainActivity)?.openEditor(project.name))
-                }
+                (activity as? MainActivity)?.openEditor(project.name)
             }
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        permDialog?.dismiss(); permDialog = null
-        newProjectDialog?.dismiss(); newProjectDialog = null
+        permDialog?.dismiss()
+        permDialog = null
+        newProjectDialog?.dismiss()
+        newProjectDialog = null
     }
 }
