@@ -97,22 +97,16 @@ class HomeFragment : Fragment() {
     }
 
     /**
-     * Calcula as dimensoes corretas do dialog respeitando a orientacao da tela.
-     * Em landscape 16:9 a altura e bem menor que a largura, entao limitamos
-     * o dialog a 90% da dimensao MENOR (altura) para evitar que seja cortado.
-     * O ScrollView no layout garante que o conteudo rola caso ultrapasse o limite.
+     * Aplica largura de 92% da tela e deixa a altura livre (WRAP_CONTENT).
+     * Os layouts dos Hubs foram redesenhados compactos para caber em 16:9 landscape
+     * sem precisar de scroll nem de altura fixa — igual ao comportamento do Godot.
      */
     private fun applyDialogSize(dialog: Dialog) {
-        val dm = requireContext().resources.displayMetrics
-        // widthPixels e heightPixels ja refletem a orientacao atual corretamente
-        val screenW = dm.widthPixels
-        val screenH = dm.heightPixels
-
-        val dialogW = (screenW * 0.92).toInt()
-        // Altura maxima = 90% da altura disponivel; WRAP_CONTENT se couber
-        val dialogH = (screenH * 0.90).toInt()
-
-        dialog.window?.setLayout(dialogW, dialogH)
+        val screenW = requireContext().resources.displayMetrics.widthPixels
+        dialog.window?.setLayout(
+            (screenW * 0.92).toInt(),
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
     }
 
     private fun showNewProjectDialog() {
@@ -124,6 +118,7 @@ class HomeFragment : Fragment() {
 
         val edtName = view.findViewById<EditText>(R.id.edt_anime_name)
         val txtError = view.findViewById<TextView>(R.id.txt_error_name)
+
         view.findViewById<TextView>(R.id.btn_criar).setOnClickListener {
             val name = edtName.text.toString().trim()
             if (name.isEmpty()) {
