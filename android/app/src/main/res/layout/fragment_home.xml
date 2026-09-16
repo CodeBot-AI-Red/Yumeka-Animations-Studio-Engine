@@ -1,133 +1,182 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Página de projetos — redesign completo
+    Estilo: dark premium com gradientes e glassmorphism
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#0D0D0D">
+    android:background="#0A0A14">
 
-    <!-- Header -->
+    <!-- ═══════════════════════════════════════════
+         HEADER — glassmorphism com gradiente roxo
+         ═══════════════════════════════════════════ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:background="@drawable/header_glass_bg"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:paddingTop="20dp"
-        android:paddingBottom="12dp"
-        android:background="#161616">
+        android:paddingBottom="18dp">
 
+        <!-- Linha 1: Logo + título + settings -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
+            <!-- Logo 夢 -->
             <TextView
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:text="夢"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:gravity="center"
+                android:background="#C9142B"
+                android:layout_marginEnd="12dp" />
+
+            <!-- Título + subtítulo -->
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Yumeka Studio"
-                android:textColor="#FFFFFF"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:orientation="vertical">
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Yumeka Animations"
+                    android:textColor="#F0F0F5"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.02" />
+
+                <TextView
+                    android:id="@+id/txt_folder_path"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Documents/Yumeka Animations"
+                    android:textColor="#6060A0"
+                    android:textSize="10sp"
+                    android:layout_marginTop="1dp" />
+
+            </LinearLayout>
+
+            <!-- Settings -->
             <TextView
                 android:id="@+id/btn_settings"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:text="&#9881;"
-                android:textSize="20sp"
-                android:textColor="#AAAAAA"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="⚙"
+                android:textSize="17sp"
+                android:textColor="#8080B0"
                 android:gravity="center"
-                android:background="#222222"
-                android:padding="6dp" />
+                android:background="@drawable/btn_import_pill" />
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/txt_folder_path"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="/Documents/Yumeka Animations"
-            android:textColor="#FF6B35"
-            android:textSize="11sp" />
-
+        <!-- Linha 2: Botões New + Import + Search -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="14dp"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:layout_marginTop="16dp">
 
+            <!-- Botão NEW com gradiente vermelho→roxo -->
             <TextView
                 android:id="@+id/btn_new_project"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
-                android:layout_weight="1"
-                android:text="+ New"
+                android:layout_weight="1.2"
+                android:text="＋  Novo"
                 android:textColor="#FFFFFF"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:gravity="center"
-                android:background="#FF6B35"
-                android:layout_marginEnd="6dp" />
+                android:background="@drawable/btn_new_gradient"
+                android:layout_marginEnd="8dp" />
 
+            <!-- Botão IMPORT pill -->
             <TextView
                 android:id="@+id/btn_import_project"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:layout_weight="1"
-                android:text="Import"
-                android:textColor="#FFFFFF"
+                android:text="↓  Importar"
+                android:textColor="#A0A0C0"
                 android:textSize="13sp"
                 android:gravity="center"
-                android:background="#222222"
-                android:layout_marginEnd="6dp" />
+                android:background="@drawable/btn_import_pill"
+                android:layout_marginEnd="8dp" />
 
+            <!-- Botão SEARCH pill -->
             <TextView
                 android:id="@+id/btn_search"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:text="&#128269;"
+                android:text="🔍"
                 android:textSize="16sp"
                 android:gravity="center"
-                android:background="#222222" />
+                android:background="@drawable/btn_import_pill" />
 
         </LinearLayout>
 
     </LinearLayout>
 
+    <!-- ═══════════════════════════════════════════
+         BARRA DE BUSCA + contador
+         ═══════════════════════════════════════════ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="8dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="6dp">
 
         <TextView
             android:id="@+id/txt_project_count"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="0 projects"
-            android:textColor="#888888"
-            android:textSize="12sp" />
+            android:text="0 projetos"
+            android:textColor="#50507A"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05" />
 
         <TextView
             android:id="@+id/btn_refresh"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Refresh"
-            android:textColor="#FF6B35"
-            android:textSize="12sp"
+            android:text="↻  Atualizar"
+            android:textColor="#6B6B9B"
+            android:textSize="11sp"
             android:padding="4dp" />
 
     </LinearLayout>
 
+    <!-- Linha divisória com gradiente -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#1E1E35"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="4dp" />
+
+    <!-- ═══════════════════════════════════════════
+         LISTA DE PROJETOS
+         ═══════════════════════════════════════════ -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/projects_recycler_view"
         android:layout_width="match_parent"
@@ -135,9 +184,13 @@
         android:layout_weight="1"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
-        android:paddingBottom="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
         android:clipToPadding="false" />
 
+    <!-- ═══════════════════════════════════════════
+         EMPTY STATE
+         ═══════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/empty_state"
         android:layout_width="match_parent"
@@ -145,33 +198,38 @@
         android:layout_weight="1"
         android:orientation="vertical"
         android:gravity="center"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:padding="40dp">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="&#127916;"
-            android:textSize="56sp"
-            android:gravity="center" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="No projects yet"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:text="夢"
+            android:textSize="42sp"
+            android:textColor="#C9142B"
             android:textStyle="bold"
-            android:gravity="center" />
+            android:gravity="center"
+            android:background="#1A0A10"
+            android:alpha="0.7" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Tap + New to create your first project"
-            android:textColor="#666666"
+            android:text="Nenhum projeto ainda"
+            android:textColor="#C0C0E0"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginTop="20dp" />
+
+        <TextView
+            android:layout_width="220dp"
+            android:layout_height="wrap_content"
+            android:text="Toque em Novo para criar seu primeiro anime"
+            android:textColor="#505070"
             android:textSize="13sp"
-            android:gravity="center" />
+            android:gravity="center"
+            android:layout_marginTop="8dp" />
 
     </LinearLayout>
 
