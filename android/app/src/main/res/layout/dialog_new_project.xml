@@ -1,152 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    Hub: Novo Projeto
+    Envolto em ScrollView para que nao seja cortado em telas 16:9 landscape
+    onde a altura disponivel e menor que a altura total do conteudo.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="#121212">
+    android:fillViewport="false"
+    android:scrollbars="none">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center"
-        android:background="#1A1A2E"
-        android:paddingTop="28dp"
-        android:paddingBottom="20dp"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp">
+        android:background="#121212">
 
-        <TextView
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:text="&#127916;"
-            android:textSize="28sp"
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:gravity="center"
-            android:background="#1E3A1E"
-            android:layout_marginBottom="14dp" />
+            android:background="#1A1A2E"
+            android:paddingTop="28dp"
+            android:paddingBottom="20dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Novo Anime"
-            android:textColor="#90EEB8"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:gravity="center" />
+            <TextView
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:text="&#127916;"
+                android:textSize="28sp"
+                android:gravity="center"
+                android:background="#1E3A1E"
+                android:layout_marginBottom="14dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Crie seu projeto no YASE"
-            android:textColor="#5C8A70"
-            android:textSize="13sp"
-            android:gravity="center" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Novo Anime"
+                android:textColor="#90EEB8"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:gravity="center" />
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Crie seu projeto no YASE"
+                android:textColor="#5C8A70"
+                android:textSize="13sp"
+                android:gravity="center" />
 
-    <!-- Body -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="#1A1A1A"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        android:paddingTop="24dp"
-        android:paddingBottom="24dp">
+        </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Qual sera o nome do anime?"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="12dp" />
-
-        <EditText
-            android:id="@+id/edt_anime_name"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:hint="Ex. Naruto, Dragon Ball, One Piece..."
-            android:textColor="#FFFFFF"
-            android:textColorHint="#444444"
-            android:textSize="14sp"
-            android:background="#222222"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:singleLine="true"
-            android:inputType="textCapWords"
-            android:maxLength="64" />
-
-        <TextView
-            android:id="@+id/txt_error_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="#FF6B35"
-            android:textSize="12sp"
-            android:paddingTop="6dp"
-            android:visibility="gone" />
-
-        <!-- Estrutura info -->
+        <!-- Body -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="#1A1A1A"
-            android:padding="12dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="20dp">
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingTop="24dp"
+            android:paddingBottom="24dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Structura sera criada automaticamente:"
-                android:textColor="#90EEB8"
-                android:textSize="11sp"
+                android:text="Qual sera o nome do anime?"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
                 android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <EditText
+                android:id="@+id/edt_anime_name"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:hint="Ex. Naruto, Dragon Ball, One Piece..."
+                android:textColor="#FFFFFF"
+                android:textColorHint="#444444"
+                android:textSize="14sp"
+                android:background="#222222"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:singleLine="true"
+                android:inputType="textCapWords"
+                android:maxLength="64" />
+
+            <TextView
+                android:id="@+id/txt_error_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FF6B35"
+                android:textSize="12sp"
+                android:paddingTop="6dp"
+                android:visibility="gone" />
+
+            <!-- Estrutura info -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#1A1A1A"
+                android:padding="12dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Structura sera criada automaticamente:"
+                    android:textColor="#90EEB8"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#128193; Nome-do-Anime/\n  &#128194; Plugins\n  &#128194; Temporadas/Temporada 1/Episodios/EP-1/\n      &#128194; 3D  Sounds  Scripts  Designs  Speeches\n  &#128216; Icon.png\n  &#128216; yase.project"
+                    android:textColor="#555555"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="#2A2A2A"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/btn_criar"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="Criar Projeto"
+                android:textColor="#111111"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:background="#90EEB8"
                 android:layout_marginBottom="8dp" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="&#128193; Nome-do-Anime/\n  &#128194; Plugins\n  &#128194; Temporadas/Temporada 1/Episodios/EP-1/\n      &#128194; 3D  Sounds  Scripts  Designs  Speeches\n  &#128216; Icon.png\n  &#128216; yase.project"
-                android:textColor="#555555"
-                android:textSize="11sp"
-                android:fontFamily="monospace" />
+                android:id="@+id/btn_cancelar"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:text="Cancelar"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:background="#111111" />
 
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0.5dp"
-            android:background="#2A2A2A"
-            android:layout_marginBottom="16dp" />
-
-        <TextView
-            android:id="@+id/btn_criar"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="Criar Projeto"
-            android:textColor="#111111"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:background="#90EEB8"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:id="@+id/btn_cancelar"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:text="Cancelar"
-            android:textColor="#666666"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:background="#111111" />
-
     </LinearLayout>
 
-</LinearLayout>
+</ScrollView>
