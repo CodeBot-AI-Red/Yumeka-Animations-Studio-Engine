@@ -14,28 +14,31 @@ class ProjectAdapter(
 ) : RecyclerView.Adapter<ProjectAdapter.ProjectViewHolder>() {
 
     inner class ProjectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val iconEmoji: TextView   = itemView.findViewById(R.id.project_icon_emoji)
-        private val nameView: TextView    = itemView.findViewById(R.id.project_name)
-        private val dateView: TextView    = itemView.findViewById(R.id.project_date)
-        private val versionView: TextView = itemView.findViewById(R.id.project_version)
-        private val sizeView: TextView    = itemView.findViewById(R.id.project_size)
-        private val errorMsg: TextView    = itemView.findViewById(R.id.project_error_message)
+        private val iconView: TextView     = itemView.findViewById(R.id.project_icon)
+        private val nameView: TextView     = itemView.findViewById(R.id.project_name)
+        private val dateView: TextView     = itemView.findViewById(R.id.project_date)
+        private val versionView: TextView  = itemView.findViewById(R.id.project_version)
+        private val pathView: TextView     = itemView.findViewById(R.id.project_path)
+        private val favView: TextView      = itemView.findViewById(R.id.project_favorite)
+        private val errorMsg: TextView     = itemView.findViewById(R.id.project_error_message)
 
         fun bind(project: Project) {
-            // Emoji baseado no nome para diferenciar visualmente
-            iconEmoji.text = when {
+            // Emoji dinamico por nome
+            iconView.text = when {
+                project.name.contains("hero",  ignoreCase = true) -> "\uD83E\uDD88"
+                project.name.contains("scene", ignoreCase = true) -> "\uD83C\uDFAA"
                 project.name.contains("fight", ignoreCase = true) -> "\uD83E\uDD4A"
                 project.name.contains("magic", ignoreCase = true) -> "\u2728"
-                project.name.contains("hero",  ignoreCase = true) -> "\uD83E\uDDB8"
-                project.name.contains("scene", ignoreCase = true) -> "\uD83C\uDFAC"
-                project.name.contains("char",  ignoreCase = true) -> "\uD83D\uDC64"
-                else -> "\uD83C\uDFA8"
-            }
+                project.name.contains("plugin",ignoreCase = true) -> "\uD83E\uDD4F"
+                else -> "\uD83C\uDFC8"
+  }
 
-            nameView.text    = project.name
-            dateView.text    = project.lastEdited
+            nameView.text   = project.name
+            dateView.text   = project.lastEdited
             versionView.text = project.version
-            sizeView.text    = project.sizeLabel
+            pathView.text   = project.path
+
+            favView.visibility = if (project.isFavorite) View.VISIBLE else View.GONE
 
             if (project.hasError) {
                 errorMsg.visibility = View.VISIBLE
