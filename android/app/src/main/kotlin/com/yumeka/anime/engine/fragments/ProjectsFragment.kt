@@ -12,8 +12,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
@@ -21,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.yumeka.anime.engine.R
 import com.yumeka.anime.engine.adapters.ProjectAdapter
 import com.yumeka.anime.engine.models.Project
+import com.yumeka.anime.engine.services.ProjectCreator
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -29,8 +33,8 @@ import java.util.Locale
 class ProjectsFragment : Fragment() {
 
     companion object {
-        private const val TAG            = "ProjectsFragment"
-        private const val YUMEKA_FOLDER  = "Yumeka Animations"
+        private const val TAG             = "ProjectsFragment"
+        private const val YUMEKA_FOLDER   = "Yumeka Animations"
     }
 
     // Views nullable — zero risco de UninitializedPropertyAccessException
@@ -76,7 +80,10 @@ class ProjectsFragment : Fragment() {
 
         recycler?.layoutManager = GridLayoutManager(requireContext(), 2)
 
-        view.findViewById<View>(R.id.fab_new_project)?.setOnClickListener { /* TODO */ }
+        // Botao "+ Novo" abre o hub de criacao de projeto
+        view.findViewById<View>(R.id.fab_new_project)?.setOnClickListener {
+            showNewProjectHub()
+        }
 
         checkPermissionAndLoad()
     }
@@ -94,9 +101,60 @@ class ProjectsFragment : Fragment() {
         pathSub     = null
     }
 
-    // ----------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Hub: Novo Projeto
+    // -------------------------------------------------------------------------
+
+    private fun showNewProjectHub() {
+        val ctx = requireContext()
+        val dialogView = LayoutInflater.from(ctx).inflate(R.layout.dialog_new_project, null)
+        val edtName    = dialogView.findViewById<EditText>(R.id.edt_anime_name)
+        val txtError   = dialogView.findViewById<TextView>(R.id.txt_error_name)
+
+        val dialog = AlertDialog.Builder(ctx)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        dialogView.findViewById<TextView>(R.id.btn_cancelar)?.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<TextView>(R.id.btn_criar)?.setOnClickListener {
+            val name = edtName.text?.toString()?.trim() ?: ""
+            if (name.isEmpty()) {
+                txtError.text       = "Digite o nome do anime."
+                txtError.visibility = View.VISIBLE
+                return@setOnClickListener
+            }
+            txtError.visibility = View.GONE
+
+            val baseDir = getOrCreateYumekaFolder()
+            val result  = ProjectCreator.createProject(baseDir, name)
+
+            when (result.status) {
+                ProjectCreator.Result.SUCCESS -> {
+                    dialog.dismiss()
+                    loadProjects()
+                    Toast.makeText(ctx, "Projeto \"$name\" criado!", Toast.LENGTH_SHORT).show()
+                }
+                ProjectCreator.Result.ALREADY_EXISTS -> {
+                    txtError.text       = result.message
+                    txtError.visibility = View.VISIBLE
+                }
+                ProjectCreator.Result.ERROR -> {
+                    txtError.text       = result.message
+                    txtError.visibility = View.VISIBLE
+                }
+            }
+        }
+
+        dialog.show()
+    }
+
+    // -------------------------------------------------------------------------
     // Permissoes
-    // ----------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     private fun checkPermissionAndLoad() {
         when {
@@ -130,9 +188,9 @@ class ProjectsFragment : Fragment() {
         }
     }
 
-    // ----------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Carregar projetos
-    // ----------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     private fun loadProjects() {
         if (!isAdded) return
@@ -149,7 +207,14 @@ class ProjectsFragment : Fragment() {
             } else {
                 emptyState?.visibility = View.GONE
                 recycler?.visibility   = View.VISIBLE
-                recycler?.adapter      = ProjectAdapter(projects) { }
+                recycler?.adapter      = ProjectAdapter(projects) { project ->
+                    // Abre o editor passando o nome do projeto
+                    val frag = EditorFragment.newInstance(project.name)
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, frag)
+                        .addToBackStack(null)
+                        .commit()
+                }
             }
             loaded = true
         } catch (e: Exception) {
@@ -184,11 +249,19 @@ class ProjectsFragment : Fragment() {
             ?: emptyList()
     }
 
+    /**
+     * Le a versao do projeto a partir do yase.project.
+     * Compativel tambem com formatos legados (project.ymk, project.json).
+     */
     private fun readVersion(folder: File): String {
         return try {
-            val ymk  = File(folder, "project.ymk")
-            val json = File(folder, "project.json")
+            val yaseProject = File(folder, "yase.project")
+            val ymk         = File(folder, "project.ymk")
+            val json        = File(folder, "project.json")
             when {
+                yaseProject.exists() -> yaseProject.readLines()
+                    .firstOrNull { it.startsWith("yase_version") }
+                    ?.split("=")?.getOrNull(1)?.trim()?.let { "v$it" } ?: "v1.0"
                 ymk.exists() -> ymk.readLines()
                     .firstOrNull { it.startsWith("version") }
                     ?.split("=", ":")?.getOrNull(1)?.trim()?.let { "v$it" } ?: "v1.0"

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Hub: Novo Projeto — layout compacto, sem scroll, cabe em 16:9 landscape.
-    Paddings e alturas reduzidos para que o conteudo inteiro apareca sem corte.
+    Paddings e alturas reduzidos para que o conteudo inteiro apare?a sem corte.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -24,7 +24,7 @@
         <TextView
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:text="&#127916;"
+            android:text="&#127900;"
             android:textSize="18sp"
             android:gravity="center"
             android:background="#1E3A1E"
@@ -105,7 +105,7 @@
             android:paddingTop="4dp"
             android:visibility="gone" />
 
-        <!-- Estrutura info compacta -->
+        <!-- Estrutura info compacta — estrutura oficial YASE -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -119,7 +119,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="&#128193; NomeAnime/  &#128194; Plugins  &#128194; Temporadas  &#128216; yase.project"
+            android:text="&#128193; NomeAnime/  &#128194; Plugins  &#128194; Assets  &#128194; Temporadas  &#128196; yase.project"
             android:textColor="#555555"
             android:textSize="10sp"
             android:fontFamily="monospace"

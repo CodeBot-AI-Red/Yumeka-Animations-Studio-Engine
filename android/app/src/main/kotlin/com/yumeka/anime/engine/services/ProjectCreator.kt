@@ -6,6 +6,27 @@ import java.io.File
  * YASE ProjectCreator
  * Cria a estrutura completa de pastas e arquivos
  * para um novo projeto de anime no YASE.
+ *
+ * Estrutura oficial:
+ * NomeAnime/
+ *   Plugins/
+ *   Assets/
+ *     Characters/
+ *     Backgrounds/
+ *     Materials/
+ *   Temporadas/
+ *     Temporada 1/
+ *       Episodios/
+ *         EP-1/
+ *           Quadros/
+ *           3D Scene/
+ *           Efeitos/
+ *           Audio/
+ *             Sounds/
+ *             Speeches/
+ *           Scripts/
+ *   Icon.png
+ *   yase.project
  */
 object ProjectCreator {
 
@@ -23,7 +44,8 @@ object ProjectCreator {
 
     /**
      * Cria um novo projeto YASE com a estrutura oficial.
-     * Retorna ALREADY_EXISTS se ja houver um projeto com esse nome.
+     * Retorna ALREADY_EXISTS se já houver um projeto com esse nome —
+     * nunca sobrescreve nem apaga o projeto existente.
      */
     fun createProject(baseDir: File, animeName: String): CreationResult {
         val safeName = animeName.trim()
@@ -34,11 +56,11 @@ object ProjectCreator {
 
         val projectDir = File(baseDir, safeName)
 
-        // Verifica duplicado
+        // Verifica duplicado — nunca sobrescreve
         if (projectDir.exists()) {
             return CreationResult(
                 Result.ALREADY_EXISTS,
-                message = "Ja existe um projeto chamado \"$safeName\". Por favor Escolha outro nome."
+                message = "Ja existe um projeto chamado \"$safeName\". Por favor escolha outro nome."
             )
         }
 
@@ -49,24 +71,34 @@ object ProjectCreator {
             // 2 - Plugins
             File(projectDir, "Plugins").mkdir()
 
-            // 3 - Temporadas > Temporada 1 > Episodios > EP-1
-  val ep1Dir = File(projectDir, "Temporadas/Temporada 1/Episodios/EP-1")
-            ep1Dir.mkdirs()
-            File(ep1Dir, "3D").mkdir()
-            File(ep1Dir, "Sounds").mkdir()
-            File(ep1Dir, "Scripts").mkdir()
-            File(ep1Dir, "Designs").mkdir()
-            File(ep1Dir, "Speeches").mkdir()
+            // 3 - Assets com sub-pastas de recursos reutilizaveis
+            val assetsDir = File(projectDir, "Assets")
+            assetsDir.mkdirs()
+            File(assetsDir, "Characters").mkdir()
+            File(assetsDir, "Backgrounds").mkdir()
+            File(assetsDir, "Materials").mkdir()
 
-            // 4 - Icon.png (arquivo vazio placeholder)
+            // 4 - Temporadas > Temporada 1 > Episodios > EP-1
+            val ep1Dir = File(projectDir, "Temporadas/Temporada 1/Episodios/EP-1")
+            ep1Dir.mkdirs()
+
+            // Sub-pastas do EP-1 — exatamente as definidas na especificacao
+            File(ep1Dir, "Quadros").mkdir()           // conteudo visual dos frames 2D
+            File(ep1Dir, "3D Scene").mkdir()          // recursos/cena 3D do episodio
+            File(ep1Dir, "Efeitos").mkdir()           // efeitos visuais
+            val audioDir = File(ep1Dir, "Audio")
+            audioDir.mkdir()
+            File(audioDir, "Sounds").mkdir()          // efeitos sonoros
+            File(audioDir, "Speeches").mkdir()        // falas
+            File(ep1Dir, "Scripts").mkdir()           // scripts do episodio
+
+            // 5 - Icon.png (placeholder vazio)
             val iconFile = File(projectDir, "Icon.png")
             if (!iconFile.exists()) iconFile.createNewFile()
 
-            // 5 - yase.project (arquivo de configuracao)
+            // 6 - yase.project (unico arquivo de configuracao na raiz)
             val projectFile = File(projectDir, "yase.project")
-            projectFile.writeText(
-                buildYaseConfig(safeName)
-            )
+            projectFile.writeText(buildYaseConfig(safeName))
 
             CreationResult(Result.SUCCESS, projectDir = projectDir)
         } catch (e: Exception) {
