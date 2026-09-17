@@ -174,19 +174,23 @@ class EditorFragment : Fragment() {
 
     private fun switchTab(root: View, isQuadros: Boolean) {
         root.findViewById<TextView>(R.id.tab_quadros)?.apply {
-            background = if (isQuadros)
-                resources.getDrawable(android.R.color.transparent, null).also {
-                    setBackgroundColor(0xFF9B6DFF.toInt())
-                }
-            else {
-                setBackgroundColor(0xFF22222E.toInt())
-            }
-            setTextColor(if (isQuadros) 0xFFFFFFFF.toInt() else 0xFFA0A0B8.toInt())
+            setBackgroundColor(
+                if (isQuadros) 0xFF9B6DFF.toInt() else 0xFF22222E.toInt()
+            )
+            setTextColor(
+                if (isQuadros) 0xFFFFFFFF.toInt() else 0xFFA0A0B8.toInt()
+            )
         }
+
         root.findViewById<TextView>(R.id.tab_3d)?.apply {
-            setBackgroundColor(if (isQuadros) 0xFF22222E.toInt() else 0xFF9B6DFF.toInt())
-            setTextColor(if (isQuadros) 0xFFA0A0B8.toInt() else 0xFFFFFFFF.toInt())
+            setBackgroundColor(
+                if (isQuadros) 0xFF22222E.toInt() else 0xFF9B6DFF.toInt()
+            )
+            setTextColor(
+                if (isQuadros) 0xFFA0A0B8.toInt() else 0xFFFFFFFF.toInt()
+            )
         }
+
         val msg = if (isQuadros) "Modo Quadros ativo" else "Modo 3D ativo"
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     }
@@ -216,13 +220,13 @@ class EditorFragment : Fragment() {
     private fun setupLayerNames(root: View) {
         data class LayerDef(val viewId: Int, val icon: String, val name: String)
         val layers = listOf(
-            LayerDef(R.id.layer_personagem, "\uD83D\uDC64", "Personagem"),
-            LayerDef(R.id.layer_3d,         "\uD83D\uDDC2",  "3D"),
-            LayerDef(R.id.layer_fundo,      "\uD83D\uDDBC",  "Fundo"),
-            LayerDef(R.id.layer_desenho,    "\u270F",         "Desenho"),
-            LayerDef(R.id.layer_efeito,     "\u2728",         "Efeito"),
+            LayerDef(R.id.layer_personagem, "👤", "Personagem"),
+            LayerDef(R.id.layer_3d,         "🗂",  "3D"),
+            LayerDef(R.id.layer_fundo,      "🖼",  "Fundo"),
+            LayerDef(R.id.layer_desenho,    "✏",         "Desenho"),
+            LayerDef(R.id.layer_efeito,     "✨",         "Efeito"),
             LayerDef(R.id.layer_texto,      "T",              "Texto"),
-            LayerDef(R.id.layer_audio,      "\uD83C\uDFB5",  "Audio")
+            LayerDef(R.id.layer_audio,      "🎵",  "Audio")
         )
         layers.forEach { def ->
             val row = root.findViewById<View>(def.viewId) ?: return@forEach
