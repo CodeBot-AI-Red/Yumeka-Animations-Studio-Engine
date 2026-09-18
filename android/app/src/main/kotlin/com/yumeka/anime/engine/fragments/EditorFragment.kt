@@ -1,6 +1,5 @@
 package com.yumeka.anime.engine.fragments
 
-import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -21,9 +20,8 @@ import com.yumeka.anime.engine.R
  *   Frame    = quadro pertencente a Cena selecionada
  *   Keyframe = ponto de animacao dentro de um Frame
  *
- * Layout mobile-first: paineis laterais sao DRAWERS animados.
- * Apenas canvas + ferramentas ficam visiveis por padrao.
- * O usuario abre os drawers pelos botoes na topbar.
+ * Projeto comeca VAZIO — o usuario cria suas proprias cenas e frames.
+ * Canvas exibe estado vazio enquanto nao ha frame selecionado.
  */
 class EditorFragment : Fragment() {
 
@@ -43,39 +41,28 @@ class EditorFragment : Fragment() {
     private var rightOpen = false
 
     // Views
-    private var panelLeft:     View? = null
-    private var panelRight:    View? = null
-    private var overlay:       View? = null
-    private var listScenes:    RecyclerView? = null
-    private var listFrames:    RecyclerView? = null
+    private var panelLeft:      View? = null
+    private var panelRight:     View? = null
+    private var overlay:        View? = null
+    private var listScenes:     RecyclerView? = null
+    private var listFrames:     RecyclerView? = null
+    private var canvasEmpty:    View? = null
+    private var canvasView:     View? = null
 
-    // Largura do drawer em pixels (calculada apos inflate)
     private var drawerWidthPx = 0
 
     // -------------------------------------------------------------------------
-    // Dados em memoria: Cenas e Frames (nao sao pastas fisicas)
+    // Dados em memoria — COMECAM VAZIOS (usuario cria)
     // -------------------------------------------------------------------------
 
-    data class Cena(val id: Int, val nome: String, val inicio: String, val fim: String)
-    data class Frame(val id: Int, val nome: String, val inicio: String, val fim: String)
+    data class Cena(val id: Int, var nome: String, var inicio: String, var fim: String)
+    data class Frame(val id: Int, var nome: String, var inicio: String, var fim: String)
 
-    private val cenas = mutableListOf(
-        Cena(1, "Cena 1", "00:00", "00:15"),
-        Cena(2, "Cena 2", "00:15", "00:30"),
-        Cena(3, "Cena 3", "00:30", "00:45"),
-        Cena(4, "Cena 4", "00:45", "01:00")
-    )
-    private var cenaSelecionada = cenas.first()
+    private val cenas = mutableListOf<Cena>()
+    private var cenaSelecionada: Cena? = null
+    private var frameSelecionado: Frame? = null
 
-    private val framesPorCena: MutableMap<Int, MutableList<Frame>> = mutableMapOf(
-        1 to mutableListOf(
-            Frame(1, "Frame 1", "0:00", "0:03"),
-            Frame(2, "Frame 2", "0:03", "0:06"),
-            Frame(3, "Frame 3", "0:06", "0:09"),
-            Frame(4, "Frame 4", "0:09", "0:12"),
-            Frame(5, "Frame 5", "0:12", "0:15")
-        )
-    )
+    private val framesPorCena: MutableMap<Int, MutableList<Frame>> = mutableMapOf()
 
     // -------------------------------------------------------------------------
 
@@ -92,20 +79,19 @@ class EditorFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Referencias dos drawers
-        panelLeft  = view.findViewById(R.id.panel_left)
-        panelRight = view.findViewById(R.id.panel_right)
-        overlay    = view.findViewById(R.id.drawer_overlay)
-        listScenes = view.findViewById(R.id.list_scenes)
-        listFrames = view.findViewById(R.id.list_frames)
+        panelLeft   = view.findViewById(R.id.panel_left)
+        panelRight  = view.findViewById(R.id.panel_right)
+        overlay     = view.findViewById(R.id.drawer_overlay)
+        listScenes  = view.findViewById(R.id.list_scenes)
+        listFrames  = view.findViewById(R.id.list_frames)
+        canvasEmpty = view.findViewById(R.id.canvas_empty_state)
+        canvasView  = view.findViewById(R.id.canvas_view)
 
         listScenes?.layoutManager = LinearLayoutManager(requireContext())
         listFrames?.layoutManager = LinearLayoutManager(requireContext())
 
-        // Calcula largura do drawer apos layout
         panelLeft?.post {
             drawerWidthPx = panelLeft?.width ?: dpToPx(260)
-            // Garante posicao inicial fora da tela
             panelLeft?.translationX  = -drawerWidthPx.toFloat()
             panelRight?.translationX =  drawerWidthPx.toFloat()
         }
@@ -115,17 +101,30 @@ class EditorFragment : Fragment() {
         setupTools(view)
         setupLayerNames(view)
 
+        // Canvas comeca no estado vazio
+        updateCanvasState()
         refreshScenes()
         refreshFrames()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        panelLeft  = null
-        panelRight = null
-        overlay    = null
-        listScenes = null
-        listFrames = null
+        panelLeft   = null
+        panelRight  = null
+        overlay     = null
+        listScenes  = null
+        listFrames  = null
+        canvasEmpty = null
+        canvasView  = null
+    }
+
+    // -------------------------------------------------------------------------
+    // Canvas: estado vazio x frame ativo
+    // -------------------------------------------------------------------------
+
+    private fun updateCanvasState() {
+        val hasFrame = frameSelecionado != null
+        canvasEmpty?.visibility = if (hasFrame) View.GONE else View.VISIBLE
     }
 
     // -------------------------------------------------------------------------
@@ -133,24 +132,21 @@ class EditorFragment : Fragment() {
     // -------------------------------------------------------------------------
 
     private fun setupTopbar(root: View) {
-        root.findViewById<TextView>(R.id.txt_project_name)?.text    = projectName
-        root.findViewById<TextView>(R.id.txt_season_episode)?.text  = "Temporada 1 Episodio 1"
+        root.findViewById<TextView>(R.id.txt_project_name)?.text   = projectName
+        root.findViewById<TextView>(R.id.txt_season_episode)?.text = "Temporada 1 Episodio 1"
 
         root.findViewById<TextView>(R.id.btn_editor_back)?.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
-
         root.findViewById<TextView>(R.id.tab_quadros)?.setOnClickListener {
             switchTab(root, isQuadros = true)
         }
         root.findViewById<TextView>(R.id.tab_3d)?.setOnClickListener {
             switchTab(root, isQuadros = false)
         }
-
         root.findViewById<TextView>(R.id.btn_play)?.setOnClickListener {
             Toast.makeText(context, "Reproduzindo episodio...", Toast.LENGTH_SHORT).show()
         }
-
         root.findViewById<TextView>(R.id.btn_alinhar_ia)?.setOnClickListener {
             Toast.makeText(context, "Alinhar com IA — em breve", Toast.LENGTH_SHORT).show()
         }
@@ -164,25 +160,18 @@ class EditorFragment : Fragment() {
     // -------------------------------------------------------------------------
 
     private fun setupDrawerControls(root: View) {
-        // Botoes toggle na topbar
         root.findViewById<TextView>(R.id.btn_toggle_left)?.setOnClickListener {
             if (leftOpen) closeLeft() else openLeft()
         }
         root.findViewById<TextView>(R.id.btn_toggle_right)?.setOnClickListener {
             if (rightOpen) closeRight() else openRight()
         }
-
-        // Botoes fechar dentro dos drawers
         root.findViewById<TextView>(R.id.btn_close_left)?.setOnClickListener  { closeLeft()  }
         root.findViewById<TextView>(R.id.btn_close_right)?.setOnClickListener { closeRight() }
-
-        // Overlay fecha o drawer aberto
         overlay?.setOnClickListener {
             if (leftOpen)  closeLeft()
             if (rightOpen) closeRight()
         }
-
-        // Keyframes
         root.findViewById<TextView>(R.id.btn_add_keyframe)?.setOnClickListener {
             Toast.makeText(context, "Adicionar keyframe — em breve", Toast.LENGTH_SHORT).show()
         }
@@ -192,8 +181,6 @@ class EditorFragment : Fragment() {
         root.findViewById<TextView>(R.id.btn_choose_keyframe)?.setOnClickListener {
             Toast.makeText(context, "Escolher keyframes — em breve", Toast.LENGTH_SHORT).show()
         }
-
-        // Frames e Cenas
         root.findViewById<TextView>(R.id.btn_add_frame)?.setOnClickListener { adicionarFrame() }
         root.findViewById<TextView>(R.id.btn_add_scene)?.setOnClickListener { adicionarCena() }
     }
@@ -203,9 +190,8 @@ class EditorFragment : Fragment() {
         if (rightOpen) closeRight()
         leftOpen = true
         val panel = panelLeft ?: return
-        val w = if (drawerWidthPx > 0) drawerWidthPx.toFloat() else dpToPx(260).toFloat()
         panel.visibility = View.VISIBLE
-        animateDrawer(panel, -w, 0f)
+        animateDrawer(panel, -drawerW(), 0f)
         showOverlay()
     }
 
@@ -213,10 +199,7 @@ class EditorFragment : Fragment() {
         if (!leftOpen) return
         leftOpen = false
         val panel = panelLeft ?: return
-        val w = if (drawerWidthPx > 0) drawerWidthPx.toFloat() else dpToPx(260).toFloat()
-        animateDrawer(panel, 0f, -w) {
-            panel.visibility = View.INVISIBLE
-        }
+        animateDrawer(panel, 0f, -drawerW()) { panel.visibility = View.INVISIBLE }
         hideOverlay()
     }
 
@@ -225,9 +208,8 @@ class EditorFragment : Fragment() {
         if (leftOpen) closeLeft()
         rightOpen = true
         val panel = panelRight ?: return
-        val w = if (drawerWidthPx > 0) drawerWidthPx.toFloat() else dpToPx(260).toFloat()
         panel.visibility = View.VISIBLE
-        animateDrawer(panel, w, 0f)
+        animateDrawer(panel, drawerW(), 0f)
         showOverlay()
     }
 
@@ -235,30 +217,25 @@ class EditorFragment : Fragment() {
         if (!rightOpen) return
         rightOpen = false
         val panel = panelRight ?: return
-        val w = if (drawerWidthPx > 0) drawerWidthPx.toFloat() else dpToPx(260).toFloat()
-        animateDrawer(panel, 0f, w) {
-            panel.visibility = View.INVISIBLE
-        }
+        animateDrawer(panel, 0f, drawerW()) { panel.visibility = View.INVISIBLE }
         hideOverlay()
     }
 
+    private fun drawerW() =
+        if (drawerWidthPx > 0) drawerWidthPx.toFloat() else dpToPx(260).toFloat()
+
     private fun animateDrawer(panel: View, from: Float, to: Float, onEnd: (() -> Unit)? = null) {
-        val anim = ObjectAnimator.ofFloat(panel, "translationX", from, to).apply {
+        ObjectAnimator.ofFloat(panel, "translationX", from, to).apply {
             duration = DRAWER_ANIM_MS
-        }
-        if (onEnd != null) {
-            anim.addListener(object : android.animation.AnimatorListenerAdapter() {
+            if (onEnd != null) addListener(object : android.animation.AnimatorListenerAdapter() {
                 override fun onAnimationEnd(a: android.animation.Animator) { onEnd() }
             })
+            start()
         }
-        anim.start()
     }
 
     private fun showOverlay() {
-        overlay?.apply {
-            visibility = View.VISIBLE
-            animate().alpha(1f).setDuration(DRAWER_ANIM_MS).start()
-        }
+        overlay?.apply { visibility = View.VISIBLE; animate().alpha(1f).setDuration(DRAWER_ANIM_MS).start() }
     }
 
     private fun hideOverlay() {
@@ -307,17 +284,17 @@ class EditorFragment : Fragment() {
     // -------------------------------------------------------------------------
 
     private fun setupLayerNames(root: View) {
-        data class LayerDef(val viewId: Int, val icon: String, val name: String)
+        data class L(val id: Int, val icon: String, val name: String)
         listOf(
-            LayerDef(R.id.layer_personagem, "\uD83D\uDC64", "Personagem"),
-            LayerDef(R.id.layer_3d,         "\uD83D\uDDC2", "3D"),
-            LayerDef(R.id.layer_fundo,      "\uD83D\uDDBC", "Fundo"),
-            LayerDef(R.id.layer_desenho,    "\u270F",        "Desenho"),
-            LayerDef(R.id.layer_efeito,     "\u2728",        "Efeito"),
-            LayerDef(R.id.layer_texto,      "T",             "Texto"),
-            LayerDef(R.id.layer_audio,      "\uD83C\uDFB5", "Audio")
+            L(R.id.layer_personagem, "\uD83D\uDC64", "Personagem"),
+            L(R.id.layer_3d,         "\uD83D\uDDC2", "3D"),
+            L(R.id.layer_fundo,      "\uD83D\uDDBC", "Fundo"),
+            L(R.id.layer_desenho,    "\u270F",        "Desenho"),
+            L(R.id.layer_efeito,     "\u2728",        "Efeito"),
+            L(R.id.layer_texto,      "T",             "Texto"),
+            L(R.id.layer_audio,      "\uD83C\uDFB5", "Audio")
         ).forEach { def ->
-            val row = root.findViewById<View>(def.viewId) ?: return@forEach
+            val row = root.findViewById<View>(def.id) ?: return@forEach
             row.findViewById<TextView>(R.id.layer_icon)?.text = def.icon
             row.findViewById<TextView>(R.id.layer_name)?.text = def.name
             row.setOnClickListener {
@@ -327,41 +304,55 @@ class EditorFragment : Fragment() {
     }
 
     // -------------------------------------------------------------------------
-    // Cenas
+    // Cenas — usuario cria do zero
     // -------------------------------------------------------------------------
 
     private fun adicionarCena() {
         val novaId     = (cenas.maxOfOrNull { it.id } ?: 0) + 1
         val inicioPrev = cenas.lastOrNull()?.fim ?: "00:00"
         cenas.add(Cena(novaId, "Cena $novaId", inicioPrev, proximoTempo(inicioPrev)))
+        if (cenaSelecionada == null) cenaSelecionada = cenas.first()
         refreshScenes()
-        Toast.makeText(context, "Cena $novaId adicionada", Toast.LENGTH_SHORT).show()
+        refreshFrames()
+        Toast.makeText(context, "Cena $novaId criada", Toast.LENGTH_SHORT).show()
     }
 
     private fun refreshScenes() {
         listScenes?.adapter = SceneAdapter(cenas) { cena ->
-            cenaSelecionada = cena
-            framesPorCena.getOrPut(cena.id) { mutableListOf() }
+            cenaSelecionada  = cena
+            frameSelecionado = null
             refreshFrames()
+            updateCanvasState()
         }
     }
 
     // -------------------------------------------------------------------------
-    // Frames
+    // Frames — usuario cria do zero
     // -------------------------------------------------------------------------
 
     private fun adicionarFrame() {
-        val frames     = framesPorCena.getOrPut(cenaSelecionada.id) { mutableListOf() }
+        val cena = cenaSelecionada
+        if (cena == null) {
+            Toast.makeText(context, "Crie uma Cena primeiro", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val frames     = framesPorCena.getOrPut(cena.id) { mutableListOf() }
         val novaId     = (frames.maxOfOrNull { it.id } ?: 0) + 1
         val inicioPrev = frames.lastOrNull()?.fim ?: "0:00"
-        frames.add(Frame(novaId, "Frame $novaId", inicioPrev, proximoTempoFrame(inicioPrev)))
+        val novo       = Frame(novaId, "Frame $novaId", inicioPrev, proximoTempoFrame(inicioPrev))
+        frames.add(novo)
+        // Seleciona automaticamente o primeiro frame criado
+        if (frameSelecionado == null) frameSelecionado = novo
         refreshFrames()
-        Toast.makeText(context, "Frame $novaId adicionado", Toast.LENGTH_SHORT).show()
+        updateCanvasState()
+        Toast.makeText(context, "Frame $novaId criado", Toast.LENGTH_SHORT).show()
     }
 
     private fun refreshFrames() {
-        val frames = framesPorCena.getOrPut(cenaSelecionada.id) { mutableListOf() }
-        listFrames?.adapter = FrameAdapter(frames) { frame ->
+        val frames = cenaSelecionada?.let { framesPorCena[it.id] } ?: emptyList()
+        listFrames?.adapter = FrameAdapter(frames.toList()) { frame ->
+            frameSelecionado = frame
+            updateCanvasState()
             Toast.makeText(context, "Frame: ${frame.nome}", Toast.LENGTH_SHORT).show()
         }
     }
@@ -384,24 +375,20 @@ class EditorFragment : Fragment() {
         (dp * resources.displayMetrics.density).toInt()
 
     // =========================================================================
-    // Adapters internos
+    // Adapters
     // =========================================================================
 
     inner class SceneAdapter(
         private val items: List<Cena>,
         private val onClick: (Cena) -> Unit
     ) : RecyclerView.Adapter<SceneAdapter.VH>() {
-
         inner class VH(v: View) : RecyclerView.ViewHolder(v) {
             val name: TextView? = v.findViewById(R.id.scene_name)
             val time: TextView? = v.findViewById(R.id.scene_time)
             val menu: TextView? = v.findViewById(R.id.scene_menu)
         }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-            VH(LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_scene_row, parent, false))
-
+        override fun onCreateViewHolder(p: ViewGroup, t: Int) =
+            VH(LayoutInflater.from(p.context).inflate(R.layout.item_scene_row, p, false))
         override fun onBindViewHolder(h: VH, pos: Int) {
             val c = items[pos]
             h.name?.text = c.nome
@@ -411,11 +398,10 @@ class EditorFragment : Fragment() {
                 Toast.makeText(context, "Opcoes: ${c.nome}", Toast.LENGTH_SHORT).show()
             }
             h.itemView.setBackgroundColor(
-                if (c.id == cenaSelecionada.id) 0xFF1E1E3A.toInt()
+                if (c.id == cenaSelecionada?.id) 0xFF1E1E3A.toInt()
                 else android.graphics.Color.TRANSPARENT
             )
         }
-
         override fun getItemCount() = items.size
     }
 
@@ -423,17 +409,13 @@ class EditorFragment : Fragment() {
         private val items: List<Frame>,
         private val onClick: (Frame) -> Unit
     ) : RecyclerView.Adapter<FrameAdapter.VH>() {
-
         inner class VH(v: View) : RecyclerView.ViewHolder(v) {
             val name: TextView? = v.findViewById(R.id.frame_name)
             val time: TextView? = v.findViewById(R.id.frame_time)
             val menu: TextView? = v.findViewById(R.id.frame_menu)
         }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-            VH(LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_frame_row, parent, false))
-
+        override fun onCreateViewHolder(p: ViewGroup, t: Int) =
+            VH(LayoutInflater.from(p.context).inflate(R.layout.item_frame_row, p, false))
         override fun onBindViewHolder(h: VH, pos: Int) {
             val f = items[pos]
             h.name?.text = f.nome
@@ -442,8 +424,11 @@ class EditorFragment : Fragment() {
             h.menu?.setOnClickListener {
                 Toast.makeText(context, "Opcoes: ${f.nome}", Toast.LENGTH_SHORT).show()
             }
+            h.itemView.setBackgroundColor(
+                if (f.id == frameSelecionado?.id) 0xFF1E1E3A.toInt()
+                else android.graphics.Color.TRANSPARENT
+            )
         }
-
         override fun getItemCount() = items.size
     }
 }

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Canvas do editor: fundo estilo "quadriculado" feito com
+    um gradiente de grade 2x2 usando apenas XML nativo Android.
+    Simula o padrao xadrez de area de trabalho vazia
+    sem precisar de nenhum arquivo PNG.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Camada base: roxo muito escuro (tom do tema YASE) -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#16162A" />
+        </shape>
+    </item>
+
+    <!-- Grade horizontal suave -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="90"
+                android:startColor="#1F1F35"
+                android:centerColor="#16162A"
+                android:endColor="#1F1F35"
+                android:centerX="0.5"
+                android:centerY="0.5" />
+        </shape>
+    </item>
+
+</layer-list>

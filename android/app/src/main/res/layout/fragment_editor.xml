@@ -1,25 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Editor YASE - Mobile-first
-    Solucao para tela cheia no mobile:
-    Paineis laterais sao DRAWERS — ficam fora da tela por padrao.
-    O usuario os abre via botoes na topbar.
-    Apenas canvas + ferramentas verticais ficam visiveis por padrao.
-
-    Conceitos separados:
-      Cena     = secao do episodio (logica, sem pasta fisica)
-      Frame    = quadro da Cena selecionada
-      Keyframe = ponto de animacao dentro de um Frame
--->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0F0F13">
 
     <!-- CAMADA BASE: topbar + ferramentas + canvas + toolbar inferior -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -37,7 +25,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Voltar -->
             <TextView
                 android:id="@+id/btn_editor_back"
                 android:layout_width="36dp"
@@ -47,7 +34,6 @@
                 android:textSize="20sp"
                 android:gravity="center" />
 
-            <!-- Toggle painel esquerdo (Frames/Keyframes) -->
             <TextView
                 android:id="@+id/btn_toggle_left"
                 android:layout_width="36dp"
@@ -58,7 +44,6 @@
                 android:gravity="center"
                 android:layout_marginStart="2dp" />
 
-            <!-- Nome projeto + episodio -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -88,7 +73,6 @@
 
             </LinearLayout>
 
-            <!-- Tab Quadros -->
             <TextView
                 android:id="@+id/tab_quadros"
                 android:layout_width="wrap_content"
@@ -102,7 +86,6 @@
                 android:background="#9B6DFF"
                 android:layout_marginEnd="3dp" />
 
-            <!-- Tab 3D -->
             <TextView
                 android:id="@+id/tab_3d"
                 android:layout_width="wrap_content"
@@ -116,7 +99,6 @@
                 android:background="#22222E"
                 android:layout_marginEnd="4dp" />
 
-            <!-- Play -->
             <TextView
                 android:id="@+id/btn_play"
                 android:layout_width="34dp"
@@ -128,7 +110,6 @@
                 android:background="#2A2A3A"
                 android:layout_marginEnd="3dp" />
 
-            <!-- Toggle painel direito (Cenas/Camadas) -->
             <TextView
                 android:id="@+id/btn_toggle_right"
                 android:layout_width="36dp"
@@ -140,7 +121,7 @@
 
         </LinearLayout>
 
-        <!-- FERRAMENTAS VERTICAIS (coluna fina, sempre visivel) -->
+        <!-- FERRAMENTAS VERTICAIS -->
         <LinearLayout
             android:id="@+id/panel_tools"
             android:layout_width="40dp"
@@ -206,24 +187,64 @@
 
         </LinearLayout>
 
-        <!-- CANVAS CENTRAL (ocupa todo o espaco disponivel) -->
+        <!-- CANVAS CENTRAL -->
         <FrameLayout
             android:id="@+id/canvas_area"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="#111118"
+            android:background="#16162A"
             app:layout_constraintTop_toBottomOf="@id/editor_topbar"
             app:layout_constraintStart_toEndOf="@id/panel_tools"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/bottom_toolbar">
 
+            <!-- Canvas de animacao / preview do frame ativo -->
             <View
                 android:id="@+id/canvas_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#111118" />
+                android:background="@drawable/canvas_empty_bg" />
 
-            <!-- Botoes flutuantes no rodape do canvas -->
+            <!-- Estado vazio: exibido quando nenhum frame esta selecionado -->
+            <LinearLayout
+                android:id="@+id/canvas_empty_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#127800;"
+                    android:textSize="40sp"
+                    android:gravity="center"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nenhum frame selecionado"
+                    android:textColor="#4A4A6A"
+                    android:textSize="13sp"
+                    android:gravity="center"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Abra o painel de Cenas e crie sua primeira cena"
+                    android:textColor="#35354A"
+                    android:textSize="11sp"
+                    android:gravity="center"
+                    android:layout_marginTop="4dp"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp" />
+
+            </LinearLayout>
+
+            <!-- Botoes flutuantes no rodape -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -279,26 +300,22 @@
                 android:paddingStart="4dp"
                 android:paddingEnd="4dp">
 
-                <!-- Cada item da toolbar inferior -->
                 <LinearLayout android:id="@+id/btool_modelos"
                     android:layout_width="56dp" android:layout_height="match_parent"
                     android:orientation="vertical" android:gravity="center">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="&#128432;" android:textSize="16sp" android:gravity="center" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Modelos" android:textColor="#9B6DFF" android:textSize="8sp"
-                        android:gravity="center" />
+                        android:text="Modelos" android:textColor="#9B6DFF" android:textSize="8sp" android:gravity="center" />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/btool_elementos"
                     android:layout_width="56dp" android:layout_height="match_parent"
                     android:orientation="vertical" android:gravity="center">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="&#10029;" android:textSize="16sp" android:gravity="center"
-                        android:textColor="#A0A0B8" />
+                        android:text="&#10029;" android:textSize="16sp" android:gravity="center" android:textColor="#A0A0B8" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Elementos" android:textColor="#606078" android:textSize="8sp"
-                        android:gravity="center" />
+                        android:text="Elementos" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/btool_texto"
@@ -308,8 +325,7 @@
                         android:text="T" android:textSize="16sp" android:gravity="center"
                         android:textColor="#A0A0B8" android:textStyle="bold" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Texto" android:textColor="#606078" android:textSize="8sp"
-                        android:gravity="center" />
+                        android:text="Texto" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/btool_galeria"
@@ -318,8 +334,7 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="&#128247;" android:textSize="16sp" android:gravity="center" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Galeria" android:textColor="#606078" android:textSize="8sp"
-                        android:gravity="center" />
+                        android:text="Galeria" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/btool_camera"
@@ -328,8 +343,7 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="&#127909;" android:textSize="16sp" android:gravity="center" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Camera" android:textColor="#606078" android:textSize="8sp"
-                        android:gravity="center" />
+                        android:text="Camera" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/btool_efeitos"
@@ -338,8 +352,7 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="&#10024;" android:textSize="16sp" android:gravity="center" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Efeitos" android:textColor="#606078" android:textSize="8sp"
-                        android:gravity="center" />
+                        android:text="Efeitos" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/btool_particulas"
@@ -348,19 +361,16 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="&#10052;" android:textSize="16sp" android:gravity="center" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Particulas" android:textColor="#606078" android:textSize="8sp"
-                        android:gravity="center" />
+                        android:text="Particulas" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/btool_luz"
                     android:layout_width="56dp" android:layout_height="match_parent"
                     android:orientation="vertical" android:gravity="center">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="&#9728;" android:textSize="16sp" android:gravity="center"
-                        android:textColor="#FBBF24" />
+                        android:text="&#9728;" android:textSize="16sp" android:gravity="center" android:textColor="#FBBF24" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Luz" android:textColor="#606078" android:textSize="8sp"
-                        android:gravity="center" />
+                        android:text="Luz" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/btool_sombras"
@@ -369,8 +379,7 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="&#9681;" android:textSize="16sp" android:gravity="center" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Sombras" android:textColor="#606078" android:textSize="8sp"
-                        android:gravity="center" />
+                        android:text="Sombras" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/btool_fundo"
@@ -379,8 +388,7 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="&#127757;" android:textSize="16sp" android:gravity="center" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Fundo" android:textColor="#606078" android:textSize="8sp"
-                        android:gravity="center" />
+                        android:text="Fundo" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/btool_personagem"
@@ -389,19 +397,16 @@
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="&#127939;" android:textSize="16sp" android:gravity="center" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Personagem" android:textColor="#606078" android:textSize="8sp"
-                        android:gravity="center" />
+                        android:text="Personagem" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
                 </LinearLayout>
 
                 <LinearLayout android:id="@+id/btool_mais"
                     android:layout_width="56dp" android:layout_height="match_parent"
                     android:orientation="vertical" android:gravity="center">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="&#8943;" android:textSize="16sp" android:gravity="center"
-                        android:textColor="#606078" />
+                        android:text="&#8943;" android:textSize="16sp" android:gravity="center" android:textColor="#606078" />
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Mais" android:textColor="#606078" android:textSize="8sp"
-                        android:gravity="center" />
+                        android:text="Mais" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -410,7 +415,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- DRAWER ESQUERDO: Keyframes + Frames — desliza sobre o canvas -->
+    <!-- DRAWER ESQUERDO: Keyframes + Frames -->
     <LinearLayout
         android:id="@+id/panel_left"
         android:layout_width="260dp"
@@ -421,7 +426,6 @@
         android:translationX="-260dp"
         android:visibility="invisible">
 
-        <!-- Header Keyframes -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
@@ -446,7 +450,6 @@
                 android:textStyle="bold"
                 android:layout_marginStart="8dp" />
 
-            <!-- Fechar drawer -->
             <TextView
                 android:id="@+id/btn_close_left"
                 android:layout_width="32dp"
@@ -503,7 +506,6 @@
             android:layout_height="0.5dp"
             android:background="#2A2A3A" />
 
-        <!-- Lista de Frames -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list_frames"
             android:layout_width="match_parent"
@@ -523,7 +525,7 @@
 
     </LinearLayout>
 
-    <!-- DRAWER DIREITO: Cenas + Camadas — desliza pelo lado direito -->
+    <!-- DRAWER DIREITO: Cenas + Camadas -->
     <LinearLayout
         android:id="@+id/panel_right"
         android:layout_width="260dp"
@@ -535,7 +537,6 @@
         android:translationX="260dp"
         android:visibility="invisible">
 
-        <!-- Header Cenas -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
@@ -571,7 +572,6 @@
                 android:background="#1E2E1E"
                 android:layout_marginEnd="6dp" />
 
-            <!-- Fechar drawer -->
             <TextView
                 android:id="@+id/btn_close_right"
                 android:layout_width="32dp"
@@ -583,7 +583,6 @@
 
         </LinearLayout>
 
-        <!-- Lista de Cenas -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list_scenes"
             android:layout_width="match_parent"
@@ -595,7 +594,6 @@
             android:layout_height="0.5dp"
             android:background="#2A2A3A" />
 
-        <!-- Header Camadas -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="44dp"
@@ -631,7 +629,6 @@
 
         </LinearLayout>
 
-        <!-- Camadas fixas do episodio -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -651,7 +648,7 @@
 
     </LinearLayout>
 
-    <!-- OVERLAY escuro ao abrir qualquer drawer -->
+    <!-- OVERLAY escuro ao abrir drawer -->
     <View
         android:id="@+id/drawer_overlay"
         android:layout_width="match_parent"
