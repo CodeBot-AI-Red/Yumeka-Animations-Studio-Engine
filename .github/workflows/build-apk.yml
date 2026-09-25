@@ -31,11 +31,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Baixar Gradle Wrapper
+      - name: Baixar Gradle Wrapper JAR
         run: |
           mkdir -p gradle/wrapper
           curl -fL -o gradle/wrapper/gradle-wrapper.jar \
-            https://github.com/gradle/gradle/raw/v8.7.0/gradle/wrapper/gradle-wrapper.jar
+            "https://services.gradle.org/distributions/gradle-8.7-wrapper.jar"
 
       - name: Cache Gradle
         uses: actions/cache@v4
