@@ -28,11 +28,12 @@ class EditorProjectStorage(private val projectDir: File) {
                 id.toIntOrNull()?.let { value ->
                     val sceneId = p.getProperty("frame.$value.scene")?.toIntOrNull() ?: return@let null
                     val folder = frameFolder(value)
-                    Frame(value, sceneId, p.getProperty("frame.$value.name", "Quadro $value"), p.getProperty("frame.$value.start", "0:00"), p.getProperty("frame.$value.end", "0:03"), artworkFile(folder).takeIf(File::exists)?.let(BitmapFactory::decodeFile))
+                    val artworkFile = artworkFile(folder)
+                    Frame(value, sceneId, p.getProperty("frame.$value.name", "Quadro $value"), p.getProperty("frame.$value.start", "0:00"), p.getProperty("frame.$value.end", "0:03"), if (artworkFile.exists()) BitmapFactory.decodeFile(artworkFile.absolutePath) else null)
                 }
             }
             State(scenes, frames)
-        } catch (_: Exception) { State(emptyList(), emptyList()) }
+        } catch (e: Exception) { State(emptyList(), emptyList()) }
     }
 
     fun saveState(scenes: List<Scene>, frames: List<Frame>) {
