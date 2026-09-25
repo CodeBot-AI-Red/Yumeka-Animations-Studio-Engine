@@ -18,7 +18,12 @@ import java.io.File
  *     Temporada 1/
  *       Episodios/
  *         EP-1/
- *           Quadros/
+ *           Cenas/                  ← pasta-mãe de todas as cenas
+ *             Cena 1/               ← criada dinamicamente pelo editor
+ *               Quadros/
+ *                 Quadro 1/
+ *                   Keyframes/
+ *                     Keyframe 1.png
  *           3D Scene/
  *           Efeitos/
  *           Audio/
@@ -82,8 +87,8 @@ object ProjectCreator {
             val ep1Dir = File(projectDir, "Temporadas/Temporada 1/Episodios/EP-1")
             ep1Dir.mkdirs()
 
-            // Sub-pastas do EP-1 — exatamente as definidas na especificacao
-            File(ep1Dir, "Quadros").mkdir()           // conteudo visual dos frames 2D
+            // Sub-pastas do EP-1
+            File(ep1Dir, "Cenas").mkdir()             // pasta-mãe das cenas (quadros ficam dentro de cada cena)
             File(ep1Dir, "3D Scene").mkdir()          // recursos/cena 3D do episodio
             File(ep1Dir, "Efeitos").mkdir()           // efeitos visuais
             val audioDir = File(ep1Dir, "Audio")
