@@ -65,6 +65,9 @@ class FrameCanvasView @JvmOverloads constructor(
     var frameActive: Boolean = false
         set(v) { field = v; invalidate() }
 
+    /** Notifica o editor ao terminar uma alteracao para salva-la imediatamente. */
+    var onArtworkChanged: (() -> Unit)? = null
+
     // Proporcao 16:9
     private val ratio = 16f / 9f
 
@@ -157,6 +160,7 @@ class FrameCanvasView @JvmOverloads constructor(
                 drawCanvas?.restore()
                 currentPath.reset()
                 invalidate()
+                onArtworkChanged?.invoke()
             }
         }
         return true
@@ -172,6 +176,7 @@ class FrameCanvasView @JvmOverloads constructor(
         drawBitmap?.eraseColor(Color.TRANSPARENT)
         currentPath.reset()
         invalidate()
+        onArtworkChanged?.invoke()
     }
 
     /** Replaces the current frame artwork without sharing mutable bitmap state. */

@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
     fun openEditor(projectName: String) {
         if (isFinishing || isDestroyed) return
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, EditorFragment.newInstance(projectName), "EDITOR")
+            .replace(R.id.fragment_container, EditorFragment.newInstance(projectName, ""), "EDITOR")
             .addToBackStack("editor")
             .setReorderingAllowed(true)
             .commitAllowingStateLoss()

@@ -209,7 +209,7 @@ class ProjectsFragment : Fragment() {
                 recycler?.visibility   = View.VISIBLE
                 recycler?.adapter      = ProjectAdapter(projects) { project ->
                     // Abre o editor passando o nome do projeto
-                    val frag = EditorFragment.newInstance(project.name)
+                    val frag = EditorFragment.newInstance(project.name, project.path)
                     parentFragmentManager.beginTransaction()
                         .replace(R.id.fragment_container, frag)
                         .addToBackStack(null)

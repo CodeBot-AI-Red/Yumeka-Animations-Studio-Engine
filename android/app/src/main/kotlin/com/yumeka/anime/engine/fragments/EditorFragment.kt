@@ -18,15 +18,20 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yumeka.anime.engine.R
 import com.yumeka.anime.engine.views.FrameCanvasView
+import com.yumeka.anime.engine.services.EditorProjectStorage
+import java.io.File
 
 class EditorFragment : Fragment() {
     private var projectName = "Projeto"
+    private var projectPath = ""
+    private var storage: EditorProjectStorage? = null
 
     companion object {
         private const val ARG = "project_name"
+        private const val ARG_PATH = "project_path"
         private const val DRAWER_MS = 220L
-        fun newInstance(name: String) = EditorFragment().apply {
-            arguments = Bundle().apply { putString(ARG, name) }
+        fun newInstance(name: String, path: String) = EditorFragment().apply {
+            arguments = Bundle().apply { putString(ARG, name); putString(ARG_PATH, path) }
         }
     }
 
@@ -61,6 +66,8 @@ class EditorFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         projectName = arguments?.getString(ARG) ?: projectName
+        projectPath = arguments?.getString(ARG_PATH).orEmpty()
+        if (projectPath.isNotBlank()) storage = EditorProjectStorage(File(projectPath))
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?) =
@@ -77,12 +84,16 @@ class EditorFragment : Fragment() {
         listFrames?.layoutManager = LinearLayoutManager(requireContext())
         panelLeft?.post { drawerW = panelLeft?.width ?: dp(260); panelLeft?.translationX = -drawerW.toFloat(); panelRight?.translationX = drawerW.toFloat() }
         setupTopbar(view); setupDrawers(view); setupBrushToolbar(view); setupLayers(view)
+        restoreProjectState()
+        canvasView?.onArtworkChanged = { saveCurrentArtwork() }
         updateCanvasState(); refreshScenes(); refreshFrames()
+        canvasView?.post { updateCanvasState() }
     }
 
     override fun onDestroyView() {
         stopPlayback(); super.onDestroyView()
         panelLeft = null; panelRight = null; overlay = null; listScenes = null; listFrames = null
+        canvasView?.onArtworkChanged = null
         canvasView = null; canvasEmpty = null; brushToolbar = null; colorSwatch = null
     }
 
@@ -94,7 +105,31 @@ class EditorFragment : Fragment() {
         canvasView?.setFrameBitmap(frameSelecionado?.artwork)
     }
 
-    private fun saveCurrentArtwork() { frameSelecionado?.artwork = canvasView?.getFrameBitmap() }
+    private fun saveCurrentArtwork() {
+        val frame = frameSelecionado ?: return
+        frame.artwork = canvasView?.getFrameBitmap()
+        storage?.saveArtwork(frame.id, frame.artwork)
+        persistState()
+    }
+
+    private fun restoreProjectState() {
+        val state = storage?.load() ?: return
+        val loadedScenes = state.scenes.map { Cena(it.id, it.name, it.start, it.end) }
+        cenas.addAll(loadedScenes)
+        state.frames.forEach { saved ->
+            framesPorCena.getOrPut(saved.sceneId) { mutableListOf() }
+                .add(Frame(saved.id, saved.name, saved.start, saved.end, saved.artwork))
+        }
+        cenaSelecionada = cenas.firstOrNull()
+    }
+
+    private fun persistState() {
+        val savedScenes = cenas.map { EditorProjectStorage.Scene(it.id, it.nome, it.inicio, it.fim) }
+        val savedFrames = framesPorCena.flatMap { (sceneId, frames) ->
+            frames.map { EditorProjectStorage.Frame(it.id, sceneId, it.nome, it.inicio, it.fim, null) }
+        }
+        storage?.saveState(savedScenes, savedFrames)
+    }
 
     private fun setupBrushToolbar(root: View) {
         root.findViewById<TextView>(R.id.brush_btn_pencil).setOnClickListener { setEraser(root, false) }
@@ -159,15 +194,15 @@ class EditorFragment : Fragment() {
     }
     private fun updateLayerSelection(root: View) { listOf(R.id.layer_personagem, R.id.layer_3d, R.id.layer_fundo, R.id.layer_desenho, R.id.layer_efeito, R.id.layer_texto, R.id.layer_audio).forEach { root.findViewById<View>(it).setBackgroundColor(if (it == selectedLayerId) 0xFF1E1E3A.toInt() else Color.TRANSPARENT) } }
 
-    private fun addScene() { saveCurrentArtwork(); val id = (cenas.maxOfOrNull { it.id } ?: 0) + 1; val start = cenas.lastOrNull()?.fim ?: "00:00"; val scene = Cena(id, "Cena $id", start, nextTime(start)); cenas.add(scene); cenaSelecionada = scene; frameSelecionado = null; refreshScenes(); refreshFrames(); updateCanvasState(); openLeft() }
-    private fun addFrame() { val scene = cenaSelecionada ?: run { openRight(); Toast.makeText(context, "Crie uma cena primeiro.", Toast.LENGTH_SHORT).show(); return }; saveCurrentArtwork(); val frames = framesPorCena.getOrPut(scene.id) { mutableListOf() }; val id = (frames.maxOfOrNull { it.id } ?: 0) + 1; val start = frames.lastOrNull()?.fim ?: "0:00"; val frame = Frame(id, "Quadro $id", start, nextTimeFrame(start)); frames.add(frame); frameSelecionado = frame; refreshFrames(); updateCanvasState() }
+    private fun addScene() { saveCurrentArtwork(); val id = (cenas.maxOfOrNull { it.id } ?: 0) + 1; val start = cenas.lastOrNull()?.fim ?: "00:00"; val scene = Cena(id, "Cena $id", start, nextTime(start)); cenas.add(scene); cenaSelecionada = scene; frameSelecionado = null; persistState(); refreshScenes(); refreshFrames(); updateCanvasState(); openLeft() }
+    private fun addFrame() { val scene = cenaSelecionada ?: run { openRight(); Toast.makeText(context, "Crie uma cena primeiro.", Toast.LENGTH_SHORT).show(); return }; saveCurrentArtwork(); val frames = framesPorCena.getOrPut(scene.id) { mutableListOf() }; val id = (framesPorCena.values.flatten().maxOfOrNull { it.id } ?: 0) + 1; val start = frames.lastOrNull()?.fim ?: "0:00"; val frame = Frame(id, "Quadro $id", start, nextTimeFrame(start)); frames.add(frame); storage?.createFrameFolder(id); frameSelecionado = frame; persistState(); refreshFrames(); updateCanvasState() }
     private fun selectScene(scene: Cena) { saveCurrentArtwork(); cenaSelecionada = scene; frameSelecionado = null; refreshScenes(); refreshFrames(); updateCanvasState() }
     private fun selectFrame(frame: Frame) { saveCurrentArtwork(); frameSelecionado = frame; refreshFrames(); updateCanvasState() }
     private fun refreshScenes() { listScenes?.adapter = SceneAdapter(cenas, ::selectScene) }
     private fun refreshFrames() { listFrames?.adapter = FrameAdapter(cenaSelecionada?.let { framesPorCena[it.id] }.orEmpty(), ::selectFrame) }
 
-    private fun showSceneMenu(scene: Cena) = AlertDialog.Builder(requireContext()).setItems(arrayOf("Renomear", "Excluir")) { _, which -> if (which == 0) rename(scene.nome) { scene.nome = it; refreshScenes() } else { cenas.remove(scene); framesPorCena.remove(scene.id); if (cenaSelecionada == scene) { cenaSelecionada = cenas.firstOrNull(); frameSelecionado = null }; refreshScenes(); refreshFrames(); updateCanvasState() } }.show()
-    private fun showFrameMenu(frame: Frame) = AlertDialog.Builder(requireContext()).setItems(arrayOf("Renomear", "Excluir")) { _, which -> if (which == 0) rename(frame.nome) { frame.nome = it; refreshFrames() } else { val frames = cenaSelecionada?.let { framesPorCena[it.id] }; frames?.remove(frame); if (frameSelecionado == frame) frameSelecionado = frames?.firstOrNull(); refreshFrames(); updateCanvasState() } }.show()
+    private fun showSceneMenu(scene: Cena) = AlertDialog.Builder(requireContext()).setItems(arrayOf("Renomear", "Excluir")) { _, which -> if (which == 0) rename(scene.nome) { scene.nome = it; persistState(); refreshScenes() } else { cenas.remove(scene); framesPorCena.remove(scene.id)?.forEach { storage?.deleteFrame(it.id) }; persistState(); if (cenaSelecionada == scene) { cenaSelecionada = cenas.firstOrNull(); frameSelecionado = null }; refreshScenes(); refreshFrames(); updateCanvasState() } }.show()
+    private fun showFrameMenu(frame: Frame) = AlertDialog.Builder(requireContext()).setItems(arrayOf("Renomear", "Excluir")) { _, which -> if (which == 0) rename(frame.nome) { frame.nome = it; persistState(); refreshFrames() } else { val frames = cenaSelecionada?.let { framesPorCena[it.id] }; frames?.remove(frame); storage?.deleteFrame(frame.id); persistState(); if (frameSelecionado == frame) frameSelecionado = frames?.firstOrNull(); refreshFrames(); updateCanvasState() } }.show()
     private fun rename(value: String, onSave: (String) -> Unit) { val input = EditText(requireContext()).apply { setText(value); selectAll() }; AlertDialog.Builder(requireContext()).setTitle("Renomear").setView(input).setPositiveButton("Salvar") { _, _ -> input.text.toString().trim().takeIf { it.isNotEmpty() }?.let(onSave) }.setNegativeButton("Cancelar", null).show() }
 
     private fun togglePlayback() { if (playing) stopPlayback() else { val frames = cenaSelecionada?.let { framesPorCena[it.id] }.orEmpty(); if (frames.isEmpty()) { Toast.makeText(context, "Adicione quadros para visualizar.", Toast.LENGTH_SHORT).show(); return }; playing = true; playbackTask = object : Runnable { var index = 0; override fun run() { selectFrame(frames[index]); index = (index + 1) % frames.size; playbackHandler.postDelayed(this, 500) } }; playbackHandler.post(playbackTask!!) } }
