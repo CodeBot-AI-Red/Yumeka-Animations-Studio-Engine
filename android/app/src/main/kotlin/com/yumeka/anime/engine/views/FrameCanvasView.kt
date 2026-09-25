@@ -174,6 +174,16 @@ class FrameCanvasView @JvmOverloads constructor(
         invalidate()
     }
 
+    /** Replaces the current frame artwork without sharing mutable bitmap state. */
+    fun setFrameBitmap(frameBitmap: Bitmap?) {
+        drawBitmap?.eraseColor(Color.TRANSPARENT)
+        if (frameBitmap != null && !frameRect.isEmpty) {
+            drawCanvas?.drawBitmap(frameBitmap, null, frameRect, null)
+        }
+        currentPath.reset()
+        invalidate()
+    }
+
     fun getFrameBitmap(): Bitmap? {
         val bmp = drawBitmap ?: return null
         val l = frameRect.left.toInt().coerceAtLeast(0)

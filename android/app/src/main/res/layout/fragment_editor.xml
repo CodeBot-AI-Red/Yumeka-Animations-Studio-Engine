@@ -34,7 +34,7 @@
                 android:textSize="20sp"
                 android:gravity="center" />
 
-            <!-- Toggle drawer esquerdo (Frames/Keyframes) -->
+            <!-- Abrir painel de quadros -->
             <TextView
                 android:id="@+id/btn_toggle_left"
                 android:layout_width="36dp"
@@ -89,20 +89,6 @@
                 android:background="#9B6DFF"
                 android:layout_marginEnd="3dp" />
 
-            <!-- Tab 3D -->
-            <TextView
-                android:id="@+id/tab_3d"
-                android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:text="3D"
-                android:textColor="#A0A0B8"
-                android:textSize="11sp"
-                android:gravity="center"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:background="#22222E"
-                android:layout_marginEnd="4dp" />
-
             <!-- Play -->
             <TextView
                 android:id="@+id/btn_play"
@@ -127,7 +113,7 @@
 
         </LinearLayout>
 
-        <!-- CANVAS: ocupa toda a area entre topbar e bottom toolbar -->
+        <!-- Canvas -->
         <FrameLayout
             android:id="@+id/canvas_area"
             android:layout_width="match_parent"
@@ -136,7 +122,7 @@
             app:layout_constraintTop_toBottomOf="@id/editor_topbar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/bottom_toolbar">
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <!-- View de desenho: retangulo branco + restricao de toque -->
             <com.yumeka.anime.engine.views.FrameCanvasView
@@ -293,195 +279,11 @@
                 <!-- Espacador -->
                 <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
 
-                <!-- Botao Editar Video (lado direito da toolbar de pincel) -->
-                <TextView
-                    android:id="@+id/btn_editar_video"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:text="&#127909; Editar Video"
-                    android:textColor="#111111"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:background="#9B6DFF" />
-
             </LinearLayout>
 
-            <!-- Barra inferior quando NAO ha frame ativo: alinhar IA + Editar Video -->
-            <LinearLayout
-                android:id="@+id/canvas_action_bar"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_gravity="bottom"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="#CC0F0F18"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:visibility="visible">
-
-                <TextView
-                    android:id="@+id/btn_alinhar_ia"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="1"
-                    android:text="&#128247;  alinhar com IA"
-                    android:textColor="#F0F0F5"
-                    android:textSize="11sp"
-                    android:gravity="center"
-                    android:background="#1E1E2E"
-                    android:layout_marginEnd="8dp" />
-
-                <TextView
-                    android:id="@+id/btn_editar_video_empty"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:text="&#127909; Editar Video"
-                    android:textColor="#111111"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:background="#9B6DFF" />
-
-            </LinearLayout>
 
         </FrameLayout>
 
-        <!-- TOOLBAR INFERIOR SCROLLAVEL -->
-        <HorizontalScrollView
-            android:id="@+id/bottom_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="#12121C"
-            android:scrollbars="none"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp">
-
-                <LinearLayout android:id="@+id/btool_modelos"
-                    android:layout_width="60dp" android:layout_height="match_parent"
-                    android:orientation="vertical" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="&#128432;" android:textSize="17sp" android:gravity="center" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Modelos" android:textColor="#9B6DFF" android:textSize="8sp" android:gravity="center" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/btool_elementos"
-                    android:layout_width="60dp" android:layout_height="match_parent"
-                    android:orientation="vertical" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="&#10029;" android:textSize="17sp" android:gravity="center" android:textColor="#A0A0B8" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Elementos" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/btool_texto"
-                    android:layout_width="60dp" android:layout_height="match_parent"
-                    android:orientation="vertical" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="T" android:textSize="17sp" android:gravity="center"
-                        android:textColor="#A0A0B8" android:textStyle="bold" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Texto" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/btool_galeria"
-                    android:layout_width="60dp" android:layout_height="match_parent"
-                    android:orientation="vertical" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="&#128247;" android:textSize="17sp" android:gravity="center" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Galeria" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/btool_camera"
-                    android:layout_width="60dp" android:layout_height="match_parent"
-                    android:orientation="vertical" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="&#127909;" android:textSize="17sp" android:gravity="center" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Camera" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/btool_efeitos"
-                    android:layout_width="60dp" android:layout_height="match_parent"
-                    android:orientation="vertical" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="&#10024;" android:textSize="17sp" android:gravity="center" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Efeitos" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/btool_particulas"
-                    android:layout_width="60dp" android:layout_height="match_parent"
-                    android:orientation="vertical" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="&#10052;" android:textSize="17sp" android:gravity="center" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Particulas" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/btool_luz"
-                    android:layout_width="60dp" android:layout_height="match_parent"
-                    android:orientation="vertical" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="&#9728;" android:textSize="17sp" android:gravity="center" android:textColor="#FBBF24" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Luz" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/btool_sombras"
-                    android:layout_width="60dp" android:layout_height="match_parent"
-                    android:orientation="vertical" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="&#9681;" android:textSize="17sp" android:gravity="center" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Sombras" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/btool_fundo"
-                    android:layout_width="60dp" android:layout_height="match_parent"
-                    android:orientation="vertical" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="&#127757;" android:textSize="17sp" android:gravity="center" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Fundo" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/btool_personagem"
-                    android:layout_width="60dp" android:layout_height="match_parent"
-                    android:orientation="vertical" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="&#127939;" android:textSize="17sp" android:gravity="center" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Personagem" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
-                </LinearLayout>
-
-                <LinearLayout android:id="@+id/btool_mais"
-                    android:layout_width="60dp" android:layout_height="match_parent"
-                    android:orientation="vertical" android:gravity="center">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="&#8943;" android:textSize="17sp" android:gravity="center" android:textColor="#606078" />
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="Mais" android:textColor="#606078" android:textSize="8sp" android:gravity="center" />
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </HorizontalScrollView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -514,7 +316,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Keyframes"
+                android:text="Quadros"
                 android:textColor="#F0F0F5"
                 android:textSize="13sp"
                 android:textStyle="bold"
@@ -531,45 +333,6 @@
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/btn_add_keyframe"
-            android:layout_width="match_parent"
-            android:layout_height="34dp"
-            android:text="+ Adicionar keyframe"
-            android:textColor="#F0F0F5"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:background="#9B6DFF"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp" />
-
-        <TextView
-            android:id="@+id/btn_del_keyframe"
-            android:layout_width="match_parent"
-            android:layout_height="34dp"
-            android:text="Excluir keyframe"
-            android:textColor="#A0A0B8"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:background="#1E1E2E"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="4dp" />
-
-        <TextView
-            android:id="@+id/btn_choose_keyframe"
-            android:layout_width="match_parent"
-            android:layout_height="34dp"
-            android:text="Escolher keyframes"
-            android:textColor="#A0A0B8"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:background="#1E1E2E"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="8dp" />
 
         <View
             android:layout_width="match_parent"
