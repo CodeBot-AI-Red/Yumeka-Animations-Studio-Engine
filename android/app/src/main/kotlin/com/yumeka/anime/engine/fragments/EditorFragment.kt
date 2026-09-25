@@ -38,7 +38,7 @@ class EditorFragment : Fragment() {
         }
     }
 
-    // ── UI refs ──────────────────────────────────────────────────────────────
+    // ── UI refs ───────────────────────────────────────────────────────────────
     private var leftOpen   = false
     private var rightOpen  = false
     private var panelLeft  : View? = null
@@ -53,22 +53,24 @@ class EditorFragment : Fragment() {
     private var listFrames    : RecyclerView? = null
     private var listKeyframes : RecyclerView? = null
 
-    // ── Playback ─────────────────────────────────────────────────────────────
+    // ── Status-bar refs (barra inferior) ─────────────────────────────────────
+    private var statusSceneName   : TextView? = null
+    private var statusFrameCount  : TextView? = null
+    private var statusKfCount     : TextView? = null
+    private var statusDuration    : TextView? = null
+
+    // ── Playback ──────────────────────────────────────────────────────────────
     private val playbackHandler = Handler(Looper.getMainLooper())
     private var playbackTask: Runnable? = null
     private var playing = false
 
-    // ── Layer panel ──────────────────────────────────────────────────────────
+    // ── Layer panel ───────────────────────────────────────────────────────────
     private var layersVisible   = true
     private var selectedLayerId = R.id.layer_desenho
 
-    // ── Data model ───────────────────────────────────────────────────────────
+    // ── Data model ────────────────────────────────────────────────────────────
     data class Cena(val id: Int, var nome: String, var inicio: String, var fim: String)
 
-    /**
-     * [keyframeCount]    = total de keyframes em disco.
-     * [currentKeyframe]  = índice (1-based) visível no canvas.
-     */
     data class Frame(
         val id: Int,
         var nome: String,
@@ -101,9 +103,7 @@ class EditorFragment : Fragment() {
         projectPath = arguments?.getString(ARG_PATH).orEmpty()
 
         val projectDir: File? = when {
-            // Caminho absoluto recebido diretamente — caso normal
             projectPath.isNotBlank() -> File(projectPath)
-            // Fallback: reconstrói o caminho a partir do nome do projeto
             projectName.isNotBlank() -> {
                 val docs = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
                 File(docs, "${HomeFragment.YUMEKA_FOLDER}/$projectName")
@@ -112,7 +112,7 @@ class EditorFragment : Fragment() {
         }
 
         if (projectDir != null) {
-            projectDir.mkdirs() // garante que a pasta existe antes de instanciar o storage
+            projectDir.mkdirs()
             storage = EditorProjectStorage(projectDir)
         }
     }
@@ -133,6 +133,12 @@ class EditorFragment : Fragment() {
         canvasEmpty   = view.findViewById(R.id.canvas_empty_state)
         brushToolbar  = view.findViewById(R.id.brush_toolbar)
         colorSwatch   = view.findViewById(R.id.brush_color_swatch)
+
+        // Status-bar inferior
+        statusSceneName  = view.findViewById(R.id.statusbar_scene_name)
+        statusFrameCount = view.findViewById(R.id.statusbar_frame_count)
+        statusKfCount    = view.findViewById(R.id.statusbar_keyframe_count)
+        statusDuration   = view.findViewById(R.id.statusbar_duration)
 
         listScenes?.layoutManager    = LinearLayoutManager(requireContext())
         listFrames?.layoutManager    = LinearLayoutManager(requireContext())
@@ -156,6 +162,7 @@ class EditorFragment : Fragment() {
         refreshScenes()
         refreshFrames()
         refreshKeyframes()
+        updateStatusBar()
         canvasView?.post { updateCanvasState() }
     }
 
@@ -166,8 +173,10 @@ class EditorFragment : Fragment() {
         overlay    = null; listScenes    = null
         listFrames = null; listKeyframes = null
         canvasView?.onArtworkChanged = null
-        canvasView   = null; canvasEmpty  = null
-        brushToolbar = null; colorSwatch  = null
+        canvasView      = null; canvasEmpty      = null
+        brushToolbar    = null; colorSwatch      = null
+        statusSceneName = null; statusFrameCount = null
+        statusKfCount   = null; statusDuration   = null
     }
 
     // ════════════════════════════════════════════════════════════════════════
@@ -182,9 +191,23 @@ class EditorFragment : Fragment() {
     }
 
     // ════════════════════════════════════════════════════════════════════════
+    //  Barra de status inferior
+    // ════════════════════════════════════════════════════════════════════════
+    private fun updateStatusBar() {
+        val scene  = cenaSelecionada
+        val frames = scene?.let { framesPorCena[it.id] } ?: emptyList()
+        val kfTotal = frames.sumOf { it.keyframeCount }
+        statusSceneName?.text  = scene?.nome ?: "—"
+        statusFrameCount?.text = "${frames.size} Frames"
+        statusKfCount?.text    = "$kfTotal Keyframes"
+        // Duração estimada: 24 fps, cada keyframe ~1 frame
+        val secs = kfTotal / 24
+        statusDuration?.text   = "Duração aprox.: ${secs}s"
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
     //  Persistência — salva em tempo real
     // ════════════════════════════════════════════════════════════════════════
-
     private fun saveCurrentKeyframe() {
         val frame = frameSelecionado ?: return
         val scene = cenaSelecionada  ?: return
@@ -220,22 +243,18 @@ class EditorFragment : Fragment() {
     // ════════════════════════════════════════════════════════════════════════
     //  Cenas
     // ════════════════════════════════════════════════════════════════════════
-
     private fun addScene() {
         saveCurrentKeyframe()
         val id    = (cenas.maxOfOrNull { it.id } ?: 0) + 1
         val start = cenas.lastOrNull()?.fim ?: "00:00"
         val scene = Cena(id, "Cena $id", start, nextTime(start))
         cenas.add(scene)
-        // ► Cria Cenas/Cena N/Quadros/ em tempo real
         storage?.createSceneFolder(id)
         cenaSelecionada  = scene
         frameSelecionado = null
         persistState()
-        refreshScenes()
-        refreshFrames()
-        refreshKeyframes()
-        updateCanvasState()
+        refreshScenes(); refreshFrames(); refreshKeyframes()
+        updateCanvasState(); updateStatusBar()
         openLeft()
     }
 
@@ -243,15 +262,12 @@ class EditorFragment : Fragment() {
         saveCurrentKeyframe()
         cenaSelecionada  = scene
         frameSelecionado = null
-        refreshScenes()
-        refreshFrames()
-        refreshKeyframes()
-        updateCanvasState()
+        refreshScenes(); refreshFrames(); refreshKeyframes()
+        updateCanvasState(); updateStatusBar()
     }
 
     private fun deleteScene(scene: Cena) {
         cenas.remove(scene)
-        // ► Apaga Cenas/Cena N/ inteira em tempo real
         storage?.deleteScene(scene.id)
         framesPorCena.remove(scene.id)
         persistState()
@@ -259,13 +275,13 @@ class EditorFragment : Fragment() {
             cenaSelecionada  = cenas.firstOrNull()
             frameSelecionado = null
         }
-        refreshScenes(); refreshFrames(); refreshKeyframes(); updateCanvasState()
+        refreshScenes(); refreshFrames(); refreshKeyframes()
+        updateCanvasState(); updateStatusBar()
     }
 
     // ════════════════════════════════════════════════════════════════════════
     //  Quadros (Frames)
     // ════════════════════════════════════════════════════════════════════════
-
     private fun addFrame() {
         val scene = cenaSelecionada ?: run {
             openRight()
@@ -278,18 +294,15 @@ class EditorFragment : Fragment() {
         val id     = (framesPorCena.values.flatten().maxOfOrNull { it.id } ?: 0) + 1
         val start  = frames.lastOrNull()?.fim ?: "0:00"
 
-        // ► Cria Cenas/Cena N/Quadros/Quadro M/Keyframes/ em tempo real
         val kfCount = storage?.createFrameFolder(scene.id, id) ?: 1
-
         val frame = Frame(id, "Quadro $id", start, nextTimeFrame(start),
                           keyframeCount = kfCount, currentKeyframe = 1)
         frames.add(frame)
         frameSelecionado = frame
 
         persistState()
-        refreshFrames()
-        refreshKeyframes()
-        updateCanvasState()
+        refreshFrames(); refreshKeyframes()
+        updateCanvasState(); updateStatusBar()
     }
 
     private fun selectFrame(frame: Frame) {
@@ -299,8 +312,7 @@ class EditorFragment : Fragment() {
             val scene = cenaSelecionada ?: return
             frame.artwork = storage?.loadKeyframe(scene.id, frame.id, frame.currentKeyframe)
         }
-        refreshFrames()
-        refreshKeyframes()
+        refreshFrames(); refreshKeyframes()
         updateCanvasState()
     }
 
@@ -308,7 +320,6 @@ class EditorFragment : Fragment() {
         val scene  = cenaSelecionada ?: return
         val frames = framesPorCena[scene.id] ?: return
         frames.remove(frame)
-        // ► Apaga pasta do quadro em tempo real
         storage?.deleteFrame(scene.id, frame.id)
         persistState()
         if (frameSelecionado == frame) {
@@ -317,7 +328,8 @@ class EditorFragment : Fragment() {
                 f.artwork = storage?.loadKeyframe(scene.id, f.id, f.currentKeyframe)
             }
         }
-        refreshFrames(); refreshKeyframes(); updateCanvasState()
+        refreshFrames(); refreshKeyframes()
+        updateCanvasState(); updateStatusBar()
     }
 
     private fun renameFrame(frame: Frame, newName: String) {
@@ -329,7 +341,6 @@ class EditorFragment : Fragment() {
     // ════════════════════════════════════════════════════════════════════════
     //  Keyframes
     // ════════════════════════════════════════════════════════════════════════
-
     private fun addKeyframe() {
         val frame = frameSelecionado ?: run {
             Toast.makeText(context, "Selecione um quadro primeiro.", Toast.LENGTH_SHORT).show()
@@ -338,16 +349,14 @@ class EditorFragment : Fragment() {
         val scene = cenaSelecionada ?: return
         saveCurrentKeyframe()
 
-        // ► Cria Keyframe N.png em tempo real
         val newIndex = storage?.addKeyframe(scene.id, frame.id, frame.keyframeCount)
             ?: (frame.keyframeCount + 1)
         frame.keyframeCount   = newIndex
         frame.currentKeyframe = newIndex
-        frame.artwork         = null   // keyframe novo está em branco
+        frame.artwork         = null
 
-        persistState()
-        refreshKeyframes()
-        updateCanvasState()
+        persistState(); refreshKeyframes()
+        updateCanvasState(); updateStatusBar()
     }
 
     private fun selectKeyframe(frame: Frame, keyframeIndex: Int) {
@@ -367,9 +376,8 @@ class EditorFragment : Fragment() {
         frame.keyframeCount = newCount
         if (frame.currentKeyframe > newCount) frame.currentKeyframe = newCount
         frame.artwork = storage?.loadKeyframe(scene.id, frame.id, frame.currentKeyframe)
-        persistState()
-        refreshKeyframes()
-        updateCanvasState()
+        persistState(); refreshKeyframes()
+        updateCanvasState(); updateStatusBar()
     }
 
     // ════════════════════════════════════════════════════════════════════════
@@ -455,8 +463,16 @@ class EditorFragment : Fragment() {
     // ════════════════════════════════════════════════════════════════════════
     private fun setupTopbar(root: View) {
         root.findViewById<TextView>(R.id.txt_project_name).text = projectName
-        root.findViewById<TextView>(R.id.txt_season_episode).text = "Temporada 1 · Episódio 1"
-        root.findViewById<TextView>(R.id.btn_editor_back).setOnClickListener { parentFragmentManager.popBackStack() }
+        // Atualiza também o nome na sidebar
+        root.findViewById<TextView?>(R.id.sidebar_project_name)?.text = projectName
+        root.findViewById<TextView>(R.id.txt_season_episode).text = "Temporada 1  ›  Episódio 1"
+        // btn_editor_back está gone no novo layout; usamos btn_editor_back_visible
+        root.findViewById<TextView?>(R.id.btn_editor_back_visible)
+            ?.setOnClickListener { parentFragmentManager.popBackStack() }
+        // btn_editor_back (gone) mantido para compatibilidade
+        root.findViewById<View?>(R.id.btn_editor_back)?.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
         root.findViewById<TextView>(R.id.tab_quadros).setOnClickListener { openLeft() }
         root.findViewById<TextView>(R.id.btn_play).setOnClickListener { togglePlayback() }
     }
@@ -467,7 +483,14 @@ class EditorFragment : Fragment() {
         root.findViewById<TextView>(R.id.btn_close_left).setOnClickListener   { closeLeft() }
         root.findViewById<TextView>(R.id.btn_close_right).setOnClickListener  { closeRight() }
         overlay?.setOnClickListener { closeLeft(); closeRight() }
-        root.findViewById<TextView>(R.id.btn_add_frame).setOnClickListener { addFrame() }
+
+        // Botão "+ Novo Frame" no cabeçalho da cena (novo layout)
+        root.findViewById<TextView?>(R.id.btn_add_frame)?.setOnClickListener { addFrame() }
+        // Botão "+ Criar Frame" no estado vazio
+        root.findViewById<TextView?>(R.id.btn_add_frame_empty)?.setOnClickListener { addFrame() }
+        // Botão no panel_left (drawer flutuante)
+        root.findViewById<TextView?>(R.id.btn_add_frame_panel)?.setOnClickListener { addFrame() }
+
         root.findViewById<TextView>(R.id.btn_add_scene).setOnClickListener { addScene() }
         root.findViewById<TextView?>(R.id.btn_add_keyframe)?.setOnClickListener { addKeyframe() }
     }

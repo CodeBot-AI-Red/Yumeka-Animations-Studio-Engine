@@ -1,293 +1,1378 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Layout redesenhado para corresponder ao mockup:
+  ┌──────────────────────────────────────────────────────────┐
+  │  TOPBAR: logo · breadcrumb · Salvo · ⚙ · [Quadros] ▶ ⛶  │
+  ├─────────────┬────────────────────────────────────────────┤
+  │ SIDEBAR     │  CONTEÚDO PRINCIPAL (canvas / empty state) │
+  │ Projeto     │                                            │
+  │  ▸ Plugins  │  Cabeçalho da cena (título + ações)        │
+  │  ▸ Assets   │  ─────────────────────────────────────────  │
+  │  ▸ Tempora  │  Estado vazio / FrameCanvasView            │
+  │  ▸ Icon.png │                                            │
+  │  ▸ yase.pro │  Barra inferior: Cena · 0 Frames · Dur.   │
+  └─────────────┴────────────────────────────────────────────┘
+  Drawers (esquerdo e direito) continuam funcionando sobre esse layout.
+-->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0F0F13">
+    android:background="#0B0B12">
 
+    <!-- ══════════════════════════════════════════════════════════
+         ESTRUTURA BASE: topbar + (sidebar | conteúdo)
+         ══════════════════════════════════════════════════════════ -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- TOPBAR -->
+        <!-- ── TOPBAR ──────────────────────────────────────────── -->
         <LinearLayout
             android:id="@+id/editor_topbar"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="52dp"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:background="#1A1A2E"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
+            android:background="#12121C"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:elevation="4dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Voltar -->
-            <TextView
-                android:id="@+id/btn_editor_back"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:text="&#8592;"
-                android:textColor="#A0A0B8"
-                android:textSize="20sp"
-                android:gravity="center" />
-
-            <!-- Abrir painel de quadros -->
+            <!-- Hamburguer / toggle sidebar -->
             <TextView
                 android:id="@+id/btn_toggle_left"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:text="&#9776;"
-                android:textColor="#9B6DFF"
-                android:textSize="16sp"
-                android:gravity="center"
-                android:layout_marginStart="2dp" />
+                android:textColor="#A0A0B8"
+                android:textSize="18sp"
+                android:gravity="center" />
 
-            <!-- Nome projeto -->
+            <!-- Logo YUMEKA -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="16dp">
+
+                <!-- Flor sakura emoji como logo -->
+                <TextView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:text="&#127800;"
+                    android:textSize="18sp"
+                    android:gravity="center" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="YUMEKA"
+                        android:textColor="#F0F0F5"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Animations Studio Engine"
+                        android:textColor="#5A5A78"
+                        android:textSize="7sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Divisor vertical -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="24dp"
+                android:background="#2A2A3A"
+                android:layout_marginEnd="12dp" />
+
+            <!-- Ícone pasta + nome do projeto + breadcrumb -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="6dp">
+                android:layout_marginEnd="8dp">
 
-                <TextView
-                    android:id="@+id/txt_project_name"
+                <!-- Nome do projeto com ícone -->
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Projeto"
-                    android:textColor="#F0F0F5"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:ellipsize="end"
-                    android:singleLine="true" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
+                    <TextView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:text="&#128193;"
+                        android:textSize="11sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:id="@+id/txt_project_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Projeto"
+                        android:textColor="#F0F0F5"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:layout_marginStart="4dp" />
+
+                    <!-- Seta dropdown -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" &#8964;"
+                        android:textColor="#606078"
+                        android:textSize="10sp" />
+
+                </LinearLayout>
+
+                <!-- Breadcrumb: Temporada 1 › Episódio 1 › Cena 1 -->
                 <TextView
                     android:id="@+id/txt_season_episode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Temporada 1 Episodio 1"
-                    android:textColor="#606078"
-                    android:textSize="9sp" />
+                    android:text="Temporada 1  ›  Epis&#243;dio 1"
+                    android:textColor="#5A5A78"
+                    android:textSize="9sp"
+                    android:layout_marginTop="1dp" />
 
             </LinearLayout>
 
-            <!-- Tab Quadros -->
-            <TextView
-                android:id="@+id/tab_quadros"
+            <!-- ● Salvo -->
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:text="Quadros"
-                android:textColor="#FFFFFF"
-                android:textSize="11sp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginEnd="12dp">
+
+                <View
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/circle_green"
+                    android:layout_marginEnd="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Salvo"
+                    android:textColor="#4ADE80"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
+
+            <!-- ⚙ Configurações -->
+            <TextView
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:text="&#9881;"
+                android:textColor="#A0A0B8"
+                android:textSize="16sp"
                 android:gravity="center"
+                android:layout_marginEnd="4dp" />
+
+            <!-- [Quadros] botão destacado roxo -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="34dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:background="#7C3AED"
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
-                android:background="#9B6DFF"
-                android:layout_marginEnd="3dp" />
+                android:layout_marginEnd="4dp">
 
-            <!-- Play -->
+                <TextView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:text="&#127925;"
+                    android:textSize="10sp"
+                    android:gravity="center"
+                    android:layout_marginEnd="4dp" />
+
+                <TextView
+                    android:id="@+id/tab_quadros"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Quadros"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- ▶ Play -->
             <TextView
                 android:id="@+id/btn_play"
                 android:layout_width="34dp"
                 android:layout_height="34dp"
                 android:text="&#9654;"
-                android:textColor="#F0F0F5"
+                android:textColor="#A0A0B8"
                 android:textSize="14sp"
                 android:gravity="center"
-                android:background="#2A2A3A"
-                android:layout_marginEnd="3dp" />
+                android:background="#1E1E2E"
+                android:layout_marginEnd="4dp" />
 
-            <!-- Toggle drawer direito (Cenas/Camadas) -->
+            <!-- ⛶ Fullscreen -->
             <TextView
                 android:id="@+id/btn_toggle_right"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:text="&#9783;"
-                android:textColor="#4ADE80"
-                android:textSize="16sp"
-                android:gravity="center" />
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:text="&#9974;"
+                android:textColor="#A0A0B8"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:background="#1E1E2E" />
+
+            <!-- Voltar (oculto mas mantido para o fragmento) -->
+            <TextView
+                android:id="@+id/btn_editor_back"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone" />
 
         </LinearLayout>
 
-        <!-- Canvas -->
-        <FrameLayout
-            android:id="@+id/canvas_area"
+        <!-- ── CORPO: sidebar + conteúdo ───────────────────────── -->
+        <LinearLayout
+            android:id="@+id/editor_body"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:background="#16162A"
+            android:orientation="horizontal"
             app:layout_constraintTop_toBottomOf="@id/editor_topbar"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- View de desenho -->
-            <com.yumeka.anime.engine.views.FrameCanvasView
-                android:id="@+id/canvas_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <!-- Estado vazio -->
+            <!-- ╔══════════════════════════════════════════════════╗
+                 ║  SIDEBAR ESQUERDA — Árvore de projeto fixada    ║
+                 ╚══════════════════════════════════════════════════╝ -->
             <LinearLayout
-                android:id="@+id/canvas_empty_state"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:id="@+id/sidebar_project"
+                android:layout_width="224dp"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:background="#0E0E18">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="&#127800;"
-                    android:textSize="40sp"
-                    android:gravity="center"
-                    android:layout_marginBottom="12dp" />
+                <!-- Cabeçalho "Projeto" -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="36dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="8dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Nenhum frame selecionado"
-                    android:textColor="#4A4A6A"
-                    android:textSize="13sp"
-                    android:gravity="center"
-                    android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Projeto"
+                        android:textColor="#606078"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.1" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Abra o painel lateral e crie sua primeira cena"
-                    android:textColor="#35354A"
-                    android:textSize="11sp"
-                    android:gravity="center"
-                    android:layout_marginTop="4dp"
-                    android:paddingStart="24dp"
-                    android:paddingEnd="24dp" />
-
-            </LinearLayout>
-
-            <!-- Toolbar de pincel: fixada no RODAPÉ do canvas -->
-            <LinearLayout
-                android:id="@+id/brush_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_gravity="bottom"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="#CC0F0F18"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:visibility="gone">
-
-                <!-- Pincel -->
-                <TextView
-                    android:id="@+id/brush_btn_pencil"
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:text="&#9998;"
-                    android:textColor="#9B6DFF"
-                    android:textSize="17sp"
-                    android:gravity="center"
-                    android:background="#22223A"
-                    android:layout_marginEnd="4dp" />
-
-                <!-- Borracha -->
-                <TextView
-                    android:id="@+id/brush_btn_eraser"
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:text="&#9633;"
-                    android:textColor="#A0A0B8"
-                    android:textSize="17sp"
-                    android:gravity="center"
-                    android:background="#22222E"
-                    android:layout_marginEnd="4dp" />
-
-                <!-- Limpar -->
-                <TextView
-                    android:id="@+id/brush_btn_clear"
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:text="&#128465;"
-                    android:textColor="#FF6B6B"
-                    android:textSize="15sp"
-                    android:gravity="center"
-                    android:background="#22222E"
-                    android:layout_marginEnd="10dp" />
+                </LinearLayout>
 
                 <View
-                    android:layout_width="0.5dp"
-                    android:layout_height="22dp"
-                    android:background="#3A3A5A"
-                    android:layout_marginEnd="10dp" />
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#1E1E2E" />
 
-                <!-- Tamanho fino -->
-                <TextView
-                    android:id="@+id/brush_size_small"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
-                    android:text="&#9679;"
-                    android:textColor="#A0A0B8"
-                    android:textSize="7sp"
-                    android:gravity="center"
-                    android:background="#22222E"
-                    android:layout_marginEnd="4dp" />
-
-                <!-- Tamanho medio -->
-                <TextView
-                    android:id="@+id/brush_size_medium"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
-                    android:text="&#9679;"
-                    android:textColor="#9B6DFF"
-                    android:textSize="13sp"
-                    android:gravity="center"
-                    android:background="#22223A"
-                    android:layout_marginEnd="4dp" />
-
-                <!-- Tamanho grosso -->
-                <TextView
-                    android:id="@+id/brush_size_large"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
-                    android:text="&#9679;"
-                    android:textColor="#A0A0B8"
-                    android:textSize="21sp"
-                    android:gravity="center"
-                    android:background="#22222E"
-                    android:layout_marginEnd="10dp" />
-
-                <View
-                    android:layout_width="0.5dp"
-                    android:layout_height="22dp"
-                    android:background="#3A3A5A"
-                    android:layout_marginEnd="10dp" />
-
-                <!-- Swatch cor atual -->
-                <TextView
-                    android:id="@+id/brush_color_swatch"
-                    android:layout_width="32dp"
+                <!-- Nó raiz: nome do projeto -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="32dp"
-                    android:background="#FF000000"
-                    android:text=""
-                    android:gravity="center"
-                    android:layout_marginEnd="8dp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="10dp">
 
-                <!-- Espacador -->
-                <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#9660;"
+                        android:textColor="#A0A0B8"
+                        android:textSize="8sp"
+                        android:gravity="center" />
+
+                    <!-- Ícone sakura do projeto -->
+                    <TextView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:text="&#127800;"
+                        android:textSize="11sp"
+                        android:gravity="center"
+                        android:layout_marginStart="2dp" />
+
+                    <TextView
+                        android:id="@+id/sidebar_project_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Projeto"
+                        android:textColor="#E0E0F0"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:layout_marginStart="6dp" />
+
+                </LinearLayout>
+
+                <!-- ── Plugins ── -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="28dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="28dp">
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#9658;"
+                        android:textColor="#4A4A6A"
+                        android:textSize="7sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:text="&#128268;"
+                        android:textSize="10sp"
+                        android:gravity="center"
+                        android:layout_marginStart="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Plugins"
+                        android:textColor="#6A6A8A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- ── Assets (expandido) ── -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="28dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="28dp">
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#9660;"
+                        android:textColor="#A0A0B8"
+                        android:textSize="7sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:text="&#128193;"
+                        android:textSize="10sp"
+                        android:gravity="center"
+                        android:layout_marginStart="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Assets"
+                        android:textColor="#9090B0"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- Characters -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="26dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="50dp">
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#9658;"
+                        android:textColor="#3A3A5A"
+                        android:textSize="6sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#128100;"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:layout_marginStart="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Characters"
+                        android:textColor="#5A5A7A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- Backgrounds -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="26dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="50dp">
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#9658;"
+                        android:textColor="#3A3A5A"
+                        android:textSize="6sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#128247;"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:layout_marginStart="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Backgrounds"
+                        android:textColor="#5A5A7A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- Materials -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="26dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="50dp">
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#9658;"
+                        android:textColor="#3A3A5A"
+                        android:textSize="6sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#127993;"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:layout_marginStart="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Materials"
+                        android:textColor="#5A5A7A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- ── Temporadas (expandido) ── -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="28dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="28dp">
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#9660;"
+                        android:textColor="#A0A0B8"
+                        android:textSize="7sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:text="&#128193;"
+                        android:textSize="10sp"
+                        android:gravity="center"
+                        android:layout_marginStart="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Temporadas"
+                        android:textColor="#9090B0"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- Temporada 1 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="26dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="50dp">
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#9660;"
+                        android:textColor="#A0A0B8"
+                        android:textSize="6sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#128193;"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:layout_marginStart="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Temporada 1"
+                        android:textColor="#7A7A9A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- Episódios -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="26dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="68dp">
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#9660;"
+                        android:textColor="#A0A0B8"
+                        android:textSize="6sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#128193;"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:layout_marginStart="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Epis&#243;dios"
+                        android:textColor="#7A7A9A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- EP-1 (selecionado/ativo) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="26dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="84dp">
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#9660;"
+                        android:textColor="#A0A0B8"
+                        android:textSize="6sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#128193;"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:layout_marginStart="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="EP-1"
+                        android:textColor="#7A7A9A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- Quadros — ITEM ATIVO (roxo highlight) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="28dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="100dp"
+                    android:background="#2A1A4E">
+
+                    <TextView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:text="&#127925;"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Quadros"
+                        android:textColor="#C4B5FD"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- 3D Scene -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="26dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="100dp">
+
+                    <TextView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:text="&#127760;"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="3D Scene"
+                        android:textColor="#5A5A7A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- Efeitos -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="26dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="100dp">
+
+                    <TextView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:text="&#10024;"
+                        android:textSize="9sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Efeitos"
+                        android:textColor="#5A5A7A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- Audio (expandido) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="26dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="100dp">
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#9660;"
+                        android:textColor="#A0A0B8"
+                        android:textSize="6sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:text="&#128266;"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:layout_marginStart="2dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Audio"
+                        android:textColor="#5A5A7A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- Sounds -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="24dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="116dp">
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#9835;"
+                        android:textSize="8sp"
+                        android:gravity="center"
+                        android:textColor="#4A4A6A" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sounds"
+                        android:textColor="#4A4A6A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- Speeches -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="24dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="116dp">
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#127908;"
+                        android:textSize="8sp"
+                        android:gravity="center"
+                        android:textColor="#4A4A6A" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Speeches"
+                        android:textColor="#4A4A6A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- Scripts -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="26dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="100dp">
+
+                    <TextView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:text="&#128196;"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:textColor="#4A4A6A" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Scripts"
+                        android:textColor="#4A4A6A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="5dp" />
+
+                </LinearLayout>
+
+                <!-- Espaçador para empurrar Icon.png e yase.project ao fundo da árvore -->
+                <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#1E1E2E" />
+
+                <!-- Icon.png -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="26dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="28dp">
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#128444;"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:textColor="#4A4A6A" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Icon.png"
+                        android:textColor="#4A4A6A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="6dp" />
+
+                </LinearLayout>
+
+                <!-- yase.project -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="26dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="28dp"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#128196;"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:textColor="#4A4A6A" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="yase.project"
+                        android:textColor="#4A4A6A"
+                        android:textSize="10sp"
+                        android:layout_marginStart="6dp" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
-        </FrameLayout>
+            <!-- Divisor sidebar/conteúdo -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#1A1A2A" />
+
+            <!-- ╔══════════════════════════════════════════════════╗
+                 ║  ÁREA DE CONTEÚDO PRINCIPAL                     ║
+                 ╚══════════════════════════════════════════════════╝ -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="#0F0F1A">
+
+                <!-- Cabeçalho da cena: título + ações -->
+                <LinearLayout
+                    android:id="@+id/scene_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="12dp"
+                    android:background="#0F0F1A">
+
+                    <!-- Botão voltar seta -->
+                    <TextView
+                        android:id="@+id/btn_editor_back_visible"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:text="&#8592;"
+                        android:textColor="#6A6A8A"
+                        android:textSize="16sp"
+                        android:gravity="center"
+                        android:layout_marginEnd="8dp"
+                        android:onClick="" />
+
+                    <!-- Título da cena -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:id="@+id/txt_scene_title"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Cena 1"
+                                android:textColor="#F0F0F5"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <!-- Ícone lápis editar -->
+                            <TextView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:text="&#9998;"
+                                android:textColor="#5A5A7A"
+                                android:textSize="12sp"
+                                android:gravity="center"
+                                android:layout_marginStart="4dp" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Gerencie os quadros desta cena. Adicione, remova e organize seus frames."
+                            android:textColor="#5A5A7A"
+                            android:textSize="9sp"
+                            android:layout_marginTop="2dp" />
+
+                    </LinearLayout>
+
+                    <!-- Botão + Novo Frame -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:background="#7C3AED"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:layout_marginEnd="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="+"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:layout_marginEnd="4dp" />
+
+                        <TextView
+                            android:id="@+id/btn_add_frame"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Novo Frame"
+                            android:textColor="#FFFFFF"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <!-- Ícone ordenar -->
+                    <TextView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:text="&#8645;"
+                        android:textColor="#5A5A7A"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:background="#181826"
+                        android:layout_marginEnd="4dp" />
+
+                    <!-- Ícone grid -->
+                    <TextView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:text="&#9783;"
+                        android:textColor="#C4B5FD"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:background="#2A1A4E"
+                        android:layout_marginEnd="4dp" />
+
+                    <!-- Menu ... -->
+                    <TextView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:text="&#8230;"
+                        android:textColor="#5A5A7A"
+                        android:textSize="16sp"
+                        android:gravity="center"
+                        android:background="#181826" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#1A1A2A" />
+
+                <!-- Área de canvas / estado vazio -->
+                <FrameLayout
+                    android:id="@+id/canvas_area"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
+
+                    <!-- View de desenho -->
+                    <com.yumeka.anime.engine.views.FrameCanvasView
+                        android:id="@+id/canvas_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <!-- Estado vazio — igual ao mockup -->
+                    <LinearLayout
+                        android:id="@+id/canvas_empty_state"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:paddingStart="32dp"
+                        android:paddingEnd="32dp">
+
+                        <!-- Ilustração sakura (círculo roxo + flor) -->
+                        <FrameLayout
+                            android:layout_width="160dp"
+                            android:layout_height="160dp"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginBottom="20dp">
+
+                            <!-- Halo externo -->
+                            <View
+                                android:layout_width="160dp"
+                                android:layout_height="160dp"
+                                android:background="@drawable/circle_halo_purple" />
+
+                            <!-- Flor grande centralizada -->
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="&#127800;"
+                                android:textSize="56sp" />
+
+                        </FrameLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Nenhum frame selecionado"
+                            android:textColor="#F0F0F5"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:layout_marginBottom="8dp" />
+
+                        <!-- Palavra "frame" em roxo -->
+                        <!-- Nota: combinamos no mesmo TextView com SpannableString no Kotlin -->
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Esta cena n&#227;o possui frames ainda. Crie seu primeiro frame para come&#231;ar a animar seu epis&#243;dio."
+                            android:textColor="#6A6A8A"
+                            android:textSize="11sp"
+                            android:gravity="center"
+                            android:layout_marginBottom="24dp" />
+
+                        <!-- Botão Criar Frame -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:background="#7C3AED"
+                            android:paddingStart="20dp"
+                            android:paddingEnd="20dp"
+                            android:layout_gravity="center_horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="+ "
+                                android:textColor="#FFFFFF"
+                                android:textSize="13sp" />
+
+                            <TextView
+                                android:id="@+id/btn_add_frame_empty"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Criar Frame"
+                                android:textColor="#FFFFFF"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Toolbar de pincel (rodapé, visível só com frame ativo) -->
+                    <LinearLayout
+                        android:id="@+id/brush_toolbar"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_gravity="bottom"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:background="#CC0F0F18"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/brush_btn_pencil"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:text="&#9998;"
+                            android:textColor="#9B6DFF"
+                            android:textSize="17sp"
+                            android:gravity="center"
+                            android:background="#22223A"
+                            android:layout_marginEnd="4dp" />
+
+                        <TextView
+                            android:id="@+id/brush_btn_eraser"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:text="&#9633;"
+                            android:textColor="#A0A0B8"
+                            android:textSize="17sp"
+                            android:gravity="center"
+                            android:background="#22222E"
+                            android:layout_marginEnd="4dp" />
+
+                        <TextView
+                            android:id="@+id/brush_btn_clear"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:text="&#128465;"
+                            android:textColor="#FF6B6B"
+                            android:textSize="15sp"
+                            android:gravity="center"
+                            android:background="#22222E"
+                            android:layout_marginEnd="10dp" />
+
+                        <View
+                            android:layout_width="0.5dp"
+                            android:layout_height="22dp"
+                            android:background="#3A3A5A"
+                            android:layout_marginEnd="10dp" />
+
+                        <TextView
+                            android:id="@+id/brush_size_small"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:text="&#9679;"
+                            android:textColor="#A0A0B8"
+                            android:textSize="7sp"
+                            android:gravity="center"
+                            android:background="#22222E"
+                            android:layout_marginEnd="4dp" />
+
+                        <TextView
+                            android:id="@+id/brush_size_medium"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:text="&#9679;"
+                            android:textColor="#9B6DFF"
+                            android:textSize="13sp"
+                            android:gravity="center"
+                            android:background="#22223A"
+                            android:layout_marginEnd="4dp" />
+
+                        <TextView
+                            android:id="@+id/brush_size_large"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:text="&#9679;"
+                            android:textColor="#A0A0B8"
+                            android:textSize="21sp"
+                            android:gravity="center"
+                            android:background="#22222E"
+                            android:layout_marginEnd="10dp" />
+
+                        <View
+                            android:layout_width="0.5dp"
+                            android:layout_height="22dp"
+                            android:background="#3A3A5A"
+                            android:layout_marginEnd="10dp" />
+
+                        <TextView
+                            android:id="@+id/brush_color_swatch"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="#FF000000"
+                            android:text=""
+                            android:gravity="center"
+                            android:layout_marginEnd="8dp" />
+
+                        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+                    </LinearLayout>
+
+                </FrameLayout>
+
+                <!-- Barra inferior de status da cena -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="36dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="#0B0B12"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp">
+
+                    <!-- Cena atual -->
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#127925;"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:layout_marginEnd="4dp" />
+
+                    <TextView
+                        android:id="@+id/statusbar_scene_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Cena 1"
+                        android:textColor="#9090B0"
+                        android:textSize="10sp"
+                        android:layout_marginEnd="20dp" />
+
+                    <!-- Separador -->
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="16dp"
+                        android:background="#2A2A3A"
+                        android:layout_marginEnd="20dp" />
+
+                    <!-- Frames -->
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#9203;"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:layout_marginEnd="4dp" />
+
+                    <TextView
+                        android:id="@+id/statusbar_frame_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 Frames"
+                        android:textColor="#9090B0"
+                        android:textSize="10sp"
+                        android:layout_marginEnd="20dp" />
+
+                    <!-- Separador -->
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="16dp"
+                        android:background="#2A2A3A"
+                        android:layout_marginEnd="20dp" />
+
+                    <!-- Keyframes -->
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#128247;"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:layout_marginEnd="4dp" />
+
+                    <TextView
+                        android:id="@+id/statusbar_keyframe_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 Keyframes"
+                        android:textColor="#9090B0"
+                        android:textSize="10sp"
+                        android:layout_marginEnd="20dp" />
+
+                    <!-- Spacer -->
+                    <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+                    <!-- Separador -->
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="16dp"
+                        android:background="#2A2A3A"
+                        android:layout_marginEnd="12dp" />
+
+                    <!-- Duração -->
+                    <TextView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:text="&#9432;"
+                        android:textSize="9sp"
+                        android:gravity="center"
+                        android:textColor="#6A6A8A"
+                        android:layout_marginEnd="4dp" />
+
+                    <TextView
+                        android:id="@+id/statusbar_duration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Dura&#231;&#227;o aprox.: 0s"
+                        android:textColor="#6A6A8A"
+                        android:textSize="10sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- ═══════════════════════════════════════════════════════════════════
-         DRAWER ESQUERDO: Quadros + Keyframes do quadro seleccionado
-         ═══════════════════════════════════════════════════════════════════ -->
+    <!-- ══════════════════════════════════════════════════════════
+         DRAWER ESQUERDO (quadros + keyframes) — flutua sobre tudo
+         ══════════════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/panel_left"
         android:layout_width="260dp"
@@ -298,7 +1383,6 @@
         android:translationX="-260dp"
         android:visibility="invisible">
 
-        <!-- Cabeçalho do painel -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
@@ -339,7 +1423,6 @@
             android:layout_height="0.5dp"
             android:background="#2A2A3A" />
 
-        <!-- Lista de Quadros — ocupa metade do painel -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list_frames"
             android:layout_width="match_parent"
@@ -347,24 +1430,21 @@
             android:layout_weight="1"
             android:paddingTop="4dp" />
 
-        <!-- Botão adicionar quadro -->
         <TextView
-            android:id="@+id/btn_add_frame"
             android:layout_width="match_parent"
             android:layout_height="40dp"
+            android:id="@+id/btn_add_frame_panel"
             android:text="+ Adicionar Quadro"
             android:textColor="#9B6DFF"
             android:textSize="12sp"
             android:gravity="center"
             android:background="#1A1A2A" />
 
-        <!-- Divisor -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#2A2A4A" />
 
-        <!-- Cabeçalho Keyframes -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="40dp"
@@ -389,7 +1469,6 @@
                 android:textStyle="bold"
                 android:layout_marginStart="8dp" />
 
-            <!-- Botão + keyframe -->
             <TextView
                 android:id="@+id/btn_add_keyframe"
                 android:layout_width="32dp"
@@ -402,7 +1481,6 @@
 
         </LinearLayout>
 
-        <!-- Lista de Keyframes do quadro seleccionado -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list_keyframes"
             android:layout_width="match_parent"
@@ -412,9 +1490,9 @@
 
     </LinearLayout>
 
-    <!-- ═══════════════════════════════════════════════════════════════════
-         DRAWER DIREITO: Cenas + Camadas
-         ═══════════════════════════════════════════════════════════════════ -->
+    <!-- ══════════════════════════════════════════════════════════
+         DRAWER DIREITO (cenas + camadas)
+         ══════════════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/panel_right"
         android:layout_width="260dp"
