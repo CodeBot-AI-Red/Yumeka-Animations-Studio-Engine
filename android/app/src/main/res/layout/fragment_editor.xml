@@ -124,7 +124,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <!-- View de desenho: retangulo branco + restricao de toque -->
+            <!-- View de desenho -->
             <com.yumeka.anime.engine.views.FrameCanvasView
                 android:id="@+id/canvas_view"
                 android:layout_width="match_parent"
@@ -169,7 +169,7 @@
 
             </LinearLayout>
 
-            <!-- Toolbar de pincel: visivel so com frame ativo, fixada no RODAPE do canvas -->
+            <!-- Toolbar de pincel: fixada no RODAPÉ do canvas -->
             <LinearLayout
                 android:id="@+id/brush_toolbar"
                 android:layout_width="match_parent"
@@ -281,13 +281,13 @@
 
             </LinearLayout>
 
-
         </FrameLayout>
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- DRAWER ESQUERDO: Keyframes + Frames -->
+    <!-- ═══════════════════════════════════════════════════════════════════
+         DRAWER ESQUERDO: Quadros + Keyframes do quadro seleccionado
+         ═══════════════════════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/panel_left"
         android:layout_width="260dp"
@@ -298,6 +298,7 @@
         android:translationX="-260dp"
         android:visibility="invisible">
 
+        <!-- Cabeçalho do painel -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"
@@ -333,12 +334,12 @@
 
         </LinearLayout>
 
-
         <View
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
             android:background="#2A2A3A" />
 
+        <!-- Lista de Quadros — ocupa metade do painel -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list_frames"
             android:layout_width="match_parent"
@@ -346,19 +347,74 @@
             android:layout_weight="1"
             android:paddingTop="4dp" />
 
+        <!-- Botão adicionar quadro -->
         <TextView
             android:id="@+id/btn_add_frame"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:text="+ Adicionar Frame"
+            android:text="+ Adicionar Quadro"
             android:textColor="#9B6DFF"
             android:textSize="12sp"
             android:gravity="center"
             android:background="#1A1A2A" />
 
+        <!-- Divisor -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#2A2A4A" />
+
+        <!-- Cabeçalho Keyframes -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="#12121C"
+            android:paddingStart="12dp"
+            android:paddingEnd="4dp">
+
+            <TextView
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:background="#FF6B35" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Keyframes"
+                android:textColor="#C0C0D8"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:layout_marginStart="8dp" />
+
+            <!-- Botão + keyframe -->
+            <TextView
+                android:id="@+id/btn_add_keyframe"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:text="+"
+                android:textColor="#FF6B35"
+                android:textSize="18sp"
+                android:gravity="center"
+                android:background="#1E1410" />
+
+        </LinearLayout>
+
+        <!-- Lista de Keyframes do quadro seleccionado -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list_keyframes"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingTop="2dp" />
+
     </LinearLayout>
 
-    <!-- DRAWER DIREITO: Cenas + Camadas -->
+    <!-- ═══════════════════════════════════════════════════════════════════
+         DRAWER DIREITO: Cenas + Camadas
+         ═══════════════════════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/panel_right"
         android:layout_width="260dp"

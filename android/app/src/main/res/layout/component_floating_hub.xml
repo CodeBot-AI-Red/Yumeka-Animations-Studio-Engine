@@ -1,76 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     FloatingHub - Menu flutuante do editor Yumeka
-    Fica no canto inferior direito do canvas (16:9 landscape).
+    Layout landscape 16:9: botoes de acao ficam em linha horizontal
+    para nao serem cortados na dimensao vertical curta.
     O botao principal (+) expande/colapsa os botoes de acao.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
-    <!-- Botoes de acao (ficam empilhados acima do main, ocultos por padrao) -->
+    <!--
+        Botoes de acao dispostos HORIZONTALMENTE (da direita para esquerda),
+        ficam na mesma linha do botao principal, ao lado dele.
+        marginEnd deixa espaco para o botao principal (64dp + 8dp margem = ~80dp).
+    -->
     <LinearLayout
         android:id="@+id/hub_actions_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:layout_marginBottom="72dp"
-        android:layout_marginEnd="8dp">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="80dp">
 
-        <!-- Export -->
+        <!-- Layers -->
         <ImageButton
-            android:id="@+id/btn_hub_export"
+            android:id="@+id/btn_hub_layers"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_margin="4dp"
             android:background="#CC1A1A2E"
-            android:src="@android:drawable/ic_menu_share"
-            android:tint="#FF6B35"
-            android:contentDescription="Export"
-            android:elevation="6dp"
-            android:padding="10dp"
-            android:visibility="gone" />
-
-        <!-- Play Preview -->
-        <ImageButton
-            android:id="@+id/btn_hub_play"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_margin="4dp"
-            android:background="#CC1A1A2E"
-            android:src="@android:drawable/ic_media_play"
-            android:tint="#4CAF50"
-            android:contentDescription="Play Preview"
-            android:elevation="6dp"
-            android:padding="10dp"
-            android:visibility="gone" />
-
-        <!-- Redo -->
-        <ImageButton
-            android:id="@+id/btn_hub_redo"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_margin="4dp"
-            android:background="#CC1A1A2E"
-            android:src="@android:drawable/ic_menu_rotate"
-            android:tint="#AAAAAA"
-            android:contentDescription="Redo"
-            android:elevation="6dp"
-            android:padding="10dp"
-            android:visibility="gone" />
-
-        <!-- Undo -->
-        <ImageButton
-            android:id="@+id/btn_hub_undo"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_margin="4dp"
-            android:background="#CC1A1A2E"
-            android:src="@android:drawable/ic_menu_revert"
-            android:tint="#AAAAAA"
-            android:contentDescription="Undo"
+            android:src="@android:drawable/ic_dialog_map"
+            android:tint="#03DAC6"
+            android:contentDescription="Layers"
             android:elevation="6dp"
             android:padding="10dp"
             android:visibility="gone" />
@@ -89,16 +52,58 @@
             android:padding="10dp"
             android:visibility="gone" />
 
-        <!-- Layers -->
+        <!-- Undo -->
         <ImageButton
-            android:id="@+id/btn_hub_layers"
+            android:id="@+id/btn_hub_undo"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_margin="4dp"
             android:background="#CC1A1A2E"
-            android:src="@android:drawable/ic_dialog_map"
-            android:tint="#03DAC6"
-            android:contentDescription="Layers"
+            android:src="@android:drawable/ic_menu_revert"
+            android:tint="#AAAAAA"
+            android:contentDescription="Undo"
+            android:elevation="6dp"
+            android:padding="10dp"
+            android:visibility="gone" />
+
+        <!-- Redo -->
+        <ImageButton
+            android:id="@+id/btn_hub_redo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="4dp"
+            android:background="#CC1A1A2E"
+            android:src="@android:drawable/ic_menu_rotate"
+            android:tint="#AAAAAA"
+            android:contentDescription="Redo"
+            android:elevation="6dp"
+            android:padding="10dp"
+            android:visibility="gone" />
+
+        <!-- Play Preview -->
+        <ImageButton
+            android:id="@+id/btn_hub_play"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="4dp"
+            android:background="#CC1A1A2E"
+            android:src="@android:drawable/ic_media_play"
+            android:tint="#4CAF50"
+            android:contentDescription="Play Preview"
+            android:elevation="6dp"
+            android:padding="10dp"
+            android:visibility="gone" />
+
+        <!-- Export -->
+        <ImageButton
+            android:id="@+id/btn_hub_export"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="4dp"
+            android:background="#CC1A1A2E"
+            android:src="@android:drawable/ic_menu_share"
+            android:tint="#FF6B35"
+            android:contentDescription="Export"
             android:elevation="6dp"
             android:padding="10dp"
             android:visibility="gone" />
