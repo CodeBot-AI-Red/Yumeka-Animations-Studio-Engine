@@ -98,8 +98,6 @@ class HomeFragment : Fragment() {
 
     /**
      * Aplica largura de 92% da tela e deixa a altura livre (WRAP_CONTENT).
-     * Os layouts dos Hubs foram redesenhados compactos para caber em 16:9 landscape
-     * sem precisar de scroll nem de altura fixa — igual ao comportamento do Godot.
      */
     private fun applyDialogSize(dialog: Dialog) {
         val screenW = requireContext().resources.displayMetrics.widthPixels
@@ -133,7 +131,9 @@ class HomeFragment : Fragment() {
                     hideKeyboard(edtName)
                     dialog.dismiss()
                     loadProjectsFrom(base)
-                    (activity as? MainActivity)?.openEditor(name)
+                    // Passa o caminho absoluto do projeto criado
+                    val projectPath = result.projectDir?.absolutePath ?: ""
+                    (activity as? MainActivity)?.openEditor(name, projectPath)
                 }
                 ProjectCreator.Result.ALREADY_EXISTS -> {
                     txtError.text = result.message
@@ -242,7 +242,8 @@ class HomeFragment : Fragment() {
             emptyState.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
             recyclerView.adapter = ProjectAdapter(projects) { project ->
-                (activity as? MainActivity)?.openEditor(project.name)
+                // Passa o caminho absoluto armazenado no modelo Project
+                (activity as? MainActivity)?.openEditor(project.name, project.path)
             }
         }
     }

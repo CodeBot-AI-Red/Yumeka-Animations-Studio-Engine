@@ -60,12 +60,15 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Abre o editor YASE para o projeto informado.
+     * [projectName] é o nome de exibição.
+     * [projectPath] é o caminho absoluto da pasta raiz do projeto em disco
+     *               (ex: /sdcard/Documents/Yumeka Animations/MeuAnime).
      * Adiciona na backstack para que o botao Voltar retorne ao Home.
      */
-    fun openEditor(projectName: String) {
+    fun openEditor(projectName: String, projectPath: String) {
         if (isFinishing || isDestroyed) return
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, EditorFragment.newInstance(projectName, ""), "EDITOR")
+            .replace(R.id.fragment_container, EditorFragment.newInstance(projectName, projectPath), "EDITOR")
             .addToBackStack("editor")
             .setReorderingAllowed(true)
             .commitAllowingStateLoss()

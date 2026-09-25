@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.yumeka.anime.engine.R
 import com.yumeka.anime.engine.views.FrameCanvasView
 import com.yumeka.anime.engine.services.EditorProjectStorage
+import com.yumeka.anime.engine.fragments.HomeFragment
 import java.io.File
 
 class EditorFragment : Fragment() {
@@ -97,7 +99,22 @@ class EditorFragment : Fragment() {
         super.onCreate(savedInstanceState)
         projectName = arguments?.getString(ARG) ?: projectName
         projectPath = arguments?.getString(ARG_PATH).orEmpty()
-        if (projectPath.isNotBlank()) storage = EditorProjectStorage(File(projectPath))
+
+        val projectDir: File? = when {
+            // Caminho absoluto recebido diretamente — caso normal
+            projectPath.isNotBlank() -> File(projectPath)
+            // Fallback: reconstrói o caminho a partir do nome do projeto
+            projectName.isNotBlank() -> {
+                val docs = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+                File(docs, "${HomeFragment.YUMEKA_FOLDER}/$projectName")
+            }
+            else -> null
+        }
+
+        if (projectDir != null) {
+            projectDir.mkdirs() // garante que a pasta existe antes de instanciar o storage
+            storage = EditorProjectStorage(projectDir)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?) =
