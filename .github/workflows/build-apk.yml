@@ -72,9 +72,20 @@ jobs:
           path: build-output.txt
           retention-days: 7
 
-      - name: Mostrar erros Kotlin no log
+      - name: Mostrar erros Kotlin e XML no log
         if: failure()
-        run: grep -E "error:|warning:|Exception|FAILED" build-output.txt | head -100 || true
+        run: |
+          echo "=== ERROS KOTLIN (e:) ==="
+          grep -n "^e: " build-output.txt || echo "(nenhum erro e:)"
+          echo ""
+          echo "=== ERROS GERAIS (error:) ==="
+          grep -n "error:" build-output.txt | head -60 || echo "(nenhum error:)"
+          echo ""
+          echo "=== TASKS FAILED ==="
+          grep -n "FAILED\|Exception\|Caused by" build-output.txt | head -40 || echo "(nenhum)"
+          echo ""
+          echo "=== ULTIMAS 80 LINHAS DO LOG ==="
+          tail -80 build-output.txt
 
       - name: Listar APKs gerados
         run: find . -name "*.apk" 2>/dev/null || echo "Nenhum APK encontrado"
