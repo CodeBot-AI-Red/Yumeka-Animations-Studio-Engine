@@ -37,19 +37,17 @@ class HomeFragment : Fragment() {
         const val YUMEKA_FOLDER = "Yumeka Animations"
     }
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var emptyState: View
-    private lateinit var txtCount: TextView
+    private lateinit var recyclerView : RecyclerView
+    private lateinit var emptyState   : View
+    private lateinit var txtCount     : TextView
     private lateinit var txtFolderPath: TextView
     private var yumekaDir: File? = null
-    private var permDialog: Dialog? = null
+    private var permDialog      : Dialog? = null
     private var newProjectDialog: Dialog? = null
 
     private val requestLegacyPermission = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { perms ->
-        if (perms.values.any { it }) initYumekaFolder() else showDeniedToast()
-    }
+    ) { perms -> if (perms.values.any { it }) initYumekaFolder() else showDeniedToast() }
 
     private val requestManagerPermission = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -58,9 +56,8 @@ class HomeFragment : Fragment() {
             initYumekaFolder() else showDeniedToast()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_home, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.fragment_home, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -73,7 +70,6 @@ class HomeFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
 
         view.findViewById<TextView>(R.id.btn_refresh).setOnClickListener { checkPermissions() }
-
         view.findViewById<TextView>(R.id.btn_new_project).setOnClickListener {
             if (hasStoragePermission()) showNewProjectDialog()
             else Toast.makeText(context, "Permita o acesso ao armazenamento primeiro.", Toast.LENGTH_SHORT).show()
@@ -85,7 +81,7 @@ class HomeFragment : Fragment() {
             Toast.makeText(context, "Busca - em breve", Toast.LENGTH_SHORT).show()
         }
         view.findViewById<TextView>(R.id.btn_settings).setOnClickListener {
-            Toast.makeText(context, "Configuracoes - em breve", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Configurações - em breve", Toast.LENGTH_SHORT).show()
         }
 
         checkPermissions()
@@ -96,25 +92,19 @@ class HomeFragment : Fragment() {
         if (hasStoragePermission()) initYumekaFolder()
     }
 
-    /**
-     * Aplica largura de 92% da tela e deixa a altura livre (WRAP_CONTENT).
-     */
     private fun applyDialogSize(dialog: Dialog) {
         val screenW = requireContext().resources.displayMetrics.widthPixels
-        dialog.window?.setLayout(
-            (screenW * 0.92).toInt(),
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
+        dialog.window?.setLayout((screenW * 0.92).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
     private fun showNewProjectDialog() {
         val dialog = Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar)
-        val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_new_project, null)
+        val view   = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_new_project, null)
         dialog.setContentView(view)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         applyDialogSize(dialog)
 
-        val edtName = view.findViewById<EditText>(R.id.edt_anime_name)
+        val edtName  = view.findViewById<EditText>(R.id.edt_anime_name)
         val txtError = view.findViewById<TextView>(R.id.txt_error_name)
 
         view.findViewById<TextView>(R.id.btn_criar).setOnClickListener {
@@ -131,23 +121,20 @@ class HomeFragment : Fragment() {
                     hideKeyboard(edtName)
                     dialog.dismiss()
                     loadProjectsFrom(base)
-                    // Passa o caminho absoluto do projeto criado
-                    val projectPath = result.projectDir?.absolutePath ?: ""
+                    // Passa nome E caminho absoluto ao editor
+                    val projectPath = result.projectDir?.absolutePath ?: return@setOnClickListener
                     (activity as? MainActivity)?.openEditor(name, projectPath)
                 }
                 ProjectCreator.Result.ALREADY_EXISTS -> {
-                    txtError.text = result.message
-                    txtError.visibility = View.VISIBLE
+                    txtError.text = result.message; txtError.visibility = View.VISIBLE
                 }
                 ProjectCreator.Result.ERROR -> {
-                    txtError.text = result.message
-                    txtError.visibility = View.VISIBLE
+                    txtError.text = result.message; txtError.visibility = View.VISIBLE
                 }
             }
         }
         view.findViewById<TextView>(R.id.btn_cancelar).setOnClickListener {
-            hideKeyboard(edtName)
-            dialog.dismiss()
+            hideKeyboard(edtName); dialog.dismiss()
         }
         newProjectDialog = dialog
         dialog.show()
@@ -155,8 +142,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun hideKeyboard(view: View) {
-        val imm = requireContext().getSystemService(InputMethodManager::class.java)
-        imm.hideSoftInputFromWindow(view.windowToken, 0)
+        requireContext().getSystemService(InputMethodManager::class.java)
+            .hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     private fun checkPermissions() {
@@ -169,11 +156,10 @@ class HomeFragment : Fragment() {
 
     private fun showPermissionDialog(isManager: Boolean) {
         val dialog = Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar)
-        val view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_permission, null)
+        val view   = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_permission, null)
         dialog.setContentView(view)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         applyDialogSize(dialog)
-
         view.findViewById<TextView>(R.id.btn_allow).setOnClickListener {
             dialog.dismiss()
             if (isManager) {
@@ -193,21 +179,17 @@ class HomeFragment : Fragment() {
     }
 
     private fun showDeniedToast() {
-        Toast.makeText(context, "Permissao necessaria para acessar os projetos.", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, "Permissão necessária para acessar os projetos.", Toast.LENGTH_LONG).show()
     }
 
-    private fun hasStoragePermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) ==
-                PackageManager.PERMISSION_GRANTED
-        }
-    }
+    private fun hasStoragePermission(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) Environment.isExternalStorageManager()
+        else ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE) ==
+            PackageManager.PERMISSION_GRANTED
 
     private fun initYumekaFolder() {
         val docs = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-        val dir = File(docs, YUMEKA_FOLDER)
+        val dir  = File(docs, YUMEKA_FOLDER)
         if (!dir.exists()) dir.mkdirs()
         yumekaDir = dir
         txtFolderPath.text = dir.absolutePath
@@ -220,16 +202,18 @@ class HomeFragment : Fragment() {
             ?.filter { it.isDirectory }
             ?.sortedByDescending { it.lastModified() }
             ?.map { folder ->
-                val isYase = File(folder, "yase.project").exists()
-                val fileCount = folder.listFiles()?.size ?: 0
-                val version = if (isYase) "YASE" else "$fileCount files"
+                val isYase     = File(folder, "yase.project").exists()
+                val fileCount  = folder.listFiles()?.size ?: 0
+                val version    = if (isYase) "YASE" else "$fileCount files"
                 Project(
-                    id = folder.name, name = folder.name,
-                    path = folder.absolutePath, version = version,
-                    lastEdited = sdf.format(Date(folder.lastModified())),
-                    iconRes = R.mipmap.ic_launcher,
-                    hasError = !folder.canRead(),
-                    errorMessage = if (!folder.canRead()) "Nao e possivel ler" else null
+                    id           = folder.name,
+                    name         = folder.name,
+                    path         = folder.absolutePath,
+                    version      = version,
+                    lastEdited   = sdf.format(Date(folder.lastModified())),
+                    iconRes      = R.mipmap.ic_launcher,
+                    hasError     = !folder.canRead(),
+                    errorMessage = if (!folder.canRead()) "Não é possível ler" else null
                 )
             } ?: emptyList()
 
@@ -237,12 +221,12 @@ class HomeFragment : Fragment() {
 
         if (projects.isEmpty()) {
             recyclerView.visibility = View.GONE
-            emptyState.visibility = View.VISIBLE
+            emptyState.visibility   = View.VISIBLE
         } else {
-            emptyState.visibility = View.GONE
+            emptyState.visibility   = View.GONE
             recyclerView.visibility = View.VISIBLE
-            recyclerView.adapter = ProjectAdapter(projects) { project ->
-                // Passa o caminho absoluto armazenado no modelo Project
+            recyclerView.adapter    = ProjectAdapter(projects) { project ->
+                // Passa nome E caminho absoluto ao editor
                 (activity as? MainActivity)?.openEditor(project.name, project.path)
             }
         }
@@ -250,9 +234,7 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        permDialog?.dismiss()
-        permDialog = null
-        newProjectDialog?.dismiss()
-        newProjectDialog = null
+        permDialog?.dismiss();       permDialog       = null
+        newProjectDialog?.dismiss(); newProjectDialog = null
     }
 }
