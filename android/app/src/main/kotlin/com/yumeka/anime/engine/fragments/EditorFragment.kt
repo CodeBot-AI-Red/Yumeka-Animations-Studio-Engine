@@ -72,7 +72,7 @@ class EditorFragment : Fragment() {
     override fun onViewCreated(view: View, state: Bundle?) {
         super.onViewCreated(view, state)
 
-        canvasView    = view.findViewById(R.id.frame_canvas)
+        canvasView    = view.findViewById(R.id.canvas_view)
         listFrames    = view.findViewById(R.id.rv_frames)
         listKeyframes = view.findViewById(R.id.list_keyframes)
 
@@ -169,20 +169,6 @@ class EditorFragment : Fragment() {
         saveCurrentKeyframe()
         frameSelecionado = frame
         kfSelecionado    = frame.keyframes.firstOrNull()
-        refreshFrames(); refreshKeyframes(); updateCanvasState()
-        view?.let { updatePanelProperties(it) }
-    }
-
-    private fun duplicateFrame() {
-        val f = frameSelecionado ?: return
-        saveCurrentKeyframe()
-        val id     = (frames.maxOfOrNull { it.id } ?: 0) + 1
-        val stored = storage?.createFrame(id, 1, "${f.nome} (cópia)", f.inicio, f.fim) ?: return
-        val copy   = Frame(stored.id, stored.name, stored.start, stored.end, stored.keyframes)
-        frames.add(copy)
-        frameSelecionado = copy
-        kfSelecionado    = copy.keyframes.firstOrNull()
-        persistState()
         refreshFrames(); refreshKeyframes(); updateCanvasState()
         view?.let { updatePanelProperties(it) }
     }
@@ -324,8 +310,7 @@ class EditorFragment : Fragment() {
     }
 
     private fun setupStripButtons(root: View) {
-        root.findViewById<TextView?>(R.id.btn_frame_add)?.setOnClickListener      { addFrame() }
-        root.findViewById<TextView?>(R.id.btn_frame_duplicate)?.setOnClickListener { duplicateFrame() }
+        root.findViewById<TextView?>(R.id.btn_add_frame)?.setOnClickListener { addFrame() }
         root.findViewById<TextView?>(R.id.btn_frame_delete)?.setOnClickListener   {
             frameSelecionado?.let { showFrameMenu(it) }
         }
