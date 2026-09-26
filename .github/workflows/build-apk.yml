@@ -54,11 +54,27 @@ jobs:
 
       - name: Build APK Debug
         if: github.event_name != 'workflow_dispatch' || github.event.inputs.release_type == 'debug'
-        run: gradle :app:assembleDebug --stacktrace
+        run: |
+          gradle :app:assembleDebug --stacktrace 2>&1 | tee build-output.txt
+          exit ${PIPESTATUS[0]}
 
       - name: Build APK Release
         if: github.event.inputs.release_type == 'release'
-        run: gradle :app:assembleRelease --stacktrace
+        run: |
+          gradle :app:assembleRelease --stacktrace 2>&1 | tee build-output.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Upload log de build (em caso de erro)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ github.sha }}
+          path: build-output.txt
+          retention-days: 7
+
+      - name: Mostrar erros Kotlin no log
+        if: failure()
+        run: grep -E "error:|warning:|Exception|FAILED" build-output.txt | head -100 || true
 
       - name: Listar APKs gerados
         run: find . -name "*.apk" 2>/dev/null || echo "Nenhum APK encontrado"
