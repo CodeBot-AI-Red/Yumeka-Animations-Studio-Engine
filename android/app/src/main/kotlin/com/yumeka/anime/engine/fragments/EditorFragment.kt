@@ -46,7 +46,7 @@ class EditorFragment : Fragment() {
     private var canvasView    : FrameCanvasView? = null
     private var canvasEmpty   : View?            = null
     private var brushToolbar  : View?            = null
-    private var colorSwatch   : TextView?        = null
+    private var colorSwatch   : View?            = null
     private var listScenes    : RecyclerView?    = null
     private var listFrames    : RecyclerView?    = null
     private var listKeyframes : RecyclerView?    = null
@@ -123,7 +123,6 @@ class EditorFragment : Fragment() {
         setupTopbar(view)
         setupDrawers(view)
         setupBrushToolbar(view)
-        setupLayers(view)
         restoreProjectState()
 
         canvasView?.onArtworkChanged = { saveCurrentKeyframe() }
@@ -196,7 +195,6 @@ class EditorFragment : Fragment() {
         val start = cenas.lastOrNull()?.fim ?: "00:00"
         val scene = Cena(id, "Cena $id", start, nextTime(start))
         cenas.add(scene)
-        // ► Cria Cenas/Cena N/Quadros/ em tempo real
         storage?.createSceneFolder(id)
         cenaSelecionada  = scene
         frameSelecionado = null
@@ -248,7 +246,6 @@ class EditorFragment : Fragment() {
         val id     = (framesPorCena.values.flatten().maxOfOrNull { it.id } ?: 0) + 1
         val start  = frames.lastOrNull()?.fim ?: "0:00"
 
-        // ► Cria Cenas/Cena N/Quadros/Quadro M/Keyframes/Keyframe 1.png em tempo real
         val stored = storage?.createFrame(id, scene.id, "Quadro $id", start, nextTimeFrame(start))
             ?: return
 
@@ -300,7 +297,6 @@ class EditorFragment : Fragment() {
             return
         }
         saveCurrentKeyframe()
-        // ► Cria Keyframe N.png em tempo real
         val kf = storage?.createKeyframe(frame.id) ?: return
         frame.keyframes.add(kf)
         kfSelecionado = kf
@@ -322,7 +318,6 @@ class EditorFragment : Fragment() {
             .setTitle("Keyframe ${kf.id}")
             .setItems(arrayOf("Excluir")) { _, _ ->
                 storage?.deleteKeyframe(frame.id, kf.id)
-                // Recarrega lista do disco após renumeração
                 val kfDir = storage?.keyframesDir(frame.id)
                 val updated = kfDir?.listFiles { f -> f.extension.equals("png", ignoreCase = true) }
                     ?.mapNotNull { f ->
@@ -397,10 +392,16 @@ class EditorFragment : Fragment() {
         root.findViewById<TextView>(R.id.btn_toggle_left).setOnClickListener  { if (leftOpen)  closeLeft()  else openLeft() }
         root.findViewById<TextView>(R.id.btn_toggle_right).setOnClickListener { if (rightOpen) closeRight() else openRight() }
         root.findViewById<TextView>(R.id.btn_close_left).setOnClickListener   { closeLeft() }
-        root.findViewById<TextView>(R.id.btn_close_right).setOnClickListener  { closeRight() }
+        // btn_close_right não existe mais no layout (panel_right é fixo), usar fallback seguro
+        root.findViewById<View?>(R.id.btn_close_right)?.setOnClickListener    { closeRight() }
         overlay?.setOnClickListener { closeLeft(); closeRight() }
-        root.findViewById<TextView>(R.id.btn_add_frame).setOnClickListener    { addFrame() }
-        root.findViewById<TextView>(R.id.btn_add_scene).setOnClickListener    { addScene() }
+
+        // Botão "+" na strip de frames (ID único: btn_add_frame)
+        root.findViewById<TextView?>(R.id.btn_add_frame)?.setOnClickListener { addFrame() }
+        // Botão "+ Quadro" no drawer esquerdo (ID renomeado: btn_add_frame_drawer)
+        root.findViewById<TextView?>(R.id.btn_add_frame_drawer)?.setOnClickListener { addFrame() }
+
+        root.findViewById<TextView?>(R.id.btn_add_scene)?.setOnClickListener    { addScene() }
         root.findViewById<TextView?>(R.id.btn_add_keyframe)?.setOnClickListener { addKeyframe() }
     }
 
@@ -431,9 +432,9 @@ class EditorFragment : Fragment() {
     }
 
     private fun setupBrushToolbar(root: View) {
-        root.findViewById<TextView>(R.id.brush_btn_pencil).setOnClickListener { setEraser(root, false) }
-        root.findViewById<TextView>(R.id.brush_btn_eraser).setOnClickListener { setEraser(root, true) }
-        root.findViewById<TextView>(R.id.brush_btn_clear).setOnClickListener {
+        root.findViewById<TextView?>(R.id.brush_btn_pencil)?.setOnClickListener { setEraser(root, false) }
+        root.findViewById<TextView?>(R.id.brush_btn_eraser)?.setOnClickListener { setEraser(root, true) }
+        root.findViewById<TextView?>(R.id.brush_btn_clear)?.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("Limpar keyframe")
                 .setMessage("Apagar todos os traços deste keyframe?")
@@ -441,16 +442,16 @@ class EditorFragment : Fragment() {
                 .setNegativeButton("Cancelar", null).show()
         }
         mapOf(R.id.brush_size_small to 3f, R.id.brush_size_medium to 6f, R.id.brush_size_large to 18f).forEach { (id, size) ->
-            root.findViewById<TextView>(id).setOnClickListener { canvasView?.brushSize = size }
+            root.findViewById<TextView?>(id)?.setOnClickListener { canvasView?.brushSize = size }
         }
         colorSwatch?.setOnClickListener { showColorPicker() }
-        colorSwatch?.setBackgroundColor(currentBrushColor)
+        (colorSwatch as? View)?.setBackgroundColor(currentBrushColor)
     }
 
     private fun setEraser(root: View, eraser: Boolean) {
         canvasView?.isEraser = eraser
-        root.findViewById<TextView>(R.id.brush_btn_pencil).setBackgroundColor(if (!eraser) 0xFF22223A.toInt() else 0xFF22222E.toInt())
-        root.findViewById<TextView>(R.id.brush_btn_eraser).setBackgroundColor(if (eraser)  0xFF22223A.toInt() else 0xFF22222E.toInt())
+        root.findViewById<TextView?>(R.id.brush_btn_pencil)?.setBackgroundColor(if (!eraser) 0xFF22223A.toInt() else 0xFF22222E.toInt())
+        root.findViewById<TextView?>(R.id.brush_btn_eraser)?.setBackgroundColor(if (eraser)  0xFF22223A.toInt() else 0xFF22222E.toInt())
     }
 
     private fun showColorPicker() {
@@ -470,38 +471,6 @@ class EditorFragment : Fragment() {
             })
         }
         AlertDialog.Builder(requireContext()).setTitle("Escolher cor").setView(grid).setNegativeButton("Fechar", null).show()
-    }
-
-    private fun setupLayers(root: View) {
-        val layers = listOf(
-            R.id.layer_personagem to ("👤" to "Personagem"),
-            R.id.layer_3d         to ("🗂" to "3D"),
-            R.id.layer_fundo      to ("🖼" to "Fundo"),
-            R.id.layer_desenho    to ("✏" to "Desenho"),
-            R.id.layer_efeito     to ("✨" to "Efeito"),
-            R.id.layer_texto      to ("T"  to "Texto"),
-            R.id.layer_audio      to ("🎵" to "Áudio")
-        )
-        layers.forEach { (id, meta) ->
-            root.findViewById<View>(id).apply {
-                findViewById<TextView>(R.id.layer_icon).text = meta.first
-                findViewById<TextView>(R.id.layer_name).text = meta.second
-                setOnClickListener { selectedLayerId = id; updateLayerSelection(root) }
-            }
-        }
-        root.findViewById<TextView>(R.id.btn_layers_visibility).setOnClickListener {
-            layersVisible = !layersVisible
-            root.findViewById<TextView>(R.id.btn_layers_visibility).text = if (layersVisible) "👁" else "◉"
-            layers.forEach { (id, _) -> root.findViewById<View>(id).alpha = if (layersVisible) 1f else .35f }
-        }
-        updateLayerSelection(root)
-    }
-
-    private fun updateLayerSelection(root: View) {
-        listOf(R.id.layer_personagem, R.id.layer_3d, R.id.layer_fundo,
-               R.id.layer_desenho, R.id.layer_efeito, R.id.layer_texto, R.id.layer_audio)
-            .forEach { root.findViewById<View>(it).setBackgroundColor(
-                if (it == selectedLayerId) 0xFF1E1E3A.toInt() else Color.TRANSPARENT) }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
