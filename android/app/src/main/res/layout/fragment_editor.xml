@@ -1,1365 +1,707 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Layout redesenhado para corresponder ao mockup:
-  ┌──────────────────────────────────────────────────────────┐
-  │  TOPBAR: logo · breadcrumb · Salvo · ⚙ · [Quadros] ▶ ⛶  │
-  ├─────────────┬────────────────────────────────────────────┤
-  │ SIDEBAR     │  CONTEÚDO PRINCIPAL (canvas / empty state) │
-  │ Projeto     │                                            │
-  │  ▸ Plugins  │  Cabeçalho da cena (título + ações)        │
-  │  ▸ Assets   │  ─────────────────────────────────────────  │
-  │  ▸ Tempora  │  Estado vazio / FrameCanvasView            │
-  │  ▸ Icon.png │                                            │
-  │  ▸ yase.pro │  Barra inferior: Cena · 0 Frames · Dur.   │
-  └─────────────┴────────────────────────────────────────────┘
-  Drawers (esquerdo e direito) continuam funcionando sobre esse layout.
+  Editor Layout — Yumeka Animations Studio Engine
+  Estrutura:
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │  TOPBAR: ☰ · 🌸 YUMEKA · │ · breadcrumb ······ ● Salvo · ⚙ · [Quadros] ▶ ⛶ ···  │
+  ├──────┬──────────────────────────────────────────────┬──────────────┤
+  │ TOOL │                  CANVAS                      │    PAINEL    │
+  │  │   │   ┌──────────────────────────────────────┐  │  Propriedades│
+  │  ↑   │   │           FrameCanvasView            │  │  do Frame    │
+  │  ✏  │   │                                      │  │  ──────────  │
+  │  ⊟   │   │                                      │  │  Frame 12    │
+  │  □   │   └──────────────────────────────────────┘  │  Duração     │
+  │  ○   ├──────────────────────────────────────────────┤  ──────────  │
+  │  T   │ Frames [250] [9][10][11][12*][13][14][15] ⊕ ⊟│  Animação ˅ │
+  │  🗂  ├──────────────────────────────────────────────┤  Camadas  ˅ │
+  │      │ ◇Keyframes ▶ ──◇──────────────◇──────── 📈˅ │  Keyframes ˄ │
+  └──────┴──────────────────────────────────────────────┴──────────────┘
 -->
-<FrameLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0B0B12">
+    android:background="@color/surface_dark">
 
     <!-- ══════════════════════════════════════════════════════════
-         ESTRUTURA BASE: topbar + (sidebar | conteúdo)
+         TOPBAR
          ══════════════════════════════════════════════════════════ -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <LinearLayout
+        android:id="@+id/editor_topbar"
+        android:layout_width="0dp"
+        android:layout_height="52dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/surface_card"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:elevation="4dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- ── TOPBAR ──────────────────────────────────────────── -->
+        <!-- ☰ Menu / toggle sidebar -->
+        <TextView
+            android:id="@+id/btn_toggle_left"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:text="&#9776;"
+            android:textColor="@color/text_secondary"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <!-- 🌸 Logo YUMEKA -->
         <LinearLayout
-            android:id="@+id/editor_topbar"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:background="#12121C"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:elevation="4dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="12dp">
 
-            <!-- Hamburguer / toggle sidebar -->
             <TextView
-                android:id="@+id/btn_toggle_left"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:text="&#9776;"
-                android:textColor="#A0A0B8"
-                android:textSize="18sp"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:text="&#127800;"
+                android:textSize="17sp"
                 android:gravity="center" />
 
-            <!-- Logo YUMEKA -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="16dp">
-
-                <!-- Flor sakura emoji como logo -->
-                <TextView
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:text="&#127800;"
-                    android:textSize="18sp"
-                    android:gravity="center" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="4dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="YUMEKA"
-                        android:textColor="#F0F0F5"
-                        android:textSize="11sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.08" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Animations Studio Engine"
-                        android:textColor="#5A5A78"
-                        android:textSize="7sp" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- Divisor vertical -->
-            <View
-                android:layout_width="1dp"
-                android:layout_height="24dp"
-                android:background="#2A2A3A"
-                android:layout_marginEnd="12dp" />
-
-            <!-- Ícone pasta + nome do projeto + breadcrumb -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:orientation="vertical"
-                android:layout_marginEnd="8dp">
+                android:layout_marginStart="5dp">
 
-                <!-- Nome do projeto com ícone -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:text="&#128193;"
-                        android:textSize="11sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:id="@+id/txt_project_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Projeto"
-                        android:textColor="#F0F0F5"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:ellipsize="end"
-                        android:singleLine="true"
-                        android:layout_marginStart="4dp" />
-
-                    <!-- Seta dropdown -->
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=" &#8964;"
-                        android:textColor="#606078"
-                        android:textSize="10sp" />
-
-                </LinearLayout>
-
-                <!-- Breadcrumb: Temporada 1 › Episódio 1 › Cena 1 -->
                 <TextView
-                    android:id="@+id/txt_season_episode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Temporada 1  ›  Epis&#243;dio 1"
-                    android:textColor="#5A5A78"
-                    android:textSize="9sp"
-                    android:layout_marginTop="1dp" />
+                    android:text="YUMEKA"
+                    android:textColor="@color/text_primary"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.08" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Animations Studio Engine"
+                    android:textColor="@color/text_muted"
+                    android:textSize="7sp" />
 
             </LinearLayout>
 
-            <!-- ● Salvo -->
+        </LinearLayout>
+
+        <!-- Divisor vertical -->
+        <View
+            android:layout_width="1dp"
+            android:layout_height="22dp"
+            android:background="@color/surface_card_border"
+            android:layout_marginEnd="12dp" />
+
+        <!-- Breadcrumb: nome projeto › EP-1 › Frame N / Total -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginEnd="10dp">
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginEnd="12dp">
-
-                <View
-                    android:layout_width="6dp"
-                    android:layout_height="6dp"
-                    android:background="@drawable/circle_green"
-                    android:layout_marginEnd="4dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Salvo"
-                    android:textColor="#4ADE80"
-                    android:textSize="10sp" />
-
-            </LinearLayout>
-
-            <!-- ⚙ Configurações -->
-            <TextView
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:text="&#9881;"
-                android:textColor="#A0A0B8"
-                android:textSize="16sp"
-                android:gravity="center"
-                android:layout_marginEnd="4dp" />
-
-            <!-- [Quadros] botão destacado roxo -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:background="#7C3AED"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:layout_marginEnd="4dp">
+                android:gravity="center_vertical">
 
                 <TextView
                     android:layout_width="14dp"
                     android:layout_height="14dp"
-                    android:text="&#127925;"
+                    android:text="&#128193;"
                     android:textSize="10sp"
-                    android:gravity="center"
-                    android:layout_marginEnd="4dp" />
+                    android:gravity="center" />
 
                 <TextView
-                    android:id="@+id/tab_quadros"
+                    android:id="@+id/txt_project_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Quadros"
-                    android:textColor="#FFFFFF"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:text="Projeto"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:layout_marginStart="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" &#8964;"
+                    android:textColor="@color/text_muted"
+                    android:textSize="10sp" />
 
             </LinearLayout>
 
-            <!-- ▶ Play -->
             <TextView
-                android:id="@+id/btn_play"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:text="&#9654;"
-                android:textColor="#A0A0B8"
-                android:textSize="14sp"
-                android:gravity="center"
-                android:background="#1E1E2E"
-                android:layout_marginEnd="4dp" />
-
-            <!-- ⛶ Fullscreen -->
-            <TextView
-                android:id="@+id/btn_toggle_right"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:text="&#9974;"
-                android:textColor="#A0A0B8"
-                android:textSize="14sp"
-                android:gravity="center"
-                android:background="#1E1E2E" />
-
-            <!-- Voltar (oculto mas mantido para o fragmento) -->
-            <TextView
-                android:id="@+id/btn_editor_back"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:visibility="gone" />
+                android:id="@+id/txt_season_episode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EP-1  ›  Frame 1 / 250"
+                android:textColor="@color/text_muted"
+                android:textSize="9sp"
+                android:layout_marginTop="1dp" />
 
         </LinearLayout>
 
-        <!-- ── CORPO: sidebar + conteúdo ───────────────────────── -->
+        <!-- ● Salvo -->
         <LinearLayout
-            android:id="@+id/editor_body"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@id/editor_topbar"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            android:gravity="center_vertical"
+            android:layout_marginEnd="10dp">
 
-            <!-- ╔══════════════════════════════════════════════════╗
-                 ║  SIDEBAR ESQUERDA — Árvore de projeto fixada    ║
-                 ╚══════════════════════════════════════════════════╝ -->
-            <LinearLayout
-                android:id="@+id/sidebar_project"
-                android:layout_width="224dp"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:background="#0E0E18">
+            <View
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:background="@drawable/circle_green"
+                android:layout_marginEnd="4dp" />
 
-                <!-- Cabeçalho "Projeto" -->
-                <LinearLayout
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Salvo"
+                android:textColor="@color/accent_green"
+                android:textSize="10sp" />
+
+        </LinearLayout>
+
+        <!-- ⚙ Configurações -->
+        <TextView
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:text="&#9881;"
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:layout_marginEnd="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <!-- [🖼 Quadros] botão roxo -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="@color/accent_purple"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_marginEnd="6dp">
+
+            <TextView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:text="&#128444;"
+                android:textSize="10sp"
+                android:gravity="center"
+                android:layout_marginEnd="5dp" />
+
+            <TextView
+                android:id="@+id/tab_quadros"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Quadros"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- ▶ Play circular -->
+        <TextView
+            android:id="@+id/btn_play"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:text="&#9654;"
+            android:textColor="@color/text_primary"
+            android:textSize="13sp"
+            android:gravity="center"
+            android:background="@color/surface_card2"
+            android:layout_marginEnd="4dp" />
+
+        <!-- ⛶ Tela cheia -->
+        <TextView
+            android:id="@+id/btn_toggle_right"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:text="&#9974;"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_marginEnd="4dp" />
+
+        <!-- ··· Mais opções -->
+        <TextView
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:text="&#8943;"
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <!-- ID oculto mantido para o Fragment -->
+        <TextView
+            android:id="@+id/btn_editor_back"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- ══════════════════════════════════════════════════════════
+         CORPO PRINCIPAL: toolbar | canvas+strip+timeline | painel
+         ══════════════════════════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/editor_body"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/editor_topbar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- ══════════════════════════════════════════════════
+             TOOLBAR DE FERRAMENTAS (esquerda, estreita)
+             ══════════════════════════════════════════════════ -->
+        <LinearLayout
+            android:id="@+id/editor_toolbar"
+            android:layout_width="52dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="top|center_horizontal"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:background="@color/surface_card"
+            android:elevation="2dp">
+
+            <!-- Seleção (ativo por padrão com fundo roxo) -->
+            <TextView
+                android:id="@+id/tool_select"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="&#8598;"
+                android:textColor="#FFFFFF"
+                android:textSize="17sp"
+                android:gravity="center"
+                android:background="@color/accent_purple"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Pincel -->
+            <TextView
+                android:id="@+id/tool_brush"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="&#9999;"
+                android:textColor="@color/text_secondary"
+                android:textSize="17sp"
+                android:gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Borracha -->
+            <TextView
+                android:id="@+id/tool_eraser"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="&#9638;"
+                android:textColor="@color/text_secondary"
+                android:textSize="17sp"
+                android:gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Retângulo -->
+            <TextView
+                android:id="@+id/tool_rect"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="&#9645;"
+                android:textColor="@color/text_secondary"
+                android:textSize="17sp"
+                android:gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Elipse -->
+            <TextView
+                android:id="@+id/tool_ellipse"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="&#9711;"
+                android:textColor="@color/text_secondary"
+                android:textSize="17sp"
+                android:gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Texto -->
+            <TextView
+                android:id="@+id/tool_text"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="T"
+                android:textColor="@color/text_secondary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_marginBottom="4dp" />
+
+            <!-- Espaçador -->
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- Camadas (fixado ao fundo) -->
+            <TextView
+                android:id="@+id/tool_layers"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:text="&#128466;"
+                android:textColor="@color/text_secondary"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+
+        </LinearLayout>
+
+        <!-- ══════════════════════════════════════════════════
+             COLUNA CENTRAL: canvas + strip + timeline
+             ══════════════════════════════════════════════════ -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:background="@color/surface_dark">
+
+            <!-- ── CANVAS ──────────────────────────────────── -->
+            <FrameLayout
+                android:id="@+id/canvas_container"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="#0B0B12">
+
+                <!-- Canvas de frames da engine -->
+                <com.yumeka.anime.engine.views.FrameCanvasView
+                    android:id="@+id/frame_canvas"
                     android:layout_width="match_parent"
-                    android:layout_height="36dp"
+                    android:layout_height="match_parent" />
+
+                <!-- Badge resolução (canto superior esquerdo) -->
+                <TextView
+                    android:id="@+id/txt_canvas_resolution"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1920 × 1080"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp"
+                    android:background="#99000000"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:layout_gravity="top|start"
+                    android:layout_margin="10dp" />
+
+                <!-- Badge zoom (canto superior direito) -->
+                <TextView
+                    android:id="@+id/txt_canvas_zoom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="100%"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp"
+                    android:background="#99000000"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="10dp" />
+
+            </FrameLayout>
+
+            <!-- ── STRIP DE FRAMES ─────────────────────────── -->
+            <LinearLayout
+                android:id="@+id/strip_frames"
+                android:layout_width="match_parent"
+                android:layout_height="88dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@color/surface_card"
+                android:paddingStart="12dp"
+                android:paddingEnd="8dp"
+                android:elevation="2dp">
+
+                <!-- Label "🖼 Frames" + contador -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingStart="12dp"
+                    android:layout_marginEnd="10dp">
+
+                    <TextView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:text="&#128444;"
+                        android:textSize="11sp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Frames"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="6dp" />
+
+                    <TextView
+                        android:id="@+id/txt_frame_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="250"
+                        android:textColor="@color/text_primary"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:background="@color/surface_card2"
+                        android:paddingStart="7dp"
+                        android:paddingEnd="7dp"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="2dp" />
+
+                </LinearLayout>
+
+                <!-- RecyclerView horizontal de thumbnails -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_frames"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:clipToPadding="false"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:scrollbars="none" />
+
+                <!-- Botões: + duplicar deletar ··· -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="6dp">
+
+                    <TextView
+                        android:id="@+id/btn_frame_add"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:text="+"
+                        android:textColor="@color/text_muted"
+                        android:textSize="18sp"
+                        android:gravity="center"
+                        android:background="@color/surface_card2"
+                        android:layout_marginEnd="4dp" />
+
+                    <TextView
+                        android:id="@+id/btn_frame_duplicate"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:text="&#8853;"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:background="@color/surface_card2"
+                        android:layout_marginEnd="4dp" />
+
+                    <TextView
+                        android:id="@+id/btn_frame_delete"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:text="&#128465;"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:background="@color/surface_card2"
+                        android:layout_marginEnd="4dp" />
+
+                    <TextView
+                        android:id="@+id/btn_frame_more"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:text="&#8943;"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:background="@color/surface_card2" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Divisor -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/surface_card_border" />
+
+            <!-- ── TIMELINE / KEYFRAMES ────────────────────── -->
+            <LinearLayout
+                android:id="@+id/strip_keyframes"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@color/surface_card"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp">
+
+                <!-- ◇ Keyframes label (roxo) -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@color/accent_purple"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:layout_marginEnd="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="&#9671;"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="5dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Keyframes"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11.5sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <!-- ▶ play da timeline -->
+                <TextView
+                    android:id="@+id/btn_tl_play"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:text="&#9654;"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:background="@color/surface_card2"
+                    android:layout_marginEnd="10dp" />
+
+                <!-- Diamante de início -->
+                <TextView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:text="&#9671;"
+                    android:textColor="@color/surface_card_border"
+                    android:textSize="10sp"
+                    android:gravity="center" />
+
+                <!-- Trilho da timeline com playhead -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="24dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp">
+
+                    <!-- Linha do trilho -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_gravity="center"
+                        android:background="@color/surface_card_border" />
+
+                    <!-- Playhead roxo (posição ~38%) -->
+                    <View
+                        android:id="@+id/tl_playhead"
+                        android:layout_width="2dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center_vertical|start"
+                        android:layout_marginStart="80dp"
+                        android:background="@color/accent_purple" />
+
+                    <!-- Diamante de meio -->
+                    <TextView
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:layout_gravity="center"
+                        android:text="&#9671;"
+                        android:textColor="@color/surface_card_border"
+                        android:textSize="10sp"
+                        android:gravity="center" />
+
+                </FrameLayout>
+
+                <!-- Diamante de fim -->
+                <TextView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:text="&#9671;"
+                    android:textColor="@color/surface_card_border"
+                    android:textSize="10sp"
+                    android:gravity="center"
+                    android:layout_marginEnd="10dp" />
+
+                <!-- Modo Normal dropdown -->
+                <LinearLayout
+                    android:id="@+id/btn_tl_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@color/surface_card2"
+                    android:paddingStart="8dp"
                     android:paddingEnd="8dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Projeto"
-                        android:textColor="#606078"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.1" />
-
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:background="#1E1E2E" />
-
-                <!-- Nó raiz: nome do projeto -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="32dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="10dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#9660;"
-                        android:textColor="#A0A0B8"
-                        android:textSize="8sp"
-                        android:gravity="center" />
-
-                    <!-- Ícone sakura do projeto -->
-                    <TextView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:text="&#127800;"
+                        android:text="&#128200;"
                         android:textSize="11sp"
-                        android:gravity="center"
-                        android:layout_marginStart="2dp" />
-
-                    <TextView
-                        android:id="@+id/sidebar_project_name"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Projeto"
-                        android:textColor="#E0E0F0"
-                        android:textSize="11sp"
-                        android:textStyle="bold"
-                        android:ellipsize="end"
-                        android:singleLine="true"
-                        android:layout_marginStart="6dp" />
-
-                </LinearLayout>
-
-                <!-- ── Plugins ── -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="28dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="28dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#9658;"
-                        android:textColor="#4A4A6A"
-                        android:textSize="7sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:text="&#128268;"
-                        android:textSize="10sp"
-                        android:gravity="center"
-                        android:layout_marginStart="2dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Plugins"
-                        android:textColor="#6A6A8A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- ── Assets (expandido) ── -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="28dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="28dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#9660;"
-                        android:textColor="#A0A0B8"
-                        android:textSize="7sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:text="&#128193;"
-                        android:textSize="10sp"
-                        android:gravity="center"
-                        android:layout_marginStart="2dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Assets"
-                        android:textColor="#9090B0"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- Characters -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="26dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="50dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#9658;"
-                        android:textColor="#3A3A5A"
-                        android:textSize="6sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#128100;"
-                        android:textSize="9sp"
-                        android:gravity="center"
-                        android:layout_marginStart="2dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Characters"
-                        android:textColor="#5A5A7A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- Backgrounds -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="26dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="50dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#9658;"
-                        android:textColor="#3A3A5A"
-                        android:textSize="6sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#128247;"
-                        android:textSize="9sp"
-                        android:gravity="center"
-                        android:layout_marginStart="2dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Backgrounds"
-                        android:textColor="#5A5A7A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- Materials -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="26dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="50dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#9658;"
-                        android:textColor="#3A3A5A"
-                        android:textSize="6sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#127993;"
-                        android:textSize="9sp"
-                        android:gravity="center"
-                        android:layout_marginStart="2dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Materials"
-                        android:textColor="#5A5A7A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- ── Temporadas (expandido) ── -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="28dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="28dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#9660;"
-                        android:textColor="#A0A0B8"
-                        android:textSize="7sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:text="&#128193;"
-                        android:textSize="10sp"
-                        android:gravity="center"
-                        android:layout_marginStart="2dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Temporadas"
-                        android:textColor="#9090B0"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- Temporada 1 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="26dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="50dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#9660;"
-                        android:textColor="#A0A0B8"
-                        android:textSize="6sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#128193;"
-                        android:textSize="9sp"
-                        android:gravity="center"
-                        android:layout_marginStart="2dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Temporada 1"
-                        android:textColor="#7A7A9A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- Episódios -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="26dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="68dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#9660;"
-                        android:textColor="#A0A0B8"
-                        android:textSize="6sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#128193;"
-                        android:textSize="9sp"
-                        android:gravity="center"
-                        android:layout_marginStart="2dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Epis&#243;dios"
-                        android:textColor="#7A7A9A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- EP-1 (selecionado/ativo) -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="26dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="84dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#9660;"
-                        android:textColor="#A0A0B8"
-                        android:textSize="6sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#128193;"
-                        android:textSize="9sp"
-                        android:gravity="center"
-                        android:layout_marginStart="2dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="EP-1"
-                        android:textColor="#7A7A9A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- Quadros — ITEM ATIVO (roxo highlight) -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="28dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="100dp"
-                    android:background="#2A1A4E">
-
-                    <TextView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:text="&#127925;"
-                        android:textSize="9sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Quadros"
-                        android:textColor="#C4B5FD"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- 3D Scene -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="26dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="100dp">
-
-                    <TextView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:text="&#127760;"
-                        android:textSize="9sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="3D Scene"
-                        android:textColor="#5A5A7A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- Efeitos -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="26dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="100dp">
-
-                    <TextView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:text="&#10024;"
-                        android:textSize="9sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Efeitos"
-                        android:textColor="#5A5A7A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- Audio (expandido) -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="26dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="100dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#9660;"
-                        android:textColor="#A0A0B8"
-                        android:textSize="6sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:text="&#128266;"
-                        android:textSize="9sp"
-                        android:gravity="center"
-                        android:layout_marginStart="2dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Audio"
-                        android:textColor="#5A5A7A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- Sounds -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="24dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="116dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#9835;"
-                        android:textSize="8sp"
-                        android:gravity="center"
-                        android:textColor="#4A4A6A" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Sounds"
-                        android:textColor="#4A4A6A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- Speeches -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="24dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="116dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#127908;"
-                        android:textSize="8sp"
-                        android:gravity="center"
-                        android:textColor="#4A4A6A" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Speeches"
-                        android:textColor="#4A4A6A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- Scripts -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="26dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="100dp">
-
-                    <TextView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:text="&#128196;"
-                        android:textSize="9sp"
-                        android:gravity="center"
-                        android:textColor="#4A4A6A" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Scripts"
-                        android:textColor="#4A4A6A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="5dp" />
-
-                </LinearLayout>
-
-                <!-- Espaçador para empurrar Icon.png e yase.project ao fundo da árvore -->
-                <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:background="#1E1E2E" />
-
-                <!-- Icon.png -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="26dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="28dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#128444;"
-                        android:textSize="9sp"
-                        android:gravity="center"
-                        android:textColor="#4A4A6A" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Icon.png"
-                        android:textColor="#4A4A6A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="6dp" />
-
-                </LinearLayout>
-
-                <!-- yase.project -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="26dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="28dp"
-                    android:layout_marginBottom="8dp">
-
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#128196;"
-                        android:textSize="9sp"
-                        android:gravity="center"
-                        android:textColor="#4A4A6A" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="yase.project"
-                        android:textColor="#4A4A6A"
-                        android:textSize="10sp"
-                        android:layout_marginStart="6dp" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- Divisor sidebar/conteúdo -->
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:background="#1A1A2A" />
-
-            <!-- ╔══════════════════════════════════════════════════╗
-                 ║  ÁREA DE CONTEÚDO PRINCIPAL                     ║
-                 ╚══════════════════════════════════════════════════╝ -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:background="#0F0F1A">
-
-                <!-- Cabeçalho da cena: título + ações -->
-                <LinearLayout
-                    android:id="@+id/scene_header"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="12dp"
-                    android:background="#0F0F1A">
-
-                    <!-- Botão voltar seta -->
-                    <TextView
-                        android:id="@+id/btn_editor_back_visible"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:text="&#8592;"
-                        android:textColor="#6A6A8A"
-                        android:textSize="16sp"
-                        android:gravity="center"
-                        android:layout_marginEnd="8dp"
-                        android:onClick="" />
-
-                    <!-- Título da cena -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
-
-                            <TextView
-                                android:id="@+id/txt_scene_title"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Cena 1"
-                                android:textColor="#F0F0F5"
-                                android:textSize="16sp"
-                                android:textStyle="bold" />
-
-                            <!-- Ícone lápis editar -->
-                            <TextView
-                                android:layout_width="22dp"
-                                android:layout_height="22dp"
-                                android:text="&#9998;"
-                                android:textColor="#5A5A7A"
-                                android:textSize="12sp"
-                                android:gravity="center"
-                                android:layout_marginStart="4dp" />
-
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Gerencie os quadros desta cena. Adicione, remova e organize seus frames."
-                            android:textColor="#5A5A7A"
-                            android:textSize="9sp"
-                            android:layout_marginTop="2dp" />
-
-                    </LinearLayout>
-
-                    <!-- Botão + Novo Frame -->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="34dp"
-                        android:orientation="horizontal"
-                        android:gravity="center"
-                        android:background="#7C3AED"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
-                        android:layout_marginEnd="8dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="+"
-                            android:textColor="#FFFFFF"
-                            android:textSize="14sp"
-                            android:layout_marginEnd="4dp" />
-
-                        <TextView
-                            android:id="@+id/btn_add_frame"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Novo Frame"
-                            android:textColor="#FFFFFF"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
-
-                    <!-- Ícone ordenar -->
-                    <TextView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:text="&#8645;"
-                        android:textColor="#5A5A7A"
-                        android:textSize="14sp"
-                        android:gravity="center"
-                        android:background="#181826"
-                        android:layout_marginEnd="4dp" />
-
-                    <!-- Ícone grid -->
-                    <TextView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:text="&#9783;"
-                        android:textColor="#C4B5FD"
-                        android:textSize="14sp"
-                        android:gravity="center"
-                        android:background="#2A1A4E"
-                        android:layout_marginEnd="4dp" />
-
-                    <!-- Menu ... -->
-                    <TextView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:text="&#8230;"
-                        android:textColor="#5A5A7A"
-                        android:textSize="16sp"
-                        android:gravity="center"
-                        android:background="#181826" />
-
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#1A1A2A" />
-
-                <!-- Área de canvas / estado vazio -->
-                <FrameLayout
-                    android:id="@+id/canvas_area"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1">
-
-                    <!-- View de desenho -->
-                    <com.yumeka.anime.engine.views.FrameCanvasView
-                        android:id="@+id/canvas_view"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
-
-                    <!-- Estado vazio — igual ao mockup -->
-                    <LinearLayout
-                        android:id="@+id/canvas_empty_state"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:paddingStart="32dp"
-                        android:paddingEnd="32dp">
-
-                        <!-- Ilustração sakura (círculo roxo + flor) -->
-                        <FrameLayout
-                            android:layout_width="160dp"
-                            android:layout_height="160dp"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginBottom="20dp">
-
-                            <!-- Halo externo -->
-                            <View
-                                android:layout_width="160dp"
-                                android:layout_height="160dp"
-                                android:background="@drawable/circle_halo_purple" />
-
-                            <!-- Flor grande centralizada -->
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:text="&#127800;"
-                                android:textSize="56sp" />
-
-                        </FrameLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Nenhum frame selecionado"
-                            android:textColor="#F0F0F5"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:gravity="center"
-                            android:layout_marginBottom="8dp" />
-
-                        <!-- Palavra "frame" em roxo -->
-                        <!-- Nota: combinamos no mesmo TextView com SpannableString no Kotlin -->
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Esta cena n&#227;o possui frames ainda. Crie seu primeiro frame para come&#231;ar a animar seu epis&#243;dio."
-                            android:textColor="#6A6A8A"
-                            android:textSize="11sp"
-                            android:gravity="center"
-                            android:layout_marginBottom="24dp" />
-
-                        <!-- Botão Criar Frame -->
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:orientation="horizontal"
-                            android:gravity="center"
-                            android:background="#7C3AED"
-                            android:paddingStart="20dp"
-                            android:paddingEnd="20dp"
-                            android:layout_gravity="center_horizontal">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="+ "
-                                android:textColor="#FFFFFF"
-                                android:textSize="13sp" />
-
-                            <TextView
-                                android:id="@+id/btn_add_frame_empty"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Criar Frame"
-                                android:textColor="#FFFFFF"
-                                android:textSize="13sp"
-                                android:textStyle="bold" />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                    <!-- Toolbar de pincel (rodapé, visível só com frame ativo) -->
-                    <LinearLayout
-                        android:id="@+id/brush_toolbar"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_gravity="bottom"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:background="#CC0F0F18"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:id="@+id/brush_btn_pencil"
-                            android:layout_width="38dp"
-                            android:layout_height="38dp"
-                            android:text="&#9998;"
-                            android:textColor="#9B6DFF"
-                            android:textSize="17sp"
-                            android:gravity="center"
-                            android:background="#22223A"
-                            android:layout_marginEnd="4dp" />
-
-                        <TextView
-                            android:id="@+id/brush_btn_eraser"
-                            android:layout_width="38dp"
-                            android:layout_height="38dp"
-                            android:text="&#9633;"
-                            android:textColor="#A0A0B8"
-                            android:textSize="17sp"
-                            android:gravity="center"
-                            android:background="#22222E"
-                            android:layout_marginEnd="4dp" />
-
-                        <TextView
-                            android:id="@+id/brush_btn_clear"
-                            android:layout_width="38dp"
-                            android:layout_height="38dp"
-                            android:text="&#128465;"
-                            android:textColor="#FF6B6B"
-                            android:textSize="15sp"
-                            android:gravity="center"
-                            android:background="#22222E"
-                            android:layout_marginEnd="10dp" />
-
-                        <View
-                            android:layout_width="0.5dp"
-                            android:layout_height="22dp"
-                            android:background="#3A3A5A"
-                            android:layout_marginEnd="10dp" />
-
-                        <TextView
-                            android:id="@+id/brush_size_small"
-                            android:layout_width="34dp"
-                            android:layout_height="34dp"
-                            android:text="&#9679;"
-                            android:textColor="#A0A0B8"
-                            android:textSize="7sp"
-                            android:gravity="center"
-                            android:background="#22222E"
-                            android:layout_marginEnd="4dp" />
-
-                        <TextView
-                            android:id="@+id/brush_size_medium"
-                            android:layout_width="34dp"
-                            android:layout_height="34dp"
-                            android:text="&#9679;"
-                            android:textColor="#9B6DFF"
-                            android:textSize="13sp"
-                            android:gravity="center"
-                            android:background="#22223A"
-                            android:layout_marginEnd="4dp" />
-
-                        <TextView
-                            android:id="@+id/brush_size_large"
-                            android:layout_width="34dp"
-                            android:layout_height="34dp"
-                            android:text="&#9679;"
-                            android:textColor="#A0A0B8"
-                            android:textSize="21sp"
-                            android:gravity="center"
-                            android:background="#22222E"
-                            android:layout_marginEnd="10dp" />
-
-                        <View
-                            android:layout_width="0.5dp"
-                            android:layout_height="22dp"
-                            android:background="#3A3A5A"
-                            android:layout_marginEnd="10dp" />
-
-                        <TextView
-                            android:id="@+id/brush_color_swatch"
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="#FF000000"
-                            android:text=""
-                            android:gravity="center"
-                            android:layout_marginEnd="8dp" />
-
-                        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
-
-                    </LinearLayout>
-
-                </FrameLayout>
-
-                <!-- Barra inferior de status da cena -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="36dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:background="#0B0B12"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp">
-
-                    <!-- Cena atual -->
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#127925;"
-                        android:textSize="9sp"
-                        android:gravity="center"
                         android:layout_marginEnd="4dp" />
 
                     <TextView
-                        android:id="@+id/statusbar_scene_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Cena 1"
-                        android:textColor="#9090B0"
-                        android:textSize="10sp"
-                        android:layout_marginEnd="20dp" />
-
-                    <!-- Separador -->
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="16dp"
-                        android:background="#2A2A3A"
-                        android:layout_marginEnd="20dp" />
-
-                    <!-- Frames -->
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#9203;"
-                        android:textSize="9sp"
-                        android:gravity="center"
-                        android:layout_marginEnd="4dp" />
+                        android:text="Normal"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="11sp" />
 
                     <TextView
-                        android:id="@+id/statusbar_frame_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0 Frames"
-                        android:textColor="#9090B0"
-                        android:textSize="10sp"
-                        android:layout_marginEnd="20dp" />
-
-                    <!-- Separador -->
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="16dp"
-                        android:background="#2A2A3A"
-                        android:layout_marginEnd="20dp" />
-
-                    <!-- Keyframes -->
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#128247;"
-                        android:textSize="9sp"
-                        android:gravity="center"
-                        android:layout_marginEnd="4dp" />
-
-                    <TextView
-                        android:id="@+id/statusbar_keyframe_count"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0 Keyframes"
-                        android:textColor="#9090B0"
-                        android:textSize="10sp"
-                        android:layout_marginEnd="20dp" />
-
-                    <!-- Spacer -->
-                    <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
-
-                    <!-- Separador -->
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="16dp"
-                        android:background="#2A2A3A"
-                        android:layout_marginEnd="12dp" />
-
-                    <!-- Duração -->
-                    <TextView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:text="&#9432;"
-                        android:textSize="9sp"
-                        android:gravity="center"
-                        android:textColor="#6A6A8A"
-                        android:layout_marginEnd="4dp" />
-
-                    <TextView
-                        android:id="@+id/statusbar_duration"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Dura&#231;&#227;o aprox.: 0s"
-                        android:textColor="#6A6A8A"
+                        android:text=" &#8964;"
+                        android:textColor="@color/text_muted"
                         android:textSize="10sp" />
 
                 </LinearLayout>
@@ -1368,259 +710,282 @@
 
         </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- ══════════════════════════════════════════════════════════
-         DRAWER ESQUERDO (quadros + keyframes) — flutua sobre tudo
-         ══════════════════════════════════════════════════════════ -->
-    <LinearLayout
-        android:id="@+id/panel_left"
-        android:layout_width="260dp"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="#F5151520"
-        android:elevation="8dp"
-        android:translationX="-260dp"
-        android:visibility="invisible">
-
+        <!-- ══════════════════════════════════════════════════
+             PAINEL DIREITO — Propriedades do Frame
+             ══════════════════════════════════════════════════ -->
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="#1A1A2E"
-            android:paddingStart="12dp"
-            android:paddingEnd="8dp">
-
-            <TextView
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                android:background="#9B6DFF" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Quadros"
-                android:textColor="#F0F0F5"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:layout_marginStart="8dp" />
-
-            <TextView
-                android:id="@+id/btn_close_left"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:text="&#10005;"
-                android:textColor="#606078"
-                android:textSize="14sp"
-                android:gravity="center" />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0.5dp"
-            android:background="#2A2A3A" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/list_frames"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingTop="4dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:id="@+id/btn_add_frame_panel"
-            android:text="+ Adicionar Quadro"
-            android:textColor="#9B6DFF"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:background="#1A1A2A" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#2A2A4A" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="#12121C"
-            android:paddingStart="12dp"
-            android:paddingEnd="4dp">
-
-            <TextView
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:background="#FF6B35" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Keyframes"
-                android:textColor="#C0C0D8"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:layout_marginStart="8dp" />
-
-            <TextView
-                android:id="@+id/btn_add_keyframe"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:text="+"
-                android:textColor="#FF6B35"
-                android:textSize="18sp"
-                android:gravity="center"
-                android:background="#1E1410" />
-
-        </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/list_keyframes"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingTop="2dp" />
-
-    </LinearLayout>
-
-    <!-- ══════════════════════════════════════════════════════════
-         DRAWER DIREITO (cenas + camadas)
-         ══════════════════════════════════════════════════════════ -->
-    <LinearLayout
-        android:id="@+id/panel_right"
-        android:layout_width="260dp"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="#F5151520"
-        android:elevation="8dp"
-        android:layout_gravity="end"
-        android:translationX="260dp"
-        android:visibility="invisible">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="#1A1A2E"
-            android:paddingStart="12dp"
-            android:paddingEnd="8dp">
-
-            <TextView
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:background="#4ADE80" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Cenas"
-                android:textColor="#F0F0F5"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:layout_marginStart="8dp" />
-
-            <TextView
-                android:id="@+id/btn_add_scene"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:text="+"
-                android:textColor="#4ADE80"
-                android:textSize="20sp"
-                android:gravity="center"
-                android:background="#1E2E1E"
-                android:layout_marginEnd="6dp" />
-
-            <TextView
-                android:id="@+id/btn_close_right"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:text="&#10005;"
-                android:textColor="#606078"
-                android:textSize="14sp"
-                android:gravity="center" />
-
-        </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/list_scenes"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0.5dp"
-            android:background="#2A2A3A" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="#1A1A2E"
-            android:paddingStart="12dp"
-            android:paddingEnd="8dp">
-
-            <TextView
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:background="#FBBF24" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Camadas"
-                android:textColor="#F0F0F5"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:layout_marginStart="8dp" />
-
-            <TextView
-                android:id="@+id/btn_layers_visibility"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:text="&#128065;"
-                android:textSize="14sp"
-                android:gravity="center"
-                android:textColor="#606078" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:id="@+id/panel_properties"
+            android:layout_width="260dp"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:paddingTop="2dp">
+            android:background="@color/surface_card"
+            android:elevation="3dp">
 
-            <include layout="@layout/item_layer_row" android:id="@+id/layer_personagem" />
-            <include layout="@layout/item_layer_row" android:id="@+id/layer_3d" />
-            <include layout="@layout/item_layer_row" android:id="@+id/layer_fundo" />
-            <include layout="@layout/item_layer_row" android:id="@+id/layer_desenho" />
-            <include layout="@layout/item_layer_row" android:id="@+id/layer_efeito" />
-            <include layout="@layout/item_layer_row" android:id="@+id/layer_texto" />
-            <include layout="@layout/item_layer_row" android:id="@+id/layer_audio" />
+            <!-- Cabeçalho do painel -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:background="@color/surface_card">
+
+                <TextView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:text="&#128444;"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_marginEnd="7dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Propriedades do Frame"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/surface_card_border" />
+
+            <!-- Preview do frame selecionado -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:background="@color/surface_card2">
+
+                <!-- Miniatura do frame (proporção 16:9) -->
+                <ImageView
+                    android:id="@+id/img_frame_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="130dp"
+                    android:scaleType="centerCrop"
+                    android:background="#0D1527" />
+
+                <!-- Badge no canto: número do frame -->
+                <TextView
+                    android:id="@+id/txt_frame_preview_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Frame 1"
+                    android:textColor="@color/text_primary"
+                    android:textSize="9sp"
+                    android:background="#99000000"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:layout_gravity="bottom|start"
+                    android:layout_margin="4dp" />
+
+            </FrameLayout>
+
+            <!-- Rodapé da miniatura: nome + duração + ··· -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:layout_marginTop="-12dp"
+                android:background="@color/surface_card2"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txt_frame_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Frame 1"
+                        android:textColor="@color/text_primary"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txt_frame_duration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Duração: 00:04"
+                        android:textColor="@color/text_muted"
+                        android:textSize="10sp" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:text="&#8942;"
+                    android:textColor="@color/text_muted"
+                    android:textSize="14sp"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/surface_card_border"
+                android:layout_marginTop="8dp" />
+
+            <!-- Seção: Animação -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:background="?attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:text="&#10024;"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Animação"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#8964;"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/surface_card_border" />
+
+            <!-- Seção: Camadas -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:background="?attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:text="&#128466;"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Camadas"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#8964;"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/surface_card_border" />
+
+            <!-- Seção: Keyframes (expandida) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:background="?attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:text="&#9671;"
+                    android:textColor="@color/accent_purple"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Keyframes"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <!-- Seta para cima (expandido) -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#8963;"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <!-- Botão + Adicionar Keyframe -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:background="@color/accent_purple"
+                android:layout_marginStart="14dp"
+                android:layout_marginEnd="14dp"
+                android:layout_marginTop="6dp">
+
+                <TextView
+                    android:id="@+id/btn_add_keyframe"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+ Adicionar Keyframe"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12.5sp"
+                    android:textStyle="bold"
+                    android:gravity="center" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <!-- OVERLAY ao abrir drawer -->
-    <View
-        android:id="@+id/drawer_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#88000000"
-        android:visibility="gone" />
-
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
