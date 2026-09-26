@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Um item de Frame na lista de frames do painel esquerdo do editor -->
+<!-- Item de Frame/Keyframe na lista do painel de propriedades -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
+    android:layout_height="56dp"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="8dp"
-    android:paddingEnd="6dp"
+    android:paddingStart="10dp"
+    android:paddingEnd="8dp"
     android:background="?android:attr/selectableItemBackground">
 
-    <!-- Thumbnail do frame -->
-    <View
-        android:id="@+id/frame_thumbnail"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="#22222E" />
+    <!-- Thumbnail quadrado do frame -->
+    <FrameLayout
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/frame_normal_border">
+
+        <ImageView
+            android:id="@+id/frame_thumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:background="#0D1527" />
+
+    </FrameLayout>
 
     <!-- Info: nome e tempo -->
     <LinearLayout
@@ -22,35 +30,39 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:layout_marginStart="8dp">
+        android:layout_marginStart="10dp">
 
         <TextView
             android:id="@+id/frame_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Frame 1"
-            android:textColor="#F0F0F5"
+            android:textColor="@color/text_primary"
             android:textSize="12sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end" />
 
         <TextView
             android:id="@+id/frame_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0:00 - 0:03"
-            android:textColor="#606078"
-            android:textSize="10sp" />
+            android:textColor="@color/text_muted"
+            android:textSize="10sp"
+            android:layout_marginTop="2dp" />
 
     </LinearLayout>
 
-    <!-- Menu do frame -->
+    <!-- Menu ··· -->
     <TextView
         android:id="@+id/frame_menu"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
         android:text="&#8942;"
-        android:textSize="14sp"
+        android:textSize="15sp"
         android:gravity="center"
-        android:textColor="#606078" />
+        android:textColor="@color/text_muted"
+        android:background="?android:attr/selectableItemBackgroundBorderless" />
 
 </LinearLayout>

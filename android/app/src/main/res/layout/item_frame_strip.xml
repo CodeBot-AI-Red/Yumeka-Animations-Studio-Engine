@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Thumbnail de frame no strip horizontal inferior do editor.
+  Mostra: thumbnail (ImageView), número do frame abaixo.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="62dp"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingTop="8dp"
+    android:paddingBottom="6dp"
+    android:paddingStart="3dp"
+    android:paddingEnd="3dp"
+    android:background="?android:attr/selectableItemBackground">
+
+    <!-- Thumbnail 16:9 do frame -->
+    <FrameLayout
+        android:layout_width="56dp"
+        android:layout_height="32dp"
+        android:background="@drawable/frame_normal_border">
+
+        <ImageView
+            android:id="@+id/img_frame_thumb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:background="#0D1527" />
+
+    </FrameLayout>
+
+    <!-- Número do frame -->
+    <TextView
+        android:id="@+id/txt_frame_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1"
+        android:textColor="@color/text_muted"
+        android:textSize="9sp"
+        android:gravity="center"
+        android:layout_marginTop="3dp" />
+
+</LinearLayout>

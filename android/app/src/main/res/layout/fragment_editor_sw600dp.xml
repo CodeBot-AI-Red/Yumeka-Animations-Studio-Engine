@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Editor Layout — variante para telas >= 600dp (tablets, desktops)
+  Painel direito fica sempre visível (sem drawer)
+  Reutiliza o mesmo fragment_editor.xml mas com panel_right sempre VISIBLE
+  e panel_left sempre expandido como coluna lateral.
+  Para simplificar, usamos um ConstraintLayout dedicado.
+-->
+<merge xmlns:android="http://schemas.android.com/apk/res/android" />
