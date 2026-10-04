@@ -116,8 +116,10 @@ object Presets {
         hair[n % hair.size], skin[n % skin.size], outfit[n % outfit.size], eyes[n % eyes.size], n % hairStyles.size
     )
 
-    fun newScene(p: StudioProject, name: String, frames: Int = 6): StudioScene {
+    /** Cena nova: em branco, 1 quadro vazio, fundo branco, sem personagens. */
+    fun newScene(p: StudioProject, name: String, frames: Int = 1): StudioScene {
         val s = StudioScene(p.newId(), name)
+        s.background = 0
         s.layers.add(LayerInfo(p.newId(), "Fundo", aboveCharacters = false))
         s.layers.add(LayerInfo(p.newId(), "Cor"))
         s.layers.add(LayerInfo(p.newId(), "Linha"))
@@ -125,16 +127,14 @@ object Presets {
         return s
     }
 
+    /** Projeto novo: totalmente em branco — o usuario cria tudo. */
     fun newProject(name: String): StudioProject {
         val p = StudioProject(name)
-        val s = newScene(p, "Cena 1")
-        val c = character(p, 0)
-        c.keys[s.frames[0].id] = Pose()
-        c.keys[s.frames[2].id] = Pose(armR = -150f, head = 8f, expression = 1, mouth = 0.6f)
-        c.keys[s.frames[4].id] = Pose(armR = -120f, head = -6f, expression = 1, mouth = 0.2f)
-        c.keys[s.frames[5].id] = Pose()
-        s.characters.add(c)
-        p.scenes.add(s)
+        p.scenes.add(newScene(p, "Cena 1"))
         return p
     }
+
+    /** Personagem novo criado pelo usuario, com aparencia neutra para ele personalizar. */
+    fun blankCharacter(p: StudioProject, name: String): StudioCharacter =
+        StudioCharacter(p.newId(), name, hair[0], skin[0], outfit[3], eyes[2], 0)
 }

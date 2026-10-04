@@ -524,9 +524,11 @@ class StudioFragment : Fragment() {
         }.toMutableList<View>()
         chips.add(ctx.pill("+ Novo personagem", accent = SC.PURPLE) {
             val n = scene.characters.size
-            val ch = Presets.character(project, n + 1)
-            ch.keys[frame.id] = Pose(x = (0.25f + 0.25f * (n % 3)).coerceAtMost(.85f), flip = n % 2 == 1)
-            scene.characters.add(ch); selectedChar = ch.id; thumbs.clear(); changed()
+            prompt("Nome do personagem", "") { nm ->
+                val ch = Presets.blankCharacter(project, nm)
+                ch.keys[frame.id] = Pose(x = (0.25f + 0.25f * (n % 3)).coerceAtMost(.85f))
+                scene.characters.add(ch); selectedChar = ch.id; thumbs.clear(); changed()
+            }
         })
         c.addView(ctx.flow(*chips.toTypedArray()))
         val ch = scene.characters.firstOrNull { it.id == selectedChar }
@@ -627,9 +629,10 @@ class StudioFragment : Fragment() {
             ctx.pill("🎬 ${s.name}", i == sceneIdx) { stopPlayback(); sceneIdx = i; frameIdx = 0; activeLayerId = scene.layers.last().id; selectedChar = scene.characters.firstOrNull()?.id ?: -1; thumbs.clear(); undo.clear(); redo.clear(); changed() }
         }.toMutableList<View>()
         chips.add(ctx.pill("+ Nova cena", accent = SC.PURPLE) {
-            val s = Presets.newScene(project, "Cena ${project.scenes.size + 1}")
-            s.background = scene.background
-            project.scenes.add(s); sceneIdx = project.scenes.size - 1; frameIdx = 0; activeLayerId = s.layers.last().id; selectedChar = -1; thumbs.clear(); changed()
+            prompt("Nome da cena", "Cena ${project.scenes.size + 1}") { nm ->
+                val s = Presets.newScene(project, nm)
+                project.scenes.add(s); sceneIdx = project.scenes.size - 1; frameIdx = 0; activeLayerId = s.layers.last().id; selectedChar = -1; thumbs.clear(); changed()
+            }
         })
         c.addView(ctx.flow(*chips.toTypedArray()))
         c.addView(ctx.flow(
