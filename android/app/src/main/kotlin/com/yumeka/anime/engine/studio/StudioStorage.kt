@@ -11,7 +11,7 @@ import java.util.concurrent.Executors
 /**
  * Persistencia do Studio: Studio/project.json + imagens PNG em Studio/art
  */
-class StudioStorage(projectDir: File) {
+class StudioStorage(private val projectDir: File) {
     val root = File(projectDir, "Studio")
     private val artDir = File(root, "art")
     val exportDir = File(projectDir, "Exportados")
@@ -26,7 +26,7 @@ class StudioStorage(projectDir: File) {
 
     fun load(defaultName: String): StudioProject {
         try {
-            if (meta.exists()) return parse(JSONObject(meta.readText()))
+            if (meta.exists()) return parse(JSONObject(meta.readText())).also { saveMeta(it) }
         } catch (_: Exception) {}
         val p = Presets.newProject(defaultName)
         saveMeta(p)
@@ -123,7 +123,12 @@ class StudioStorage(projectDir: File) {
         }
         o.put("scenes", sa)
         val text = o.toString()
-        io.execute { try { root.mkdirs(); meta.writeText(text) } catch (_: Exception) {} }
+        val snap = snapshot(p)
+        lastSnap = snap
+        io.execute {
+            try { root.mkdirs(); meta.writeText(text) } catch (_: Exception) {}
+            syncTree(snap)
+        }
     }
 
     fun saveArt(frameId: Int, layerId: Int, bmp: Bitmap?) {
@@ -134,10 +139,91 @@ class StudioStorage(projectDir: File) {
                 if (copy == null) f.delete()
                 else FileOutputStream(f).use { copy.compress(Bitmap.CompressFormat.PNG, 100, it) }
             } catch (_: Exception) {}
+            lastSnap?.let { syncTree(it) }
         }
     }
 
     fun deleteFrame(frame: StudioFrame, scene: StudioScene) {
         scene.layers.forEach { l -> io.execute { artFile(frame.id, l.id).delete() } }
+    }
+
+    // ── Espelho em tempo real na estrutura oficial de pastas do projeto ──────
+    // Temporadas/Temporada 1/Episodios/EP-1/Cenas/<Cena>/Quadros/Quadro N/Keyframes/<Camada>.png
+    // Assets/Characters/<Personagem>.json
+
+    private class SnapScene(val name: String, val frames: List<Pair<Int, Int>>, val layers: List<Pair<Int, String>>)
+    private class SnapChar(val name: String, val json: String)
+    private class Snap(val name: String, val fps: Int, val scenes: List<SnapScene>, val chars: List<SnapChar>)
+
+    @Volatile private var lastSnap: Snap? = null
+
+    private fun snapshot(p: StudioProject) = Snap(
+        p.name, p.fps,
+        p.scenes.map { sc -> SnapScene(sc.name, sc.frames.map { it.id to it.hold }, sc.layers.map { it.id to it.name }) },
+        p.scenes.flatMap { it.characters }.distinctBy { it.name }.map { c ->
+            SnapChar(c.name, JSONObject().put("name", c.name).put("hair", c.hairColor).put("skin", c.skin)
+                .put("outfit", c.outfit).put("eyes", c.eyeColor).put("style", c.hairStyle).toString(2))
+        }
+    )
+
+    private fun safe(n: String): String =
+        n.replace(Regex("[\\\\/:*?\"<>|]"), "_").trim().trimEnd('.').ifEmpty { "Sem nome" }
+
+    private fun uniqueNames(names: List<String>): List<String> {
+        val used = mutableMapOf<String, Int>()
+        return names.map { raw ->
+            val b = safe(raw); val k = b.lowercase(); val c = used.getOrDefault(k, 0); used[k] = c + 1
+            if (c == 0) b else "$b ($c)"
+        }
+    }
+
+    private fun prune(dir: File, keep: Set<String>) {
+        dir.listFiles()?.forEach { if (it.name !in keep) it.deleteRecursively() }
+    }
+
+    private fun syncTree(snap: Snap) {
+        try {
+            val ep = File(projectDir, "Temporadas/Temporada 1/Episodios/EP-1")
+            val cenas = File(ep, "Cenas").apply { mkdirs() }
+            val sceneNames = uniqueNames(snap.scenes.map { it.name })
+            snap.scenes.forEachIndexed { si, sc ->
+                val sDir = File(cenas, sceneNames[si])
+                val quadros = File(sDir, "Quadros").apply { mkdirs() }
+                val qNames = mutableSetOf<String>()
+                val layerNames = uniqueNames(sc.layers.map { it.second })
+                sc.frames.forEachIndexed { fi, (fid, hold) ->
+                    val qn = "Quadro ${fi + 1}"; qNames += qn
+                    val kf = File(quadros, "$qn/Keyframes").apply { mkdirs() }
+                    val keep = mutableSetOf<String>()
+                    sc.layers.forEachIndexed { li, (lid, _) ->
+                        val src = artFile(fid, lid)
+                        val dst = File(kf, "${layerNames[li]}.png")
+                        if (src.exists()) {
+                            keep += dst.name
+                            if (!dst.exists() || dst.length() != src.length() || dst.lastModified() < src.lastModified()) src.copyTo(dst, true)
+                        }
+                    }
+                    prune(kf, keep)
+                    File(quadros, "$qn/quadro.json").writeText(JSONObject().put("ordem", fi + 1).put("duracao", hold).toString())
+                }
+                prune(quadros, qNames)
+            }
+            prune(cenas, sceneNames.toSet())
+
+            val chDir = File(projectDir, "Assets/Characters").apply { mkdirs() }
+            val chNames = uniqueNames(snap.chars.map { it.name })
+            val keepCh = mutableSetOf<String>()
+            snap.chars.forEachIndexed { i, c ->
+                val f = File(chDir, "${chNames[i]}.json"); keepCh += f.name
+                if (!f.exists() || f.readText() != c.json) f.writeText(c.json)
+            }
+            chDir.listFiles()?.forEach { if (it.isFile && it.name.endsWith(".json") && it.name !in keepCh) it.delete() }
+
+            val cfg = File(projectDir, "yase.project")
+            val lines = (if (cfg.exists()) cfg.readLines() else listOf("# YASE Project Configuration"))
+                .filterNot { it.startsWith("scenes=") || it.startsWith("fps=") || it.startsWith("updated_at=") }
+            val now = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US).format(java.util.Date())
+            cfg.writeText((lines + listOf("fps=${snap.fps}", "scenes=${snap.scenes.size}", "updated_at=$now")).joinToString("\n"))
+        } catch (_: Exception) {}
     }
 }
