@@ -18,3 +18,8 @@ Thumbs.db
 
 # Gradle cache
 gradle/wrapper/gradle-wrapper.jar
+
+# Motores nativos de IA (codigo baixado e compilado em CI)
+android/native-ai/third_party/
+android/native-ai/build/
+android/app/src/main/jniLibs/

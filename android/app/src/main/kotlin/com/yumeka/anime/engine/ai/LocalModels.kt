@@ -89,7 +89,9 @@ data class CompatReport(
     val freeStorageBytes: Long,
     val storageOk: Boolean,
     val runtimeAvailable: Boolean,
-    val installed: Boolean
+    val installed: Boolean,
+    /** true somente apos uma execucao real bem-sucedida do motor neste aparelho. */
+    val runtimeValidated: Boolean = false
 ) {
     val canInstall get() = isAndroid && is64Bit && sdkOk && ramOk && (storageOk || installed)
     val canRun get() = canInstall && runtimeAvailable && installed
@@ -100,7 +102,10 @@ data class CompatReport(
         sdkOk to "Android 8.0 ou superior (atual: API ${Build.VERSION.SDK_INT})",
         ramOk to "Memoria: ${totalRamMb} MB no total, ${availRamMb} MB livres (minimo ${spec.minRamMb} MB)",
         (storageOk || installed) to "Armazenamento livre: ${fmtBytes(freeStorageBytes)} (necessario ${fmtBytes(spec.totalBytes + SAFETY_MARGIN)})",
-        runtimeAvailable to "Motor local ${spec.runtime} incluido no app"
+        runtimeAvailable to "Motor local ${spec.runtime} incluido no app",
+        runtimeValidated to (if (runtimeValidated) "Execucao real ja validada neste aparelho"
+            else "Execucao real ainda NAO validada neste aparelho (sera confirmada na primeira geracao/analise)"),
+        true to "Aceleracao: CPU ARM64 (NEON/dotprod). GPU/NPU nao utilizadas nesta versao"
     )
 
     companion object { const val SAFETY_MARGIN = 800L * 1024 * 1024 }
@@ -154,7 +159,8 @@ class ModelManager(private val ctx: Context) {
             freeStorageBytes = free,
             storageOk = free >= remaining + CompatReport.SAFETY_MARGIN,
             runtimeAvailable = runtimeAvailable,
-            installed = isInstalled(spec)
+            installed = isInstalled(spec),
+            runtimeValidated = runtimeAvailable && RuntimeValidation.isValidated(ctx, spec.id)
         )
     }
 
@@ -214,7 +220,9 @@ class ModelManager(private val ctx: Context) {
 
     fun cancel() { activeCall?.cancel(); activeCall = null }
 
-    fun delete(spec: ModelSpec) { cancel(); dir(spec).deleteRecursively() }
+    fun delete(spec: ModelSpec) { cancel(); dir(spec).deleteRecursively(); RuntimeValidation.clear(ctx, spec.id) }
+
+    fun markRuntimeOk(spec: ModelSpec) = RuntimeValidation.markOk(ctx, spec.id)
 
     companion object {
         fun isCancel(t: Throwable) = t is CancellationException || (t is java.io.IOException && t.message?.contains("Canceled", true) == true)

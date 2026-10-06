@@ -120,9 +120,17 @@ class AiFrameFragment : Fragment() {
     override fun onResume() { super.onResume(); activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_USER }
 
     /** Libera a memoria dos modelos ao sair do painel. */
+    private fun errorTitle(t: Throwable, fallback: String) = when (t) {
+        is LocalAiUnavailable -> "Recurso nao compativel"
+        is NativeAiException -> t.kind.title
+        is OutOfMemoryError -> "Memoria insuficiente"
+        else -> fallback
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         dlJobs.values.forEach { it.cancel() }; mm.cancel()
+        AiSession.cancelAll() // interrompe a tarefa nativa para o lock ser liberado logo
         Thread { AiSession.releaseAll() }.start()
     }
 
@@ -184,12 +192,11 @@ class AiFrameFragment : Fragment() {
             ctx.pill(fixedSeed?.let { "Seed: $it" } ?: "Seed: aleatorio", false) {
                 askNumber("Seed (vazio = aleatorio)", fixedSeed?.toString() ?: "", allowEmpty = true) { v -> fixedSeed = if (v < 0) null else v.toLong(); build() }
             },
-            ctx.pill("Precisao: FP16 quando disponivel", false) {},
-            ctx.pill("Execucao: GPU (Vulkan) quando disponivel", false) {},
+            ctx.pill("Execucao: CPU ARM64 (pesos quantizados GGUF)", false) {},
             ctx.pill("1 geracao por vez · 1 modelo carregado", false) {}
         ))
 
-        val gen = ctx.pill(if (busy) "Gerando..." else "Gerar", true) { generate(null) }.apply {
+        val gen = ctx.pill(if (busy) "Cancelar" else "Gerar", true) { if (busy) { AiSession.cancelAll(); toast("Cancelando...") } else generate(null) }.apply {
             textSize = 17f; gravity = Gravity.CENTER
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ctx.dp(56)).apply { topMargin = ctx.dp(16) }
         }
@@ -319,7 +326,7 @@ class AiFrameFragment : Fragment() {
         val prompt = override?.prompt ?: promptEt.text.toString().trim()
         if (prompt.isEmpty()) return toast("Escreva um prompt")
         val spec = Models.DREAMSHAPER
-        if (!NativeDiffusion.available) return showError("Recurso nao compativel", UNSUPPORTED_MESSAGE +
+        if (!NativeDiffusion.available) return showError("Recurso nao compativel", unavailableMessage(NativeDiffusion.loadError) +
             if (CloudGeneration.enabled) "" else "\n\nA geracao em nuvem nao esta configurada neste app.")
         if (!mm.isInstalled(spec)) return showCompat(spec, install = true)
         val rep = mm.check(spec, true)
@@ -350,7 +357,8 @@ class AiFrameFragment : Fragment() {
                 setProgress(100, "Concluido")
             } catch (t: Throwable) {
                 setProgress(0, "")
-                showError(if (t is LocalAiUnavailable) "Recurso nao compativel" else "Falha na geracao", t.message ?: "Erro desconhecido")
+                if (t is NativeAiException && t.kind == NativeAiException.Kind.CANCELLED) toast("Geracao cancelada")
+                else showError(errorTitle(t, "Falha na geracao"), t.message ?: "Erro desconhecido")
             } finally {
                 busy = false
                 states[spec.id] = if (mm.isInstalled(spec)) ModelState.INSTALLED else ModelState.NOT_INSTALLED
@@ -426,9 +434,9 @@ class AiFrameFragment : Fragment() {
     private fun analyze(item: Item) {
         if (busy) return toast("Aguarde a tarefa atual terminar")
         val spec = Models.MOONDREAM2
-        if (!NativeVision.available) return showError("Recurso nao compativel", UNSUPPORTED_MESSAGE)
+        if (!NativeVision.available) return showError("Recurso nao compativel", unavailableMessage(NativeVision.loadError))
         if (!mm.isInstalled(spec)) return showCompat(spec, install = true)
-        busy = true
+        busy = true; build()
         progressBar.visibility = View.VISIBLE
         lifecycleScope.launch {
             try {
@@ -456,7 +464,8 @@ class AiFrameFragment : Fragment() {
                 refreshGallery()
             } catch (t: Throwable) {
                 setProgress(0, "")
-                showError(if (t is LocalAiUnavailable) "Recurso nao compativel" else "Falha na analise", t.message ?: "Erro desconhecido")
+                if (t is NativeAiException && t.kind == NativeAiException.Kind.CANCELLED) toast("Analise cancelada")
+                else showError(errorTitle(t, "Falha na analise"), t.message ?: "Erro desconhecido")
             } finally {
                 busy = false
                 states[spec.id] = if (mm.isInstalled(spec)) ModelState.INSTALLED else ModelState.NOT_INSTALLED

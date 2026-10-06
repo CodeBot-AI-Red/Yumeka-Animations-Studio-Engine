@@ -13,6 +13,14 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
+        // Motores de IA nativos sao compilados apenas para ARM64 (android/native-ai).
+        ndk { abiFilters += listOf("arm64-v8a") }
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    packaging {
+        // Necessario para mmap dos modelos e para alinhamento de 16 KB das .so.
+        jniLibs { useLegacyPackaging = false }
     }
 
     buildTypes {
@@ -67,4 +75,9 @@ dependencies {
 
     // OkHttp
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // Testes
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test:runner:1.5.2")
 }
