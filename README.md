@@ -18,6 +18,19 @@ Editor totalmente novo, adaptavel a celular (retrato e paisagem) e tablet:
 
 Codigo em `android/app/src/main/kotlin/com/yumeka/anime/engine/studio/`.
 
+## Editor de episodios
+
+Botao **🎬 Editar episódio** no topo do estudio: pre-visualizacao, linha do tempo multi-faixa (arrastar, mover,
+redimensionar, cortar, duplicar, excluir), falas (voz sintetizada ou arquivo), audio, musica, efeitos sonoros,
+efeitos visuais, imagens, videos, texto, introducao/desfecho, reorganizar cenas, desfazer/refazer, salvamento
+automatico local e exportacao (PNG 12 fps ou pacote .zip). Codigo em `.../engine/episode/`.
+
+## Quadros com IA (no aparelho)
+
+Botao **✨ Gerar quadro com IA**: DreamShaper XL v2 Turbo (GGUF) para gerar e Moondream2 para analisar,
+baixados somente quando o usuario pede. Os motores nativos ainda precisam ser integrados — veja
+`android/app/src/main/cpp/ai/README.md`. Codigo em `.../engine/ai/`.
+
 ---
 
 > Build por Yumeka Studio | Powered by Yumeka Animations Engine

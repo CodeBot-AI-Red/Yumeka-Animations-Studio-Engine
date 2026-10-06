@@ -73,4 +73,24 @@ class MainActivity : AppCompatActivity() {
             .setReorderingAllowed(true)
             .commitAllowingStateLoss()
     }
+
+    /** Abre o editor visual de episodios (linha do tempo, audio, video, IA). */
+    fun openEpisodeEditor(projectName: String, projectPath: String) {
+        if (isFinishing || isDestroyed) return
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, com.yumeka.anime.engine.episode.EpisodeEditorFragment.newInstance(projectName, projectPath), "EPISODE")
+            .addToBackStack("episode")
+            .setReorderingAllowed(true)
+            .commitAllowingStateLoss()
+    }
+
+    /** Abre o painel de geracao de quadros com IA local. */
+    fun openAiFrame(projectName: String, projectPath: String) {
+        if (isFinishing || isDestroyed) return
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, com.yumeka.anime.engine.ai.AiFrameFragment.newInstance(projectName, projectPath, standalone = true), "AI_FRAME")
+            .addToBackStack("ai_frame")
+            .setReorderingAllowed(true)
+            .commitAllowingStateLoss()
+    }
 }

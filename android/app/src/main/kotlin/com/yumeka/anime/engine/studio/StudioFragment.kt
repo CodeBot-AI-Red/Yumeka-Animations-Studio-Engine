@@ -223,6 +223,19 @@ class StudioFragment : Fragment() {
             }
             bar.addView(View(ctx), LinearLayout.LayoutParams(ctx.dp(8), 1))
         }
+        bar.addView(ctx.pill("🎬 Editar episódio", true, SC.PINK) {
+            storage.saveMeta(project)
+            (activity as? com.yumeka.anime.engine.MainActivity)?.openEpisodeEditor(project.name, arguments?.getString(ARG_PATH).orEmpty())
+        }.apply {
+            textSize = 15f
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ctx.dp(44)).apply { rightMargin = ctx.dp(4) }
+        })
+        bar.addView(ctx.pill("✨ Gerar quadro com IA", false, SC.PURPLE) {
+            storage.saveMeta(project)
+            (activity as? com.yumeka.anime.engine.MainActivity)?.openAiFrame(project.name, arguments?.getString(ARG_PATH).orEmpty())
+        }.apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ctx.dp(44)).apply { rightMargin = ctx.dp(4) }
+        })
         bar.addView(ctx.toolButton("↶", null, false, 40) { doUndo() })
         bar.addView(ctx.toolButton("↷", null, false, 40) { doRedo() })
         playBtn = ctx.toolButton(if (playing) "⏸" else "▶", null, playing, 40) { togglePlay() }.getChildAt(0) as TextView
