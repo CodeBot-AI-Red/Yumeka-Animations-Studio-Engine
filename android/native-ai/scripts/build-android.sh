@@ -2,7 +2,7 @@
 # Compila libyumeka_sd.so e libyumeka_vlm.so para Android arm64-v8a com o NDK
 # e copia para android/app/src/main/jniLibs (empacotadas automaticamente no APK).
 #
-# Requer: ANDROID_NDK (ou ANDROID_NDK_HOME / ANDROID_NDK_ROOT), cmake >= 3.22, ninja.
+# Requer: ANDROID_NDK (ou ANDROID_NDK_HOME / ANDROID_NDK_ROOT), cmake >= 3.22 (ninja opcional).
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 source "$HERE/versions.env"
@@ -16,7 +16,8 @@ mkdir -p "$OUT"
 
 build() { # pasta alvo
   local b="$HERE/build/$1-$ANDROID_ABI"
-  cmake -S "$HERE/$1" -B "$b" -G Ninja \
+  local gen="Unix Makefiles"; command -v ninja >/dev/null && gen=Ninja
+  cmake -S "$HERE/$1" -B "$b" -G "$gen" \
     -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
     -DANDROID_ABI="$ANDROID_ABI" \
     -DANDROID_PLATFORM="android-$ANDROID_NATIVE_API" \
@@ -36,7 +37,7 @@ echo "=== Bibliotecas geradas ==="
 ls -la "$OUT"
 for so in "$OUT"/*.so; do
   echo "--- $so"
-  file "$so" || true
+  command -v file >/dev/null && file "$so" || true
   echo "Simbolos JNI exportados:"
   "$NDK"/toolchains/llvm/prebuilt/*/bin/llvm-nm -D --defined-only "$so" | grep ' T Java_' || { echo "ERRO: nenhum simbolo JNI em $so" >&2; exit 1; }
 done

@@ -81,3 +81,14 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test:runner:1.5.2")
 }
+
+// Compila stable-diffusion.cpp e llama.cpp (codigo-fonte oficial, versoes em android/native-ai/versions.env)
+// para arm64-v8a antes do build. Use -PskipNativeAi=true apenas para builds sem IA local.
+val buildNativeAi = tasks.register<Exec>("buildNativeAi") {
+    group = "build"
+    description = "Compila libyumeka_sd.so e libyumeka_vlm.so a partir do codigo-fonte oficial"
+    workingDir = rootProject.projectDir
+    commandLine("bash", "android/native-ai/scripts/gradle-native.sh")
+    onlyIf { !project.hasProperty("skipNativeAi") }
+}
+tasks.named("preBuild") { dependsOn(buildNativeAi) }
