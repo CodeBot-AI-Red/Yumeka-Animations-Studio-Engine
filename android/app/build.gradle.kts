@@ -3,6 +3,9 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+// Numero de versao cresce a cada build no GitHub Actions, para o Android sempre aceitar a atualizacao.
+val ciBuildNumber = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+
 android {
     namespace = "com.yumeka.anime.engine"
     compileSdk = 34
@@ -11,11 +14,23 @@ android {
         applicationId = "com.yumeka.anime.engine"
         minSdk = 21
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = ciBuildNumber
+        versionName = "1.0.$ciBuildNumber"
         // Motores de IA nativos sao compilados apenas para ARM64 (android/native-ai).
         ndk { abiFilters += listOf("arm64-v8a") }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // Chave de assinatura FIXA, versionada no repositorio. Sem ela, cada build do
+    // GitHub Actions gera uma chave aleatoria e o Android recusa a atualizacao
+    // ("o pacote tem um conflito com um pacote ja existente").
+    signingConfigs {
+        create("yumeka") {
+            storeFile = file("yumeka-debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     packaging {
@@ -26,6 +41,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            signingConfig = signingConfigs.getByName("yumeka")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -34,6 +50,7 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
+            signingConfig = signingConfigs.getByName("yumeka")
         }
     }
 
