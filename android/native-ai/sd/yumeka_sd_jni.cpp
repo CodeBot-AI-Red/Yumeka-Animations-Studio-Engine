@@ -170,8 +170,9 @@ Java_com_yumeka_anime_engine_ai_NativeDiffusion_nativeGenerate(JNIEnv* env, jcla
         g.height = height;
         g.seed = seed;
         g.batch_count = 1;
-        g.sample_params.sample_method = EULER_SAMPLE_METHOD;
-        g.sample_params.scheduler = sd_get_default_scheduler(h->ctx, EULER_SAMPLE_METHOD);
+        // DreamShaper XL Turbo: DPM++ SDE + Karras (recomendado pelo autor do modelo)
+        g.sample_params.sample_method = DPMPP2M_SDE_SAMPLE_METHOD;
+        g.sample_params.scheduler = KARRAS_SCHEDULER;
         g.sample_params.sample_steps = steps;
         g.sample_params.guidance.txt_cfg = guidance;
         g.vae_tiling_params.enabled = true; // decodificacao em blocos: menos pico de RAM
