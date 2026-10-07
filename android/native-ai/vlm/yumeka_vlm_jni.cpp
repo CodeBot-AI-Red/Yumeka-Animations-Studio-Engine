@@ -102,7 +102,6 @@ Java_com_yumeka_anime_engine_ai_NativeVision_nativeLoad(JNIEnv* env, jclass, jst
     try {
         llama_model_params mp = llama_model_default_params();
         mp.n_gpu_layers = 0; // CPU (nenhum backend de GPU compilado)
-        mp.use_mmap = true;
         h->model = llama_model_load_from_file(textPath.c_str(), mp);
         if (!h->model) {
             std::string why = takeLastError();
