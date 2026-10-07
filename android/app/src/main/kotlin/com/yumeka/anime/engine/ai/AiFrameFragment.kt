@@ -59,9 +59,9 @@ class AiFrameFragment : Fragment() {
         }
         val STYLES = listOf("Nenhum", "anime", "manga", "cel shading", "aquarela", "ghibli-like soft", "cinematic", "pixel art", "3D render")
         val RATIOS = listOf("1:1" to (1 to 1), "16:9" to (16 to 9), "9:16" to (9 to 16), "4:3" to (4 to 3), "3:4" to (3 to 4))
-        val RESOLUTIONS = listOf(256, 320, 384, 512, 768, 1024)
-        const val SAFE_MAX_RES = 384
-        const val SAFE_MAX_STEPS = 4
+        val RESOLUTIONS = listOf(512, 640, 768, 1024)
+        const val SAFE_MAX_RES = 768
+        const val SAFE_MAX_STEPS = 6
     }
 
     private class Item(val file: File, var meta: FrameMeta, var thumb: Bitmap)
@@ -79,10 +79,10 @@ class AiFrameFragment : Fragment() {
 
     private var style = "anime"
     private var ratio = 0
-    private var resolution = 256
+    private var resolution = 512
     private var count = 1
-    private var steps = 2
-    private var guidance = 1f
+    private var steps = 4
+    private var guidance = 2f
     private var fixedSeed: Long? = null
     private var advancedAccepted = false
 
@@ -213,14 +213,14 @@ class AiFrameFragment : Fragment() {
 
     private fun size(): Pair<Int, Int> {
         val (rx, ry) = RATIOS[ratio].second
-        fun r64(v: Int) = ((v + 32) / 64 * 64).coerceAtLeast(128)
+        fun r64(v: Int) = ((v + 32) / 64 * 64).coerceAtLeast(384)
         return if (rx >= ry) resolution to r64(resolution * ry / rx) else r64(resolution * rx / ry) to resolution
     }
 
     private fun guarded(risky: Boolean, msg: String, apply: () -> Unit) {
         if (!risky || advancedAccepted) return apply()
         AlertDialog.Builder(requireContext()).setTitle("Configuracao avancada")
-            .setMessage("$msg\n\nValores seguros para Moto Edge 30 Neo: 256x256 (max. 384), 2 steps, 1 imagem.")
+            .setMessage("$msg\n\nValores seguros para Moto Edge 30 Neo: 512x512 (max. 768), 4 steps, guidance 2, 1 imagem. O DreamShaper XL e um modelo SDXL: abaixo de 512 px ele so produz borroes.")
             .setPositiveButton("Entendi, permitir") { _, _ -> advancedAccepted = true; apply() }
             .setNegativeButton("Manter seguro", null).show()
     }
