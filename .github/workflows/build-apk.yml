@@ -90,18 +90,38 @@ jobs:
       - name: Listar APKs gerados
         run: find . -name "*.apk" 2>/dev/null || echo "Nenhum APK encontrado"
 
+      - name: Renomear APK Debug para yase
+        if: success() && (github.event_name != 'workflow_dispatch' || github.event.inputs.release_type == 'debug')
+        run: |
+          mkdir -p android/app/build/outputs/apk/debug/renamed
+          for apk in android/app/build/outputs/apk/debug/*.apk; do
+            if [ -f "$apk" ]; then
+              cp "$apk" "android/app/build/outputs/apk/debug/renamed/yase.apk"
+            fi
+          done
+
+      - name: Renomear APK Release para yase
+        if: success() && github.event.inputs.release_type == 'release'
+        run: |
+          mkdir -p android/app/build/outputs/apk/release/renamed
+          for apk in android/app/build/outputs/apk/release/*.apk; do
+            if [ -f "$apk" ]; then
+              cp "$apk" "android/app/build/outputs/apk/release/renamed/yase.apk"
+            fi
+          done
+
       - name: Upload APK Debug
         if: success() && (github.event_name != 'workflow_dispatch' || github.event.inputs.release_type == 'debug')
         uses: actions/upload-artifact@v4
         with:
-          name: yumeka-animations-debug-${{ github.sha }}
-          path: android/app/build/outputs/apk/debug/*.apk
+          name: yase-debug-${{ github.sha }}
+          path: android/app/build/outputs/apk/debug/renamed/yase.apk
           retention-days: 30
 
       - name: Upload APK Release
         if: success() && github.event.inputs.release_type == 'release'
         uses: actions/upload-artifact@v4
         with:
-          name: yumeka-animations-release-${{ github.sha }}
-          path: android/app/build/outputs/apk/release/*.apk
+          name: yase-release-${{ github.sha }}
+          path: android/app/build/outputs/apk/release/renamed/yase.apk
           retention-days: 90
