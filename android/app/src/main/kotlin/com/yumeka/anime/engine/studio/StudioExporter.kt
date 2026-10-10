@@ -37,7 +37,7 @@ object StudioExporter {
 
     fun exportGif(p: StudioProject, dir: File, progress: (Float) -> Unit): File {
         val file = File(dir, "${safe(p.name)}_${System.currentTimeMillis() / 1000}.gif")
-        val w = 480; val h = 480
+        val w = 480; val h = 270
         val seq = sequence(p)
         BufferedOutputStream(FileOutputStream(file)).use { os ->
             val gif = GifWriter(os, w, h)

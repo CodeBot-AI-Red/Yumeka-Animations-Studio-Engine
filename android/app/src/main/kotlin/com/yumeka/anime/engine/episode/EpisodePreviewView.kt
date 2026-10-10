@@ -16,7 +16,7 @@ import kotlin.math.min
 import kotlin.math.sin
 
 /**
- * Pre-visualizacao quadrada do episodio no tempo [timeMs].
+ * Pre-visualizacao 16:9 do episodio no tempo [timeMs].
  * Tambem usada pela exportacao para renderizar quadros (drawAt).
  */
 class EpisodePreviewView(context: Context) : View(context) {
@@ -31,9 +31,9 @@ class EpisodePreviewView(context: Context) : View(context) {
     override fun onMeasure(w: Int, h: Int) {
         val width = MeasureSpec.getSize(w)
         val maxH = MeasureSpec.getSize(h)
-        var height = width
+        var height = width * 9 / 16
         var finalW = width
-        if (MeasureSpec.getMode(h) != MeasureSpec.UNSPECIFIED && height > maxH) { height = maxH; finalW = height }
+        if (MeasureSpec.getMode(h) != MeasureSpec.UNSPECIFIED && height > maxH) { height = maxH; finalW = height * 16 / 9 }
         setMeasuredDimension(finalW, height)
     }
 

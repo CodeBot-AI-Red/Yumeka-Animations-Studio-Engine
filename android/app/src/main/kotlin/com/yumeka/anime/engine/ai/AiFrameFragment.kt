@@ -78,7 +78,7 @@ class AiFrameFragment : Fragment() {
     private lateinit var modelsBox: LinearLayout
 
     private var style = "anime"
-    private var ratio = 0
+    private var ratio = 1
     private var resolution = 1024
     private var count = 1
     private var steps = 4
@@ -117,7 +117,7 @@ class AiFrameFragment : Fragment() {
         return root
     }
 
-    override fun onResume() { super.onResume(); activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT }
+    override fun onResume() { super.onResume(); activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE }
 
     /** Libera a memoria dos modelos ao sair do painel. */
     private fun errorTitle(t: Throwable, fallback: String) = when (t) {

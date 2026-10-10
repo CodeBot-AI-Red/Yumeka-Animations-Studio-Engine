@@ -108,7 +108,7 @@ class StudioFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
     }
 
     override fun onPause() {
@@ -382,9 +382,9 @@ class StudioFragment : Fragment() {
     }
 
     private fun thumbFor(f: StudioFrame, idx: Int): Bitmap = thumbs.getOrPut(f.id) {
-        val b = Bitmap.createBitmap(128, 128, Bitmap.Config.ARGB_8888)
+        val b = Bitmap.createBitmap(128, 72, Bitmap.Config.ARGB_8888)
         val c = Canvas(b)
-        c.scale(128f / ART_W, 128f / ART_H)
+        c.scale(128f / ART_W, 72f / ART_H)
         FrameRenderer.render(c, scene, idx, false)
         b
     }
@@ -394,7 +394,7 @@ class StudioFragment : Fragment() {
         val strip = timelineStrip ?: return
         strip.removeAllViews()
         val compact = resources.configuration.screenHeightDp < 480
-        val tw = ctx.dp(if (compact) 72 else 88); val th = tw
+        val tw = ctx.dp(if (compact) 72 else 88); val th = tw * 9 / 16
         scene.frames.forEachIndexed { i, f ->
             val sel = i == frameIdx
             val cell = FrameLayout(ctx).apply {
@@ -810,7 +810,7 @@ class StudioFragment : Fragment() {
 
     private fun showExport() {
         stopPlayback()
-        val opts = arrayOf("🎞  Video MP4 (1024×1024)", "🖼  GIF animado (480×480)", "🗂  Sequencia de imagens PNG (1024×1024)")
+        val opts = arrayOf("🎞  Video MP4 (1024×576)", "🖼  GIF animado (480×270)", "🗂  Sequencia de imagens PNG (1024×576)")
         AlertDialog.Builder(requireContext()).setTitle("Exportar anime").setItems(opts) { _, w -> runExport(w) }.show()
     }
 

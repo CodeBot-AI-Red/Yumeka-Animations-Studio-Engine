@@ -2,9 +2,9 @@ package com.yumeka.anime.engine.studio
 
 import android.graphics.Bitmap
 
-/** Resolucao interna quadrada de cada quadro. */
+/** Resolucao interna 16:9 de cada quadro. */
 const val ART_W = 1024
-const val ART_H = 1024
+const val ART_H = 576
 
 class StudioProject(var name: String) {
     var fps = 12

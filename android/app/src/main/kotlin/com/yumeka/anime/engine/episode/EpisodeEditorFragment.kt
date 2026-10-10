@@ -125,7 +125,7 @@ class EpisodeEditorFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
     }
 
     override fun onPause() {
@@ -617,7 +617,7 @@ class EpisodeEditorFragment : Fragment() {
         if (ep.totalMs <= 0) return toast("Adicione conteudo antes de exportar")
         AlertDialog.Builder(requireContext()).setTitle("Exportar episodio")
             .setItems(arrayOf(
-                "Sequencia de imagens PNG (12 fps, 1024x1024)",
+                "Sequencia de imagens PNG (12 fps, 1024x576)",
                 "Pacote do projeto (.zip) para backup",
                 "Video MP4 com audio (em preparacao)"
             )) { _, i ->
@@ -650,12 +650,12 @@ class EpisodeEditorFragment : Fragment() {
                 withContext(Dispatchers.IO) {
                     val dir = EpisodeStorage.uniqueFile(storage.exportDir, "${snapshot.name.replace(Regex("[^A-Za-z0-9_-]"), "_")}_quadros").apply { mkdirs() }
                     val renderer = EpisodeRenderer(1.5f)
-                    val bmp = Bitmap.createBitmap(1024, 1024, Bitmap.Config.ARGB_8888)
+                    val bmp = Bitmap.createBitmap(1024, 576, Bitmap.Config.ARGB_8888)
                     val cv = Canvas(bmp)
                     val total = snapshot.totalMs
                     val frames = (total / (1000 / 12)).toInt().coerceAtLeast(1)
                     for (i in 0 until frames) {
-                        renderer.drawAt(cv, 1024, 1024, snapshot, i * 1000L / 12, fastVideo = false)
+                        renderer.drawAt(cv, 1024, 576, snapshot, i * 1000L / 12, fastVideo = false)
                         FileOutputStream(File(dir, "quadro_%05d.png".format(i))).use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
                         if (i % 6 == 0) handler.post { bar.progress = i * 100 / frames }
                     }
