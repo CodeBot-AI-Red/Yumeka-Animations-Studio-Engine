@@ -2,6 +2,9 @@ package com.yumeka.anime.engine.studio
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.RectF
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -57,7 +60,19 @@ class StudioStorage(private val projectDir: File) {
                     val file = artFile(f.id, l.id)
                     if (file.exists()) {
                         val opts = BitmapFactory.Options().apply { inMutable = true }
-                        BitmapFactory.decodeFile(file.absolutePath, opts)?.let { f.art[l.id] = it }
+                        BitmapFactory.decodeFile(file.absolutePath, opts)?.let { original ->
+                            if (original.width == ART_W && original.height == ART_H) f.art[l.id] = original
+                            else {
+                                // Preserve legacy art without stretching or cropping it.
+                                val fitted = Bitmap.createBitmap(ART_W, ART_H, Bitmap.Config.ARGB_8888)
+                                val scale = minOf(ART_W / original.width.toFloat(), ART_H / original.height.toFloat())
+                                val w = original.width * scale; val h = original.height * scale
+                                Canvas(fitted).drawBitmap(original, null, RectF((ART_W - w) / 2f, (ART_H - h) / 2f,
+                                    (ART_W + w) / 2f, (ART_H + h) / 2f), Paint(Paint.FILTER_BITMAP_FLAG))
+                                original.recycle()
+                                f.art[l.id] = fitted
+                            }
+                        }
                     }
                 }
                 s.frames.add(f)

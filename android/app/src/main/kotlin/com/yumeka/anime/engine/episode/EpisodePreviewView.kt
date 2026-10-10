@@ -16,7 +16,7 @@ import kotlin.math.min
 import kotlin.math.sin
 
 /**
- * Pre-visualizacao 16:9 do episodio no tempo [timeMs].
+ * Pre-visualizacao quadrada do episodio no tempo [timeMs].
  * Tambem usada pela exportacao para renderizar quadros (drawAt).
  */
 class EpisodePreviewView(context: Context) : View(context) {
@@ -31,9 +31,9 @@ class EpisodePreviewView(context: Context) : View(context) {
     override fun onMeasure(w: Int, h: Int) {
         val width = MeasureSpec.getSize(w)
         val maxH = MeasureSpec.getSize(h)
-        var height = width * 9 / 16
+        var height = width
         var finalW = width
-        if (MeasureSpec.getMode(h) != MeasureSpec.UNSPECIFIED && height > maxH) { height = maxH; finalW = height * 16 / 9 }
+        if (MeasureSpec.getMode(h) != MeasureSpec.UNSPECIFIED && height > maxH) { height = maxH; finalW = height }
         setMeasuredDimension(finalW, height)
     }
 
@@ -102,7 +102,7 @@ class EpisodeRenderer(private val density: Float) {
     }
 
     private fun fit(bmp: Bitmap, w: Int, h: Int, scale: Float) {
-        val s = maxOf(w / bmp.width.toFloat(), h / bmp.height.toFloat()) * scale
+        val s = minOf(w / bmp.width.toFloat(), h / bmp.height.toFloat()) * scale
         val bw = bmp.width * s; val bh = bmp.height * s
         rect.set((w - bw) / 2, (h - bh) / 2, (w + bw) / 2, (h + bh) / 2)
     }

@@ -66,6 +66,7 @@ class EpisodeEditorFragment : Fragment() {
             val at = (ep.playheadMs - ep.introMs).coerceIn(0, ep.bodyMs)
             val c = Clip(ep.newId(), TrackType.IMAGE, at, durationMs, "Quadro IA", file.absolutePath, meta = meta)
             ep.clips.add(c)
+            ep.playheadMs = at + ep.introMs
             return c
         }
     }
@@ -124,7 +125,7 @@ class EpisodeEditorFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_USER
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 
     override fun onPause() {
@@ -159,12 +160,14 @@ class EpisodeEditorFragment : Fragment() {
         savedText = ctx.label("Salvo", 10f, SC.GREEN)
         titles.addView(savedText)
         top.addView(titles, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        val actions = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         undoBtn = ctx.toolButton("↶", null, false, 44) { undo() }
         redoBtn = ctx.toolButton("↷", null, false, 44) { redo() }
-        top.addView(undoBtn); top.addView(redoBtn)
-        top.addView(ctx.toolButton("💾", null, false, 44) { save(silent = false) })
-        top.addView(ctx.pill("Exportar", true) { showExport() })
+        actions.addView(undoBtn); actions.addView(redoBtn)
+        actions.addView(ctx.toolButton("💾", null, false, 44) { save(silent = false) })
+        actions.addView(ctx.pill("Exportar", true) { showExport() })
         root.addView(top)
+        root.addView(HorizontalScrollView(ctx).apply { isHorizontalScrollBarEnabled = false; addView(actions) })
 
         val body = ScrollView(ctx).apply { isFillViewport = true }
         val col = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL }
@@ -188,8 +191,11 @@ class EpisodeEditorFragment : Fragment() {
         tr.addView(ctx.toolButton("⏭", null, false, 44) { seek(ep.totalMs) })
         timeText = ctx.label("", 13f, SC.TEXT, true).apply { setPadding(ctx.dp(10), 0, 0, 0) }
         tr.addView(timeText, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-        tr.addView(ctx.pill("✨ Gerar quadro com IA", true, SC.PURPLE) { openAi() })
         col.addView(tr)
+        col.addView(ctx.pill("✨ Gerar quadro com IA", true, SC.PURPLE) { openAi() }.apply {
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ctx.dp(48))
+        })
 
         // Linha do tempo
         timeline = EpisodeTimelineView(ctx).apply {
@@ -611,7 +617,7 @@ class EpisodeEditorFragment : Fragment() {
         if (ep.totalMs <= 0) return toast("Adicione conteudo antes de exportar")
         AlertDialog.Builder(requireContext()).setTitle("Exportar episodio")
             .setItems(arrayOf(
-                "Sequencia de imagens PNG (12 fps, 1280x720)",
+                "Sequencia de imagens PNG (12 fps, 1024x1024)",
                 "Pacote do projeto (.zip) para backup",
                 "Video MP4 com audio (em preparacao)"
             )) { _, i ->
@@ -644,12 +650,12 @@ class EpisodeEditorFragment : Fragment() {
                 withContext(Dispatchers.IO) {
                     val dir = EpisodeStorage.uniqueFile(storage.exportDir, "${snapshot.name.replace(Regex("[^A-Za-z0-9_-]"), "_")}_quadros").apply { mkdirs() }
                     val renderer = EpisodeRenderer(1.5f)
-                    val bmp = Bitmap.createBitmap(1280, 720, Bitmap.Config.ARGB_8888)
+                    val bmp = Bitmap.createBitmap(1024, 1024, Bitmap.Config.ARGB_8888)
                     val cv = Canvas(bmp)
                     val total = snapshot.totalMs
                     val frames = (total / (1000 / 12)).toInt().coerceAtLeast(1)
                     for (i in 0 until frames) {
-                        renderer.drawAt(cv, 1280, 720, snapshot, i * 1000L / 12, fastVideo = false)
+                        renderer.drawAt(cv, 1024, 1024, snapshot, i * 1000L / 12, fastVideo = false)
                         FileOutputStream(File(dir, "quadro_%05d.png".format(i))).use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
                         if (i % 6 == 0) handler.post { bar.progress = i * 100 / frames }
                     }

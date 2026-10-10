@@ -79,7 +79,7 @@ class AiFrameFragment : Fragment() {
 
     private var style = "anime"
     private var ratio = 0
-    private var resolution = 512
+    private var resolution = 1024
     private var count = 1
     private var steps = 4
     private var guidance = 2f
@@ -117,7 +117,7 @@ class AiFrameFragment : Fragment() {
         return root
     }
 
-    override fun onResume() { super.onResume(); activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_USER }
+    override fun onResume() { super.onResume(); activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT }
 
     /** Libera a memoria dos modelos ao sair do painel. */
     private fun errorTitle(t: Throwable, fallback: String) = when (t) {
@@ -140,6 +140,8 @@ class AiFrameFragment : Fragment() {
 
     private fun build() {
         val ctx = requireContext()
+        val promptDraft = if (::promptEt.isInitialized) promptEt.text.toString() else ""
+        val negativeDraft = if (::negEt.isInitialized) negEt.text.toString() else ""
         content.removeAllViews()
 
         content.addView(ctx.sectionTitle("Modelos no aparelho"))
@@ -154,12 +156,14 @@ class AiFrameFragment : Fragment() {
             setTextColor(SC.TEXT); setHintTextColor(SC.MUTED); background = roundBg(SC.CARD, ctx.dp(12).toFloat())
             setPadding(ctx.dp(12), ctx.dp(10), ctx.dp(12), ctx.dp(10))
         }
+        promptEt.setText(promptDraft)
         content.addView(promptEt)
         content.addView(ctx.sectionTitle("Negative prompt (opcional)"))
         negEt = EditText(ctx).apply {
             hint = "ex: maos deformadas, borrado, texto"; setTextColor(SC.TEXT); setHintTextColor(SC.MUTED)
             background = roundBg(SC.CARD, ctx.dp(12).toFloat()); setPadding(ctx.dp(12), ctx.dp(10), ctx.dp(12), ctx.dp(10))
         }
+        negEt.setText(negativeDraft)
         content.addView(negEt)
 
         content.addView(ctx.sectionTitle("Estilo visual"))
@@ -333,6 +337,10 @@ class AiFrameFragment : Fragment() {
         if (!rep.ramOk) return showError("Memoria insuficiente", "Este aparelho nao tem memoria suficiente para executar o modelo localmente.")
 
         val (w, h) = if (override != null) override.width to override.height else size()
+        if (maxOf(w, h) > SAFE_MAX_RES && !advancedAccepted) {
+            guarded(true, "Gerar em ${w}x$h exige muita memoria, pode demorar e aquecer o Moto Edge 30 Neo. O tamanho nao sera reduzido automaticamente.") { generate(override) }
+            return
+        }
         val neg = override?.negativePrompt ?: negEt.text.toString().trim()
         val n = if (override != null) 1 else count
         busy = true; build()

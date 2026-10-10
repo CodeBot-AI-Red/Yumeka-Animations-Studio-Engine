@@ -108,7 +108,7 @@ class StudioFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_USER
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 
     override fun onPause() {
@@ -120,7 +120,6 @@ class StudioFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         handler.removeCallbacksAndMessages(null)
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -217,33 +216,40 @@ class StudioFragment : Fragment() {
         titles.addView(titleText)
         bar.addView(titles, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         updateTitle()
+        val commands = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         if (compactTabs) {
             TAB_ICONS.forEachIndexed { i, ic ->
-                bar.addView(ctx.toolButton(ic, null, sheetOpen && tab == i, 40) { openTab(i) })
+                commands.addView(ctx.toolButton(ic, null, sheetOpen && tab == i, 40) { openTab(i) })
             }
-            bar.addView(View(ctx), LinearLayout.LayoutParams(ctx.dp(8), 1))
+            commands.addView(View(ctx), LinearLayout.LayoutParams(ctx.dp(8), 1))
         }
-        bar.addView(ctx.pill("🎬 Editar episódio", true, SC.PINK) {
+        commands.addView(ctx.pill("🎬 Editar episódio", true, SC.PINK) {
             storage.saveMeta(project)
             (activity as? com.yumeka.anime.engine.MainActivity)?.openEpisodeEditor(project.name, arguments?.getString(ARG_PATH).orEmpty())
         }.apply {
             textSize = 15f
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ctx.dp(44)).apply { rightMargin = ctx.dp(4) }
         })
-        bar.addView(ctx.pill("✨ Gerar quadro com IA", false, SC.PURPLE) {
+        commands.addView(ctx.pill("✨ Gerar quadro com IA", false, SC.PURPLE) {
             storage.saveMeta(project)
             (activity as? com.yumeka.anime.engine.MainActivity)?.openAiFrame(project.name, arguments?.getString(ARG_PATH).orEmpty())
         }.apply {
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ctx.dp(44)).apply { rightMargin = ctx.dp(4) }
         })
-        bar.addView(ctx.toolButton("↶", null, false, 40) { doUndo() })
-        bar.addView(ctx.toolButton("↷", null, false, 40) { doRedo() })
-        playBtn = ctx.toolButton(if (playing) "⏸" else "▶", null, playing, 40) { togglePlay() }.getChildAt(0) as TextView
-        bar.addView(playBtn!!.parent as View)
-        bar.addView(ctx.pill("Exportar", true) { showExport() }.apply {
+        commands.addView(ctx.toolButton("↶", null, false, 40) { doUndo() })
+        commands.addView(ctx.toolButton("↷", null, false, 40) { doRedo() })
+        val playback = ctx.toolButton(if (playing) "⏸" else "▶", null, playing, 40) { togglePlay() }
+        playBtn = playback.getChildAt(0) as TextView
+        commands.addView(playback)
+        commands.addView(ctx.pill("Exportar", true) { showExport() }.apply {
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { leftMargin = ctx.dp(4) }
         })
-        return bar
+        val commandScroll = HorizontalScrollView(ctx).apply { isHorizontalScrollBarEnabled = false; addView(commands) }
+        return LinearLayout(ctx).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(bar)
+            addView(commandScroll, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+        }
     }
 
     private fun updateTitle() {
@@ -370,15 +376,15 @@ class StudioFragment : Fragment() {
         box.addView(ctrls)
         timelineScroll = HorizontalScrollView(ctx).apply { isHorizontalScrollBarEnabled = false }
         timelineStrip = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; setPadding(ctx.dp(6), 0, ctx.dp(6), 0) }
-        timelineScroll!!.addView(timelineStrip)
+        timelineScroll?.addView(timelineStrip)
         box.addView(timelineScroll, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         return box
     }
 
     private fun thumbFor(f: StudioFrame, idx: Int): Bitmap = thumbs.getOrPut(f.id) {
-        val b = Bitmap.createBitmap(128, 72, Bitmap.Config.ARGB_8888)
+        val b = Bitmap.createBitmap(128, 128, Bitmap.Config.ARGB_8888)
         val c = Canvas(b)
-        c.scale(128f / ART_W, 72f / ART_H)
+        c.scale(128f / ART_W, 128f / ART_H)
         FrameRenderer.render(c, scene, idx, false)
         b
     }
@@ -388,7 +394,7 @@ class StudioFragment : Fragment() {
         val strip = timelineStrip ?: return
         strip.removeAllViews()
         val compact = resources.configuration.screenHeightDp < 480
-        val tw = ctx.dp(if (compact) 72 else 88); val th = tw * 9 / 16
+        val tw = ctx.dp(if (compact) 72 else 88); val th = tw
         scene.frames.forEachIndexed { i, f ->
             val sel = i == frameIdx
             val cell = FrameLayout(ctx).apply {
@@ -804,7 +810,7 @@ class StudioFragment : Fragment() {
 
     private fun showExport() {
         stopPlayback()
-        val opts = arrayOf("🎞  Video MP4 (1280×720)", "🖼  GIF animado (480×270)", "🗂  Sequencia de imagens PNG")
+        val opts = arrayOf("🎞  Video MP4 (1024×1024)", "🖼  GIF animado (480×480)", "🗂  Sequencia de imagens PNG (1024×1024)")
         AlertDialog.Builder(requireContext()).setTitle("Exportar anime").setItems(opts) { _, w -> runExport(w) }.show()
     }
 

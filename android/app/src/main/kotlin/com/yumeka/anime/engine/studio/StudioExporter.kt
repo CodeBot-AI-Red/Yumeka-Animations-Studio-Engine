@@ -27,7 +27,7 @@ object StudioExporter {
         out.mkdirs()
         val seq = sequence(p)
         seq.forEachIndexed { i, (s, idx) ->
-            val b = FrameRenderer.renderBitmap(s, idx, 1280, 720)
+            val b = FrameRenderer.renderBitmap(s, idx, ART_W, ART_H)
             FileOutputStream(File(out, "quadro_%04d.png".format(i + 1))).use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }
             b.recycle()
             progress((i + 1f) / seq.size)
@@ -37,7 +37,7 @@ object StudioExporter {
 
     fun exportGif(p: StudioProject, dir: File, progress: (Float) -> Unit): File {
         val file = File(dir, "${safe(p.name)}_${System.currentTimeMillis() / 1000}.gif")
-        val w = 480; val h = 270
+        val w = 480; val h = 480
         val seq = sequence(p)
         BufferedOutputStream(FileOutputStream(file)).use { os ->
             val gif = GifWriter(os, w, h)
@@ -56,7 +56,7 @@ object StudioExporter {
     fun exportMp4(p: StudioProject, dir: File, progress: (Float) -> Unit): File {
         if (Build.VERSION.SDK_INT < 23) throw IllegalStateException("Video MP4 requer Android 6.0 ou superior. Use GIF.")
         val file = File(dir, "${safe(p.name)}_${System.currentTimeMillis() / 1000}.mp4")
-        val w = 1280; val h = 720
+        val w = ART_W; val h = ART_H
         val fmt = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, w, h).apply {
             setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
             setInteger(MediaFormat.KEY_BIT_RATE, 6_000_000)
