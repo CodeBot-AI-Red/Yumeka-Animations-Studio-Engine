@@ -5,6 +5,7 @@ import org.json.JSONObject
 
 /** Tipos de faixa da linha do tempo do episodio. Cada item adicionado vira uma faixa propria. */
 enum class TrackType(val label: String, val icon: String, val color: Int, val visual: Boolean) {
+    SEQUENCE("Quadros", "🎞", 0xFF6EE7F9.toInt(), true),
     SCENE("Cena", "🎬", 0xFFE8445A.toInt(), true),
     IMAGE("Imagem", "🖼", 0xFF9B6DFF.toInt(), true),
     VIDEO("Video", "📹", 0xFFFF5C8A.toInt(), true),
@@ -69,6 +70,10 @@ data class FrameAnalysis(
     }
 }
 
+data class SequenceFrame(val file: String, val endMs: Long) {
+    fun toJson() = JSONObject().put("file", file).put("endMs", endMs)
+}
+
 data class Clip(
     val id: Long,
     var type: TrackType,
@@ -84,15 +89,37 @@ data class Clip(
     /** "none", "fade", "flash", "slide". */
     var transition: String = "none",
     var volume: Float = 1f,
-    var meta: FrameMeta? = null
+    var meta: FrameMeta? = null,
+    val frames: List<SequenceFrame> = emptyList(),
+    var sourceOffsetMs: Long = 0,
+    val sourceKey: String = ""
 ) {
     val endMs get() = startMs + durationMs
+    val sourceDurationMs get() = frames.lastOrNull()?.endMs ?: Long.MAX_VALUE
+    val minimumDurationMs get() = if (frames.isEmpty()) 200L else 1L
+    fun frameAt(localMs: Long): SequenceFrame? {
+        if (frames.isEmpty()) return null
+        val t = (localMs + sourceOffsetMs).coerceIn(0, sourceDurationMs - 1)
+        var lo = 0; var hi = frames.lastIndex
+        while (lo < hi) {
+            val mid = (lo + hi) / 2
+            if (t < frames[mid].endMs) hi = mid else lo = mid + 1
+        }
+        return frames[lo]
+    }
+    fun splitAt(id: Long, at: Long): Clip? {
+        if (at <= startMs || at >= endMs) return null
+        return copy(id = id, startMs = at, durationMs = endMs - at,
+            sourceOffsetMs = sourceOffsetMs + at - startMs, meta = meta?.copy())
+    }
 
     fun toJson(): JSONObject = JSONObject()
         .put("id", id).put("type", type.name).put("startMs", startMs).put("durationMs", durationMs)
         .put("label", label).put("file", file).put("text", text).put("zoom", zoom)
         .put("transition", transition).put("volume", volume.toDouble())
         .put("meta", meta?.toJson() ?: JSONObject.NULL)
+        .put("frames", JSONArray().apply { frames.forEach { put(it.toJson()) } })
+        .put("sourceOffsetMs", sourceOffsetMs).put("sourceKey", sourceKey)
 
     companion object {
         fun fromJson(o: JSONObject) = Clip(
@@ -101,7 +128,10 @@ data class Clip(
             o.optLong("startMs"), o.optLong("durationMs", 3000), o.optString("label"),
             o.optString("file"), o.optString("text"), o.optString("zoom", "none"),
             o.optString("transition", "none"), o.optDouble("volume", 1.0).toFloat(),
-            o.optJSONObject("meta")?.let { FrameMeta.fromJson(it) }
+            o.optJSONObject("meta")?.let { FrameMeta.fromJson(it) },
+            o.optJSONArray("frames")?.let { a -> List(a.length()) { i ->
+                val f = a.getJSONObject(i); SequenceFrame(f.getString("file"), f.getLong("endMs"))
+            } } ?: emptyList(), o.optLong("sourceOffsetMs"), o.optString("sourceKey")
         )
     }
 }
@@ -146,7 +176,7 @@ class Episode(
     fun clip(id: Long) = clips.firstOrNull { it.id == id }
 
     fun toJson(): JSONObject = JSONObject()
-        .put("version", 1).put("name", name).put("intro", intro.toJson()).put("outro", outro.toJson())
+        .put("version", 2).put("name", name).put("intro", intro.toJson()).put("outro", outro.toJson())
         .put("playheadMs", playheadMs).put("nextId", nextId)
         .put("clips", JSONArray().apply { clips.forEach { put(it.toJson()) } })
 

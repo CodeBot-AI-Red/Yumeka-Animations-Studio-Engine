@@ -67,6 +67,13 @@ class EpisodeRenderer(private val density: Float) {
             val local = bodyT - c.startMs
             val alpha = transitionAlpha(c, local)
             when (c.type) {
+                TrackType.SEQUENCE -> {
+                    val bmp = c.frameAt(local)?.let { image(it.file) }
+                    if (bmp == null) missing(canvas, w, h, c) else {
+                        fit(bmp, w, h, zoomScale(c, local)); p.alpha = alpha
+                        canvas.drawBitmap(bmp, null, rect, p); p.alpha = 255
+                    }
+                }
                 TrackType.SCENE, TrackType.IMAGE -> drawImage(canvas, w, h, c, local, alpha)
                 TrackType.VIDEO -> drawVideo(canvas, w, h, c, local, alpha, fastVideo)
                 else -> {}
@@ -126,7 +133,8 @@ class EpisodeRenderer(private val density: Float) {
         val r = retrievers.getOrPut(c.file) {
             MediaMetadataRetriever().apply { runCatching { setDataSource(c.file) } }
         }
-        val bucket = if (fast) (local / 250) * 250 else local
+        val sourceTime = local + c.sourceOffsetMs
+        val bucket = if (fast) (sourceTime / 250) * 250 else sourceTime
         val key = "${c.file}#$bucket"
         val bmp = images.get(key) ?: runCatching {
             r.getFrameAtTime(bucket * 1000, if (fast) MediaMetadataRetriever.OPTION_CLOSEST_SYNC else MediaMetadataRetriever.OPTION_CLOSEST)

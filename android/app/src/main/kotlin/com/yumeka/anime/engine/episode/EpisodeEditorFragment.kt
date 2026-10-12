@@ -84,6 +84,9 @@ class EpisodeEditorFragment : Fragment() {
     private lateinit var undoBtn: View
     private lateinit var redoBtn: View
     private lateinit var savedText: TextView
+    private lateinit var inspectorScroll: HorizontalScrollView
+    private var previewExpanded = false
+    private var tracksPane: LinearLayout? = null
 
     private var selectedId = -1L
     private var playing = false
@@ -148,96 +151,74 @@ class EpisodeEditorFragment : Fragment() {
         val ctx = requireContext()
         val root = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(SC.BG) }
 
-        // Barra superior
         val top = LinearLayout(ctx).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-            setPadding(ctx.dp(6), ctx.dp(6), ctx.dp(6), ctx.dp(6)); setBackgroundColor(SC.PANEL)
+            setPadding(ctx.dp(4), 0, ctx.dp(4), 0); setBackgroundColor(SC.PANEL)
         }
-        top.addView(ctx.toolButton("←", null, false, 44) { activity?.onBackPressedDispatcher?.onBackPressed() })
-        val titles = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL; setPadding(ctx.dp(8), 0, ctx.dp(8), 0) }
-        titles.addView(ctx.label("EDITAR EPISODIO", 9f, SC.PINK, true).apply { letterSpacing = .2f })
-        titles.addView(ctx.label(ep.name, 15f, SC.TEXT, true).apply { maxLines = 1 })
-        savedText = ctx.label("Salvo", 10f, SC.GREEN)
-        titles.addView(savedText)
-        top.addView(titles, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-        val actions = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        undoBtn = ctx.toolButton("↶", null, false, 44) { undo() }
-        redoBtn = ctx.toolButton("↷", null, false, 44) { redo() }
-        actions.addView(undoBtn); actions.addView(redoBtn)
-        actions.addView(ctx.toolButton("💾", null, false, 44) { save(silent = false) })
-        actions.addView(ctx.pill("Exportar", true) { showExport() })
-        root.addView(top)
-        root.addView(HorizontalScrollView(ctx).apply { isHorizontalScrollBarEnabled = false; addView(actions) })
-
-        val body = ScrollView(ctx).apply { isFillViewport = true }
-        val col = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL }
-
-        // Pre-visualizacao
-        val pvBox = FrameLayout(ctx).apply { setBackgroundColor(0xFF000000.toInt()) }
-        preview = EpisodePreviewView(ctx).apply { episode = ep; timeMs = ep.playheadMs }
-        pvBox.addView(preview, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER))
-        val maxPv = (resources.displayMetrics.heightPixels * 0.42f).toInt()
-        col.addView(pvBox, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, maxPv))
-
-        // Transporte
-        val tr = LinearLayout(ctx).apply {
-            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-            setPadding(ctx.dp(8), ctx.dp(6), ctx.dp(8), ctx.dp(6))
-        }
-        tr.addView(ctx.toolButton("⏮", null, false, 44) { seek(0) })
-        val pb = ctx.toolButton("▶", null, false, 52) { togglePlay() }
-        playBtn = pb.getChildAt(0) as TextView
-        tr.addView(pb)
-        tr.addView(ctx.toolButton("⏭", null, false, 44) { seek(ep.totalMs) })
-        timeText = ctx.label("", 13f, SC.TEXT, true).apply { setPadding(ctx.dp(10), 0, 0, 0) }
-        tr.addView(timeText, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-        col.addView(tr)
-        col.addView(ctx.pill("✨ Gerar quadro com IA", true, SC.PURPLE) { openAi() }.apply {
-            gravity = Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ctx.dp(48))
+        top.addView(ctx.toolButton("←", "Voltar", false, 48) { activity?.onBackPressedDispatcher?.onBackPressed() })
+        val titles = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL }
+        titles.addView(ctx.label(ep.name, 14f, SC.TEXT, true).apply {
+            maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END
         })
-
-        // Linha do tempo
+        savedText = ctx.label("Salvo", 10f, SC.GREEN); titles.addView(savedText)
+        top.addView(titles, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        undoBtn = ctx.toolButton("↶", "Desfazer", false, 48) { stop(); undo() }
+        redoBtn = ctx.toolButton("↷", "Refazer", false, 48) { stop(); redo() }
+        top.addView(undoBtn); top.addView(redoBtn)
+        top.addView(ctx.toolButton("💾", "Salvar", false, 48) { save(false) })
+        top.addView(ctx.toolButton("↗", "Exportar", false, 48) { showExport() })
+        root.addView(top)
+        val body = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL }
+        val left = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL }
+        val pvBox = FrameLayout(ctx).apply { setBackgroundColor(SC.BG) }
+        preview = EpisodePreviewView(ctx).apply { episode = ep; timeMs = ep.playheadMs }
+        pvBox.addView(preview, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER))
+        left.addView(pvBox, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
+        val tr = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        tr.addView(ctx.toolButton("⏮", "Inicio", false, 48) { seek(0) })
+        val pb = ctx.toolButton("▶", "Reproduzir", false, 48) { togglePlay() }
+        playBtn = pb.getChildAt(0) as TextView; tr.addView(pb)
+        timeText = ctx.label("", 11f, SC.TEXT, true).apply { maxLines = 2 }
+        tr.addView(timeText, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        tr.addView(ctx.toolButton("⛶", "Ampliar", false, 48) {
+            previewExpanded = !previewExpanded
+            tracksPane?.visibility = if (previewExpanded) View.GONE else View.VISIBLE
+            left.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, if (previewExpanded) 1f else .42f)
+            body.requestLayout()
+        })
+        left.addView(tr)
+        body.addView(left, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, .42f))
+        val right = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL }
+        tracksPane = right
+        val timelineTools = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        timelineTools.addView(ctx.toolButton("＋", "Adicionar", false, 48) { showAddMenu() })
+        timelineTools.addView(ctx.toolButton("−", "Menos zoom", false, 48) { timeline.zoomBy(.75f) })
+        timelineTools.addView(ctx.toolButton("＋", "Mais zoom", false, 48) { timeline.zoomBy(1.33f) })
+        timelineTools.addView(ctx.toolButton("↔", "Enquadrar", false, 48) { timeline.fitEpisode() })
+        timelineTools.addView(ctx.toolButton("✎", "Editar item", false, 48) {
+            if (ep.clip(selectedId) == null) toast("Selecione um item na timeline")
+            else inspectorScroll.visibility = if (inspectorScroll.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        })
+        right.addView(HorizontalScrollView(ctx).apply { isHorizontalScrollBarEnabled = false; addView(timelineTools) })
         timeline = EpisodeTimelineView(ctx).apply {
             episode = ep; playheadMs = ep.playheadMs
             onPlayhead = { ms -> if (playing) stop(); applyPlayhead(ms) }
             onSelect = { id -> selectedId = id; refreshInspector() }
-            onEditStart = { history.push(ep); refreshUndo() }
+            onEditStart = { stop(); history.push(ep); refreshUndo() }
             onEditEnd = { markDirty(); preview.invalidate(); refreshInspector() }
         }
-        col.addView(timeline)
-
-        // Inspetor do item selecionado
-        val insScroll = HorizontalScrollView(ctx).apply { isHorizontalScrollBarEnabled = false }
+        right.addView(timeline, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
         inspector = LinearLayout(ctx).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-            setPadding(ctx.dp(8), ctx.dp(8), ctx.dp(8), ctx.dp(8))
+            setPadding(ctx.dp(4), 0, ctx.dp(4), 0)
         }
-        insScroll.addView(inspector)
-        col.addView(insScroll)
-        body.addView(col)
+        inspectorScroll = HorizontalScrollView(ctx).apply {
+            isHorizontalScrollBarEnabled = false; visibility = View.GONE; addView(inspector)
+        }
+        right.addView(inspectorScroll)
+        body.addView(right, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, .58f))
         root.addView(body, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
-
-        // Barra inferior de ferramentas
-        val navScroll = HorizontalScrollView(ctx).apply { isHorizontalScrollBarEnabled = false; setBackgroundColor(SC.PANEL) }
-        val nav = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; setPadding(ctx.dp(4), ctx.dp(6), ctx.dp(4), ctx.dp(6)) }
-        listOf(
-            Triple("🎬", "Cena") { addScene() },
-            Triple("💬", "Falas") { addDialogue() },
-            Triple("🎙", "Audio") { pickAudio(TrackType.AUDIO) },
-            Triple("🎵", "Musica") { pickAudio(TrackType.MUSIC) },
-            Triple("🔊", "Efeito sonoro") { pickAudio(TrackType.SFX) },
-            Triple("✨", "Efeito visual") { addVfx() },
-            Triple("🖼", "Imagem") { pickImage() },
-            Triple("📹", "Video") { pickVideo() },
-            Triple("🅣", "Texto") { addText() },
-            Triple("🎌", "Introducao") { editBookend(true) },
-            Triple("🏁", "Desfecho") { editBookend(false) },
-            Triple("↕", "Reorganizar") { reorderScenes() },
-            Triple("🤖", "Quadro IA") { openAi() }
-        ).forEach { (ic, cap, act) -> nav.addView(ctx.toolButton(ic, cap, false, 68) { act() }) }
-        navScroll.addView(nav)
-        root.addView(navScroll)
+        timeline.post { timeline.fitEpisode() }
 
         refreshAll()
         return root
@@ -263,9 +244,10 @@ class EpisodeEditorFragment : Fragment() {
         inspector.removeAllViews()
         val c = ep.clip(selectedId)
         if (c == null) {
-            inspector.addView(ctx.label("Toque em um item da linha do tempo para edita-lo. Arraste para mover, puxe as bordas para redimensionar.", 12f, SC.TEXT2))
+            inspectorScroll.visibility = View.GONE
             return
         }
+        inspectorScroll.visibility = View.VISIBLE
         inspector.addView(ctx.label("${c.type.icon} ${c.label}  ·  ${EpisodeTimelineView.fmt(c.durationMs)}", 12f, SC.TEXT, true).apply { setPadding(0, 0, ctx.dp(8), 0) })
         fun act(t: String, accent: Int = SC.PINK, f: () -> Unit) =
             inspector.addView(ctx.pill(t, false, accent) { f() }.apply {
@@ -294,6 +276,7 @@ class EpisodeEditorFragment : Fragment() {
     // ── Edicao (com desfazer) ────────────────────────────────────────────────
 
     private inline fun commit(block: () -> Unit) {
+        stop()
         history.push(ep)
         block()
         markDirty(); refreshAll()
@@ -335,6 +318,19 @@ class EpisodeEditorFragment : Fragment() {
             if (type == TrackType.MUSIC) c.volume = 0.6f
             ep.clips.add(c); selectedId = c.id
         }
+    }
+
+    private fun showAddMenu() {
+        val actions = listOf<Pair<String, () -> Unit>>(
+            "🎬 Cena" to { addScene() }, "💬 Fala" to { addDialogue() },
+            "🎙 Audio" to { pickAudio(TrackType.AUDIO) }, "🎵 Musica" to { pickAudio(TrackType.MUSIC) },
+            "🔊 Efeito sonoro" to { pickAudio(TrackType.SFX) }, "✨ Efeito visual" to { addVfx() },
+            "🖼 Imagem" to { pickImage() }, "📹 Video" to { pickVideo() }, "🅣 Texto" to { addText() },
+            "🎌 Introducao" to { editBookend(true) }, "🏁 Desfecho" to { editBookend(false) },
+            "↕ Reorganizar" to { reorderScenes() }, "🤖 Gerar quadro com IA" to { openAi() }
+        )
+        AlertDialog.Builder(requireContext()).setTitle("Adicionar ao episodio")
+            .setItems(actions.map { it.first }.toTypedArray()) { _, i -> stop(); actions[i].second() }.show()
     }
 
     private fun addScene() = input("Nova cena", "Nome da cena", "Cena ${ep.clips.count { it.type == TrackType.SCENE } + 1}") { n ->
@@ -422,7 +418,9 @@ class EpisodeEditorFragment : Fragment() {
 
     private fun editDuration(c: Clip) = input("Duracao (segundos)", "Ex: 3.5", "%.1f".format(c.durationMs / 1000f), numeric = true) { s ->
         val v = s.replace(',', '.').toFloatOrNull()
-        if (v == null || v < 0.2f || v > 3600f) toast("Informe um valor entre 0.2 e 3600 segundos")
+        if (v == null || !v.isFinite() || v < c.minimumDurationMs / 1000f || v > 3600f) toast("Informe um valor entre 0.2 e 3600 segundos")
+        else if (c.frames.isNotEmpty() && (v * 1000).toLong() > c.sourceDurationMs - c.sourceOffsetMs)
+            toast("A duracao nao pode ultrapassar os quadros disponiveis")
         else commit { c.durationMs = (v * 1000).toLong() }
     }
 
@@ -451,7 +449,7 @@ class EpisodeEditorFragment : Fragment() {
         val t = bodyCursor
         if (t <= c.startMs + 100 || t >= c.endMs - 100) return toast("Posicione o cursor dentro do item para cortar")
         commit {
-            val right = c.copy(id = ep.newId(), startMs = t, durationMs = c.endMs - t, meta = c.meta?.copy())
+            val right = c.splitAt(ep.newId(), t) ?: return@commit
             c.durationMs = t - c.startMs
             ep.clips.add(ep.clips.indexOf(c) + 1, right); selectedId = right.id
         }
@@ -485,7 +483,7 @@ class EpisodeEditorFragment : Fragment() {
 
     private fun reorderScenes() {
         val ctx = requireContext()
-        val scenes = ep.clips.filter { it.type in listOf(TrackType.SCENE, TrackType.IMAGE, TrackType.VIDEO) }.sortedBy { it.startMs }.toMutableList()
+        val scenes = ep.clips.filter { it.type in listOf(TrackType.SEQUENCE, TrackType.SCENE, TrackType.IMAGE, TrackType.VIDEO) }.sortedBy { it.startMs }.toMutableList()
         if (scenes.size < 2) return toast("Adicione pelo menos duas cenas, imagens ou videos para reorganizar")
         val box = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL; setPadding(ctx.dp(16), ctx.dp(8), ctx.dp(16), 0) }
         fun render() {
@@ -597,7 +595,7 @@ class EpisodeEditorFragment : Fragment() {
                 runCatching {
                     MediaPlayer().apply {
                         setDataSource(c.file); prepare()
-                        setVolume(c.volume, c.volume); seekTo((bodyT - c.startMs).toInt()); start()
+                        setVolume(c.volume, c.volume); seekTo((bodyT - c.startMs + c.sourceOffsetMs).toInt()); start()
                     }
                 }.onSuccess { players[c.id] = it }
             } else if (!active && mp != null) {

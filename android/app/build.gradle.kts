@@ -95,6 +95,7 @@ dependencies {
 
     // Testes
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test:runner:1.5.2")
 }
@@ -109,3 +110,8 @@ val buildNativeAi = tasks.register<Exec>("buildNativeAi") {
     onlyIf { !project.hasProperty("skipNativeAi") }
 }
 tasks.named("preBuild") { dependsOn(buildNativeAi) }
+
+// Verify timeline ordering, cuts and serialization in the existing APK workflow.
+tasks.configureEach {
+    if (name == "assembleDebug") dependsOn("testDebugUnitTest")
+}

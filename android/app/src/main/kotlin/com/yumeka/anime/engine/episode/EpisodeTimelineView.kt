@@ -39,7 +39,6 @@ class EpisodeTimelineView(context: Context) : View(context) {
     private val rulerH = 28 * d
     private val rowH = 46 * d
     private val edge = 18 * d
-    private val minDur = 200L
     private var pxPerMs = 0.06f * d
     private var scrollMs = 0f
 
@@ -49,6 +48,10 @@ class EpisodeTimelineView(context: Context) : View(context) {
 
     private enum class Mode { NONE, SCRUB, MOVE, LEFT, RIGHT, PAN }
     private var mode = Mode.NONE
+    private var scrollY = 0f
+    private var downY = 0f
+    private var downScrollY = 0f
+    private var downOffset = 0L
     private var downX = 0f
     private var downStart = 0L
     private var downDur = 0L
@@ -66,14 +69,25 @@ class EpisodeTimelineView(context: Context) : View(context) {
         }
     })
 
+    fun zoomBy(factor: Float) {
+        val focus = xToMs(width / 2f)
+        pxPerMs = (pxPerMs * factor).coerceIn(0.00001f * d, 0.6f * d)
+        scrollMs = (focus - width / 2f / pxPerMs).coerceAtLeast(0f); invalidate()
+    }
+    fun fitEpisode() {
+        val total = episode?.totalMs?.coerceAtLeast(1000) ?: 1000
+        if (width <= 0) return
+        pxPerMs = ((width - 24 * d) / total).coerceIn(0.00001f * d, 0.6f * d)
+        scrollMs = 0f; scrollY = 0f; invalidate()
+    }
     private fun introMs() = episode?.introMs ?: 0L
     private fun msToX(ms: Float) = (ms - scrollMs) * pxPerMs
     private fun xToMs(x: Float) = x / pxPerMs + scrollMs
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val rows = max(episode?.clips?.size ?: 0, 3)
+        val rows = max(episode?.clips?.size ?: 0, 1)
         val h = (rulerH + rows * rowH + 8 * d).toInt()
-        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), h)
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), resolveSize(h, heightMeasureSpec))
     }
 
     private fun ensureVisible() {
@@ -83,7 +97,7 @@ class EpisodeTimelineView(context: Context) : View(context) {
     }
 
     private fun clipRect(i: Int, c: Clip, out: RectF) {
-        val top = rulerH + i * rowH + 4 * d
+        val top = rulerH + i * rowH - scrollY + 4 * d
         out.set(msToX((introMs() + c.startMs).toFloat()), top, msToX((introMs() + c.endMs).toFloat()), top + rowH - 8 * d)
     }
 
@@ -108,9 +122,10 @@ class EpisodeTimelineView(context: Context) : View(context) {
             val s = (ep.introMs + ep.bodyMs).toFloat()
             drawBookend(canvas, s, s + ep.outroMs, "Desfecho")
         }
-        // Faixas
+        scrollY = scrollY.coerceIn(0f, max(0f, rulerH + ep.clips.size * rowH - height))
+        canvas.save(); canvas.clipRect(0f, rulerH, width.toFloat(), height.toFloat())
         ep.clips.forEachIndexed { i, c ->
-            val top = rulerH + i * rowH
+            val top = rulerH + i * rowH - scrollY
             p.color = if (i % 2 == 0) 0xFF12121B.toInt() else 0xFF15151F.toInt()
             canvas.drawRect(0f, top, width.toFloat(), top + rowH, p)
             clipRect(i, c, rect)
@@ -129,6 +144,7 @@ class EpisodeTimelineView(context: Context) : View(context) {
             canvas.drawText("${c.type.icon} ${c.label}", max(rect.left, 0f) + 10 * d, rect.centerY() + 4 * d, tp)
             canvas.restore()
         }
+        canvas.restore()
         // Cursor
         val px = msToX(playheadMs.toFloat())
         p.color = 0xFFFF6080.toInt()
@@ -156,16 +172,16 @@ class EpisodeTimelineView(context: Context) : View(context) {
         val ep = episode ?: return true
         when (e.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
-                downX = e.x; moved = false; downScroll = scrollMs
+                downX = e.x; downY = e.y; downScrollY = scrollY; moved = false; downScroll = scrollMs
                 parent?.requestDisallowInterceptTouchEvent(true)
                 if (e.y < rulerH) { mode = Mode.SCRUB; scrub(e.x); return true }
-                val row = ((e.y - rulerH) / rowH).toInt()
+                val row = ((e.y - rulerH + scrollY) / rowH).toInt()
                 val c = ep.clips.getOrNull(row)
                 mode = Mode.PAN; dragClip = null
                 if (c != null) {
                     clipRect(row, c, rect)
                     if (e.x >= rect.left - edge / 2 && e.x <= rect.right + edge / 2) {
-                        dragClip = c; downStart = c.startMs; downDur = c.durationMs
+                        dragClip = c; downStart = c.startMs; downDur = c.durationMs; downOffset = c.sourceOffsetMs
                         mode = when {
                             c.id == selectedId && abs(e.x - rect.left) < edge -> Mode.LEFT
                             c.id == selectedId && abs(e.x - rect.right) < edge -> Mode.RIGHT
@@ -176,7 +192,9 @@ class EpisodeTimelineView(context: Context) : View(context) {
             }
             MotionEvent.ACTION_MOVE -> {
                 val dx = e.x - downX
-                if (!moved && abs(dx) > 6 * d) {
+                val dy = e.y - downY
+                if (!moved && abs(dy) > 6 * d && abs(dy) > abs(dx) && mode != Mode.SCRUB) mode = Mode.PAN
+                if (!moved && max(abs(dx), abs(dy)) > 6 * d) {
                     moved = true
                     if (mode in listOf(Mode.MOVE, Mode.LEFT, Mode.RIGHT)) {
                         val c = dragClip
@@ -189,13 +207,16 @@ class EpisodeTimelineView(context: Context) : View(context) {
                 val c = dragClip
                 when (mode) {
                     Mode.SCRUB -> scrub(e.x)
-                    Mode.PAN -> { scrollMs = (downScroll - dx / pxPerMs).coerceAtLeast(0f); invalidate() }
+                    Mode.PAN -> { scrollMs = (downScroll - dx / pxPerMs).coerceAtLeast(0f)
+                        scrollY = (downScrollY - dy).coerceIn(0f, max(0f, rulerH + ep.clips.size * rowH - height)); invalidate() }
                     Mode.MOVE -> if (c != null) { c.startMs = snap(downStart + dms).coerceAtLeast(0); changed() }
                     Mode.LEFT -> if (c != null) {
-                        val ns = (downStart + dms).coerceIn(0, downStart + downDur - minDur)
+                        val lower = if (c.frames.isEmpty()) 0L else max(0L, downStart - downOffset)
+                        val ns = (downStart + dms).coerceIn(lower, downStart + downDur - c.minimumDurationMs)
+                        if (c.frames.isNotEmpty()) c.sourceOffsetMs = downOffset + ns - downStart
                         c.durationMs = downDur - (ns - downStart); c.startMs = ns; changed()
                     }
-                    Mode.RIGHT -> if (c != null) { c.durationMs = (downDur + dms).coerceAtLeast(minDur); changed() }
+                    Mode.RIGHT -> if (c != null) { c.durationMs = (downDur + dms).coerceIn(c.minimumDurationMs, c.sourceDurationMs - c.sourceOffsetMs); changed() }
                     Mode.NONE -> {}
                 }
             }

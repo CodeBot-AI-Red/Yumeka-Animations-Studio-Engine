@@ -24,6 +24,10 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.yumeka.anime.engine.episode.EpisodeStorage
+import com.yumeka.anime.engine.episode.StudioSequenceImporter
+import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.math.sin
 
@@ -63,6 +67,9 @@ class StudioFragment : Fragment() {
     private var selectedChar = -1
     private var tab = 0
     private var sheetOpen = false
+    private var brushOpen = false
+    private var framesOpen = true
+    private var importingEpisode = false
     private var playing = false
     private var holdTick = 0
 
@@ -160,7 +167,7 @@ class StudioFragment : Fragment() {
             hs.addView(toolBox)
             center.addView(hs)
         }
-        center.addView(brushBar())
+        if (brushOpen || h >= 480) center.addView(brushBar())
         mid.addView(center, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f))
         if (side) {
             val panel = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL; background = roundBg(SC.PANEL, 0f) }
@@ -170,7 +177,7 @@ class StudioFragment : Fragment() {
             mid.addView(panel, LinearLayout.LayoutParams(ctx.dp(if (w >= 1100) 340 else 300), ViewGroup.LayoutParams.MATCH_PARENT))
         } else panelHost = null
         col.addView(mid, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
-        col.addView(timeline(compact = h < 480))
+        if (framesOpen) col.addView(timeline(compact = h < 480))
         if (!railLeft) col.addView(bottomTabs())
         root.addView(col, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
 
@@ -211,8 +218,8 @@ class StudioFragment : Fragment() {
         }
         bar.addView(ctx.toolButton("←", null, false, 40) { activity?.onBackPressedDispatcher?.onBackPressed() })
         val titles = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL; setPadding(ctx.dp(8), 0, ctx.dp(8), 0) }
-        titles.addView(ctx.label("YUMEKA STUDIO", 9f, SC.PINK, true).apply { letterSpacing = .2f })
-        titleText = ctx.label("", 15f, SC.TEXT, true).apply { maxLines = 1 }
+        if (resources.configuration.screenHeightDp >= 480) titles.addView(ctx.label("YUMEKA STUDIO", 9f, SC.PINK, true))
+        titleText = ctx.label("", 13f, SC.TEXT, true).apply { maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END }
         titles.addView(titleText)
         bar.addView(titles, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         updateTitle()
@@ -224,8 +231,7 @@ class StudioFragment : Fragment() {
             commands.addView(View(ctx), LinearLayout.LayoutParams(ctx.dp(8), 1))
         }
         commands.addView(ctx.pill("🎬 Editar episódio", true, SC.PINK) {
-            storage.saveMeta(project)
-            (activity as? com.yumeka.anime.engine.MainActivity)?.openEpisodeEditor(project.name, arguments?.getString(ARG_PATH).orEmpty())
+            prepareEpisode()
         }.apply {
             textSize = 15f
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ctx.dp(44)).apply { rightMargin = ctx.dp(4) }
@@ -245,11 +251,52 @@ class StudioFragment : Fragment() {
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { leftMargin = ctx.dp(4) }
         })
         val commandScroll = HorizontalScrollView(ctx).apply { isHorizontalScrollBarEnabled = false; addView(commands) }
+        if (resources.configuration.screenHeightDp < 480) {
+            titles.layoutParams = LinearLayout.LayoutParams(ctx.dp(110), ViewGroup.LayoutParams.WRAP_CONTENT)
+            bar.addView(commandScroll, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+            return bar
+        }
         return LinearLayout(ctx).apply {
             orientation = LinearLayout.VERTICAL
             addView(bar)
             addView(commandScroll, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
         }
+    }
+
+    private fun prepareEpisode() {
+        if (importingEpisode) return
+        stopPlayback()
+        val ctx = requireContext()
+        val path = arguments?.getString(ARG_PATH).orEmpty()
+        val dir = if (path.isNotBlank()) File(path) else File(ctx.filesDir, "projetos/${project.name}")
+        val episodes = EpisodeStorage(dir)
+        fun importSequence() {
+            importingEpisode = true
+            storage.saveMeta(project)
+            val bar = ProgressBar(ctx, null, android.R.attr.progressBarStyleHorizontal).apply { max = 100 }
+            var job: kotlinx.coroutines.Job? = null
+            val dialog = AlertDialog.Builder(ctx).setTitle("Preparando quadros...").setView(bar).setCancelable(false)
+                .setNegativeButton("Cancelar") { _, _ -> job?.cancel() }.create()
+            dialog.show()
+            job = lifecycleScope.launch {
+                try {
+                    StudioSequenceImporter.update(project, episodes) { bar.progress = it }
+                    if (isAdded) (activity as? com.yumeka.anime.engine.MainActivity)?.openEpisodeEditor(project.name, path)
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    if (isAdded) toast("Preparacao cancelada; episodio anterior preservado")
+                } catch (e: Exception) {
+                    if (isAdded) toast("Nao foi possivel preparar os quadros: ${e.message}")
+                } finally { importingEpisode = false; dialog.dismiss() }
+            }
+        }
+        if (episodes.load(project.name).clips.any { it.sourceKey == StudioSequenceImporter.SOURCE_KEY }) {
+            AlertDialog.Builder(ctx).setTitle("Atualizar sequencia de desenhos?")
+                .setMessage("Usar todos os quadros na ordem atual do Studio? Cortes e duracao da sequencia anterior serao substituidos; falas, sons e outros itens serao mantidos.")
+                .setPositiveButton("Atualizar") { _, _ -> importSequence() }
+                .setNeutralButton("Abrir sem atualizar") { _, _ ->
+                    (activity as? com.yumeka.anime.engine.MainActivity)?.openEpisodeEditor(project.name, path)
+                }.setNegativeButton("Cancelar", null).show()
+        } else importSequence()
     }
 
     private fun updateTitle() {
@@ -267,6 +314,8 @@ class StudioFragment : Fragment() {
                 if (t == Tool.MOVE && scene.characters.isEmpty()) toast("Adicione um personagem na aba Personagens")
             })
         }
+        box.addView(ctx.toolButton("🎨", "Pincel", brushOpen, sz) { brushOpen = !brushOpen; buildUi() })
+        box.addView(ctx.toolButton("🎞", "Quadros", framesOpen, sz) { framesOpen = !framesOpen; buildUi() })
         box.addView(ctx.toolButton("⟲", "Centralizar", false, sz) { canvasView.resetView() })
     }
 
