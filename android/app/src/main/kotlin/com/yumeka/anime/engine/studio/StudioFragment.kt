@@ -155,9 +155,9 @@ class StudioFragment : Fragment() {
         val mid = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL }
         if (railLeft) {
             val rail = ScrollView(ctx).apply { isVerticalScrollBarEnabled = false; setBackgroundColor(SC.PANEL) }
-            toolBox = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL; setPadding(ctx.dp(4), ctx.dp(4), ctx.dp(4), ctx.dp(4)) }
+            toolBox = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL; setPadding(ctx.dp(2), ctx.dp(2), ctx.dp(2), ctx.dp(2)) }
             rail.addView(toolBox)
-            mid.addView(rail, LinearLayout.LayoutParams(ctx.dp(if (h < 420) 60 else 72), ViewGroup.LayoutParams.MATCH_PARENT))
+            mid.addView(rail, LinearLayout.LayoutParams(ctx.dp(if (h < 420) 48 else 56), ViewGroup.LayoutParams.MATCH_PARENT))
         }
         val center = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL }
         center.addView(canvasView, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
@@ -213,46 +213,48 @@ class StudioFragment : Fragment() {
         val ctx = requireContext()
         val bar = LinearLayout(ctx).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-            setPadding(ctx.dp(6), ctx.dp(4), ctx.dp(6), ctx.dp(4))
+            setPadding(ctx.dp(4), ctx.dp(2), ctx.dp(4), ctx.dp(2))
             background = gradBg(0f, 0xFF15101C.toInt(), SC.PANEL)
         }
-        bar.addView(ctx.toolButton("←", null, false, 40) { activity?.onBackPressedDispatcher?.onBackPressed() })
-        val titles = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL; setPadding(ctx.dp(8), 0, ctx.dp(8), 0) }
-        if (resources.configuration.screenHeightDp >= 480) titles.addView(ctx.label("YUMEKA STUDIO", 9f, SC.PINK, true))
-        titleText = ctx.label("", 13f, SC.TEXT, true).apply { maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END }
+        bar.addView(ctx.toolButton("←", null, false, 36) { activity?.onBackPressedDispatcher?.onBackPressed() })
+        val titles = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL; setPadding(ctx.dp(6), 0, ctx.dp(6), 0) }
+        if (resources.configuration.screenHeightDp >= 480) titles.addView(ctx.label("YUMEKA STUDIO", 8f, SC.PINK, true))
+        titleText = ctx.label("", 12f, SC.TEXT, true).apply { maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END }
         titles.addView(titleText)
         bar.addView(titles, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         updateTitle()
         val commands = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         if (compactTabs) {
             TAB_ICONS.forEachIndexed { i, ic ->
-                commands.addView(ctx.toolButton(ic, null, sheetOpen && tab == i, 40) { openTab(i) })
+                commands.addView(ctx.toolButton(ic, null, sheetOpen && tab == i, 36) { openTab(i) })
             }
-            commands.addView(View(ctx), LinearLayout.LayoutParams(ctx.dp(8), 1))
+            commands.addView(View(ctx), LinearLayout.LayoutParams(ctx.dp(4), 1))
         }
         commands.addView(ctx.pill("🎬 Editar episódio", true, SC.PINK) {
             prepareEpisode()
         }.apply {
-            textSize = 15f
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ctx.dp(44)).apply { rightMargin = ctx.dp(4) }
+            textSize = 12f
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ctx.dp(36)).apply { rightMargin = ctx.dp(4) }
         })
-        commands.addView(ctx.pill("✨ Gerar quadro com IA", false, SC.PURPLE) {
+        commands.addView(ctx.pill("✨ Quadro IA", false, SC.PURPLE) {
             storage.saveMeta(project)
             (activity as? com.yumeka.anime.engine.MainActivity)?.openAiFrame(project.name, arguments?.getString(ARG_PATH).orEmpty())
         }.apply {
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ctx.dp(44)).apply { rightMargin = ctx.dp(4) }
+            textSize = 12f
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ctx.dp(36)).apply { rightMargin = ctx.dp(4) }
         })
-        commands.addView(ctx.toolButton("↶", null, false, 40) { doUndo() })
-        commands.addView(ctx.toolButton("↷", null, false, 40) { doRedo() })
-        val playback = ctx.toolButton(if (playing) "⏸" else "▶", null, playing, 40) { togglePlay() }
+        commands.addView(ctx.toolButton("↶", null, false, 36) { doUndo() })
+        commands.addView(ctx.toolButton("↷", null, false, 36) { doRedo() })
+        val playback = ctx.toolButton(if (playing) "⏸" else "▶", null, playing, 36) { togglePlay() }
         playBtn = playback.getChildAt(0) as TextView
         commands.addView(playback)
         commands.addView(ctx.pill("Exportar", true) { showExport() }.apply {
-            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { leftMargin = ctx.dp(4) }
+            textSize = 12f
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ctx.dp(36)).apply { leftMargin = ctx.dp(4) }
         })
         val commandScroll = HorizontalScrollView(ctx).apply { isHorizontalScrollBarEnabled = false; addView(commands) }
         if (resources.configuration.screenHeightDp < 480) {
-            titles.layoutParams = LinearLayout.LayoutParams(ctx.dp(110), ViewGroup.LayoutParams.WRAP_CONTENT)
+            titles.layoutParams = LinearLayout.LayoutParams(ctx.dp(100), ViewGroup.LayoutParams.WRAP_CONTENT)
             bar.addView(commandScroll, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
             return bar
         }
@@ -307,7 +309,7 @@ class StudioFragment : Fragment() {
         val ctx = requireContext()
         val box = toolBox ?: return
         box.removeAllViews()
-        val sz = if (vertical && resources.configuration.screenHeightDp < 420) 50 else 56
+        val sz = if (vertical && resources.configuration.screenHeightDp < 420) 42 else 48
         Tool.values().forEach { t ->
             box.addView(ctx.toolButton(t.icon, t.label, t == tool, sz) {
                 tool = t; syncCanvas(); refreshTools(vertical)
@@ -408,23 +410,28 @@ class StudioFragment : Fragment() {
         val ctx = requireContext()
         val box = LinearLayout(ctx).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-            setBackgroundColor(0xFF0E0E16.toInt()); setPadding(ctx.dp(6), ctx.dp(6), ctx.dp(6), ctx.dp(6))
+            setBackgroundColor(0xFF0E0E16.toInt()); setPadding(ctx.dp(4), ctx.dp(2), ctx.dp(4), ctx.dp(2))
         }
         val ctrls = LinearLayout(ctx).apply { orientation = if (compact) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL }
-        val bs = if (compact) 40 else 44
+        val bs = if (compact) 34 else 38
         val r1 = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL }
-        r1.addView(ctx.toolButton("＋", null, false, bs) { addFrame(false) })
-        r1.addView(ctx.toolButton("⧉", null, false, bs) { addFrame(true) })
+        r1.addView(ctx.toolButton("＋", "Novo", false, bs) { addFrame(false) })
+        r1.addView(ctx.toolButton("⧉", "Duplicar", false, bs) { addFrame(true) })
         val r2 = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL }
-        r2.addView(ctx.toolButton("🗑", null, false, bs) { deleteFrame() })
-        r2.addView(ctx.toolButton("×${frame.hold}", null, false, bs) {
+        r2.addView(ctx.toolButton("🧹", "Limpar", false, bs) {
+            frame.art.keys.toList().forEach { l -> storage.saveArt(frame.id, l, null) }
+            frame.art.clear(); thumbs.remove(frame.id); changed()
+            toast("Desenhos limpos no quadro ${frameIdx + 1}")
+        })
+        r2.addView(ctx.toolButton("🗑", "Excluir", false, bs) { deleteFrame() })
+        r2.addView(ctx.toolButton("×${frame.hold}", "Tempo", false, bs) {
             frame.hold = if (frame.hold >= 4) 1 else frame.hold + 1; scheduleSave(); buildUi()
             toast("Duracao do quadro: ${frame.hold} tempo(s)")
         })
         ctrls.addView(r1); ctrls.addView(r2)
         box.addView(ctrls)
         timelineScroll = HorizontalScrollView(ctx).apply { isHorizontalScrollBarEnabled = false }
-        timelineStrip = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; setPadding(ctx.dp(6), 0, ctx.dp(6), 0) }
+        timelineStrip = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; setPadding(ctx.dp(4), 0, ctx.dp(4), 0) }
         timelineScroll?.addView(timelineStrip)
         box.addView(timelineScroll, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         return box
