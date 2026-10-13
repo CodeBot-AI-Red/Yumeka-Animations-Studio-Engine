@@ -52,7 +52,7 @@ object StudioSequenceImporter {
                 val row = previous.firstOrNull()?.let { ep.clips.indexOf(it) } ?: 0
                 ep.clips.removeAll { it.sourceKey == SOURCE_KEY }
                 val clip = Clip(ep.newId(), TrackType.SEQUENCE, position, frames.last().endMs,
-                    "Desenhos · $total quadros", frames = frames.toList(), sourceKey = SOURCE_KEY)
+                    "Animação Studio ($total quadros)", frames = frames.toList(), sourceKey = SOURCE_KEY)
                 ep.clips.add(row.coerceAtMost(ep.clips.size), clip)
                 ep.playheadMs = position + ep.introMs
                 storage.save(ep)
